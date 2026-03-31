@@ -1,12 +1,12 @@
 <script>
   import { afterUpdate } from "svelte";
-  import { chatStore } from "../stores/chat.js";
-  import { wsStore } from "../stores/websocket.js";
+  import { chatStore } from "../../../../stores/chat.js";
+  import { wsStore } from "../../../../stores/websocket.js";
 
-  import { sendWebSocketMessage } from "../utils/websocket2.js";
-  import { currentSessionSelectedDocIds } from "../stores/attachments.js";
+  import { sendWebSocketMessage } from "../../../../utils/websocket2.js";
+  import { currentSessionSelectedDocIds } from "../../../../stores/attachments.js";
 
-  /** @typedef {import('../models/chat').ChatMessage} ChatMessage */
+  /** @typedef {import('../../../../models/chat.js').ChatMessage} ChatMessage */
 
   // Session-scoped: caller passes the sessionId belonging to a section
   /** @type {string | null} */

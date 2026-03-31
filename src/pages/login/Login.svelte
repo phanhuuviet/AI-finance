@@ -1,5 +1,5 @@
 <script>
-  import { login as loginStore, register as registerStore } from '../stores/auth.js';
+  import { login as loginStore, register as registerStore } from '../../stores/auth.js';
   
   let isLogin = true;
   let username = '';

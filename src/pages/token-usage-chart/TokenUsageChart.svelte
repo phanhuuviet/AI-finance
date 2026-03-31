@@ -1,11 +1,11 @@
 <script>
   import { onMount, onDestroy, tick } from 'svelte';
-  import { fetchWithAuth } from '../utils/api.js';
-  import { getMockTokenUsageAnalytics } from '../utils/mockTokenAnalytics.js';
+  import { fetchWithAuth } from '../../utils/api.js';
+  import { getMockTokenUsageAnalytics } from '../../utils/mockTokenAnalytics.js';
   import Chart from 'chart.js/auto';
 
-  /** @typedef {import('../models/tokenAnalytics').TokenUsageAnalytics} TokenUsageAnalytics */
-  /** @typedef {import('../models/tokenAnalytics').TokenUsageDailyRow} TokenUsageDailyRow */
+  /** @typedef {import('../../models/tokenAnalytics.js').TokenUsageAnalytics} TokenUsageAnalytics */
+  /** @typedef {import('../../models/tokenAnalytics.js').TokenUsageDailyRow} TokenUsageDailyRow */
 
   /** @type {TokenUsageAnalytics | null} */
   let analyticsData = null;

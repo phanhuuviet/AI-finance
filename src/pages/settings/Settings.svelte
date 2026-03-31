@@ -1,9 +1,9 @@
 <script>
-  import { user } from '../stores/auth.js';
-  import { fetchWithAuth } from '../utils/api.js';
+  import { user } from '../../stores/auth.js';
+  import { fetchWithAuth } from '../../utils/api.js';
 
-  /** @typedef {import('../models/user').User} User */
-  /** @typedef {import('../models/user').UserPreferences} UserPreferences */
+  /** @typedef {import('../../models/user.js').User} User */
+  /** @typedef {import('../../models/user.js').UserPreferences} UserPreferences */
   
   let initialized = false;
   let username = '';

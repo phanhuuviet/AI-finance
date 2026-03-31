@@ -2,16 +2,16 @@
   import { onDestroy, onMount } from "svelte";
   import { cubicOut } from "svelte/easing";
   import { fade, fly, scale } from "svelte/transition";
-  import { workspaceStore } from "../stores/workspace.js";
-  import { fetchWithAuth } from "../utils/api.js";
-  import StudioModalAudioOverview from "./StudioModalAudioOverview.svelte";
-  import StudioModalVideoOverview from "./StudioModalVideoOverview.svelte";
-  import StudioModalMindmap from "./StudioModalMindmap.svelte";
-  import StudioModalReport from "./StudioModalReport.svelte";
-  import StudioModalQuiz from "./StudioModalQuiz.svelte";
-  import StudioModalData from "./StudioModalData.svelte";
+  import { workspaceStore } from "../../../../stores/workspace.js";
+  import { fetchWithAuth } from "../../../../utils/api.js";
+  import StudioModalAudioOverview from "./modal/StudioModalAudioOverview.svelte";
+  import StudioModalVideoOverview from "./modal/StudioModalVideoOverview.svelte";
+  import StudioModalMindmap from "./modal/StudioModalMindmap.svelte";
+  import StudioModalReport from "./modal/StudioModalReport.svelte";
+  import StudioModalQuiz from "./modal/StudioModalQuiz.svelte";
+  import StudioModalData from "./modal/StudioModalData.svelte";
 
-  /** @typedef {import('../models/studio').StudioOutput} StudioOutput */
+  /** @typedef {import('../../../../models/studio.js').StudioOutput} StudioOutput */
 
   /** @type {string | null} */
   let sessionId = null;

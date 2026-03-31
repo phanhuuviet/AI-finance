@@ -1,10 +1,10 @@
 <script>
-  import { fetchWithAuth } from "../utils/api.js";
+  import { fetchWithAuth } from "../../../../utils/api.js";
   import { onMount } from "svelte";
-  import { workspaceStore } from "../stores/workspace.js";
-  import { attachmentsStore } from "../stores/attachments.js";
+  import { workspaceStore } from "../../../../stores/workspace.js";
+  import { attachmentsStore } from "../../../../stores/attachments.js";
 
-  /** @typedef {import('../models/document').DocumentItem} DocumentItem */
+  /** @typedef {import('../../../../models/document.js').DocumentItem} DocumentItem */
 
   /** @type {FileList | null} */
   let file = null;

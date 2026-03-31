@@ -1,9 +1,9 @@
 <script>
   import { onMount } from "svelte";
-  import { chatStore } from "../stores/chat.js";
-  import { workspaceStore } from "../stores/workspace.js";
+  import { chatStore } from "../../../../stores/chat.js";
+  import { workspaceStore } from "../../../../stores/workspace.js";
 
-  /** @typedef {import('../models/chat').ChatSession} ChatSession */
+  /** @typedef {import('../../../../models/chat.js').ChatSession} ChatSession */
 
   let searchTerm = "";
 

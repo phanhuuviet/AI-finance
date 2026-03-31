@@ -1,14 +1,14 @@
 <script>
-  import DocumentUploadV2 from "./DocumentUpload.svelte";
-  import StudioPanel from "./StudioPanel.svelte";
-  import ChatInterface from "./ChatInterfaceSectioned.svelte";
-  import ChatHistory from "./ChatHistoryPickSession.svelte";
+  import DocumentUploadV2 from "./components/document-upload/DocumentUpload.svelte";
+  import StudioPanel from "./components/studio/StudioPanel.svelte";
+  import ChatInterface from "./components/chat/ChatInterfaceSectioned.svelte";
+  import ChatHistory from "./components/chat/ChatHistory.svelte";
 
   import { fade } from "svelte/transition";
 
-  import { workspaceStore } from "../stores/workspace.js";
+  import { workspaceStore } from "../../stores/workspace.js";
 
-  /** @typedef {import('../models/workspace').WorkspaceSection} WorkspaceSection */
+  /** @typedef {import('../../models/workspace').WorkspaceSection} WorkspaceSection */
 
   /** @type {string | null} */
   let sessionId = null;

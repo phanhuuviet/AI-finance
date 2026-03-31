@@ -1,11 +1,11 @@
 <script>
   import { user, logout } from "../stores/auth.js";
-  import TokenUsageChart from "./TokenUsageChart.svelte";
-  import Settings from "./Settings.svelte";
+  import TokenUsageChart from "../pages/token-usage-chart/TokenUsageChart.svelte";
+  import Settings from "../pages/settings/Settings.svelte";
 
   import { chatStore } from "../stores/chat.js";
   import { workspaceStore } from "../stores/workspace.js";
-  import WorkspacePanel from "./WorkspacePanel.svelte";
+  import WorkspacePanel from "../pages/workspace/WorkspacePanel.svelte";
 
   /** @typedef {import('../models/document').DocumentItem} DocumentItem */
   /** @typedef {import('../models/chat').ChatSession} ChatSession */
