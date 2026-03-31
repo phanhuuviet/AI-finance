@@ -3,10 +3,12 @@
   import { user, fetchUser } from "./stores/auth.js";
   import { connectWebSocket, disconnectWebSocket } from "./utils/websocket2.js";
   import DashboardNotebookLM from "./components/DashboardNotebookLM.svelte";
+  import { initRouter } from "./stores/router.js";
 
   let loading = true;
 
   onMount(async () => {
+    initRouter();
     try {
       if (localStorage.getItem("token")) {
         await fetchUser();

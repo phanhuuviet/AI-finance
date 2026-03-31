@@ -2,15 +2,38 @@
   import { user, logout } from "../stores/auth.js";
   import TokenUsageChart from "../pages/token-usage-chart/TokenUsageChart.svelte";
   import Settings from "../pages/settings/Settings.svelte";
+  import Login from "../pages/login/Login.svelte";
 
   import { chatStore } from "../stores/chat.js";
   import { workspaceStore } from "../stores/workspace.js";
   import WorkspacePanel from "../pages/workspace/WorkspacePanel.svelte";
+  import { route, navigate } from "../stores/router.js";
 
   /** @typedef {import('../models/document').DocumentItem} DocumentItem */
   /** @typedef {import('../models/chat').ChatSession} ChatSession */
 
   let activeTab = "home"; // home | analytics | settings
+
+  /**
+   * Route -> UI tab
+    * @param {'workspace'|'analytics'|'settings'|'login'} page
+   */
+  function tabFromPage(page) {
+    if (page === "analytics") return "analytics";
+    if (page === "settings") return "settings";
+    return "home";
+  }
+
+  /**
+   * Tab -> route
+   * @param {'home'|'analytics'|'settings'} tab
+   */
+  function goToTab(tab) {
+    if (tab === "analytics") return navigate("/analytics");
+    if (tab === "settings") return navigate("/settings");
+
+    return navigate("/workspace");
+  }
 
   let isNewChatModalOpen = false;
   let newChatTitle = "";
@@ -44,15 +67,40 @@
       newChatTitle = "";
       selectedDocs = [];
 
-      // Behavior B: selecting a conversation resets its section to 'chat'
-      workspaceStore.setCurrentSession(created?._id);
-      await chatStore.loadMessages(created?._id);
+      // Route reflects the newly created chat
+      navigate(`/workspace/${created?._id}`);
     } catch (error) {
       alert("Failed to create chat: " + error.message);
     }
   }
 
   $: if (isNewChatModalOpen) fetchDocs();
+
+  // Keep UI tab synced with URL.
+  $: activeTab = tabFromPage($route.page);
+
+  // When URL is /workspace/:idchat, select that chat.
+  let lastLoadedChatId = null;
+  $: if ($route.page === "workspace") {
+    const chatId = $route.chatId;
+    if (!chatId) {
+      if ($workspaceStore.currentSessionId) {
+        workspaceStore.setCurrentSession(null);
+        chatStore.setCurrentSession(null);
+      }
+    }
+    if (chatId && chatId !== $workspaceStore.currentSessionId) {
+      workspaceStore.setCurrentSession(chatId);
+      chatStore.setCurrentSession(chatId);
+      lastLoadedChatId = chatId;
+      chatStore.loadMessages(chatId);
+    } else if (chatId && chatId === $workspaceStore.currentSessionId && lastLoadedChatId !== chatId) {
+      // Direct URL load (or back/forward) where store already has chatId but messages not loaded in this session
+      lastLoadedChatId = chatId;
+      chatStore.setCurrentSession(chatId);
+      chatStore.loadMessages(chatId);
+    }
+  }
 </script>
 
 <div class="flex h-screen bg-gray-50 overflow-hidden">
@@ -78,19 +126,19 @@
     <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
       <button
         class={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${activeTab === "home" ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-gray-100"}`}
-        on:click={() => (activeTab = "home")}
+        on:click={() => goToTab("home")}
       >
         Workspace
       </button>
       <button
         class={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${activeTab === "analytics" ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-gray-100"}`}
-        on:click={() => (activeTab = "analytics")}
+        on:click={() => goToTab("analytics")}
       >
         Analytics
       </button>
       <button
         class={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${activeTab === "settings" ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-gray-100"}`}
-        on:click={() => (activeTab = "settings")}
+        on:click={() => goToTab("settings")}
       >
         Settings
       </button>
@@ -101,11 +149,11 @@
         <div
           class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold"
         >
-          {$user?.username?.charAt(0).toUpperCase()}
+          {($user?.username?.[0] || "?").toUpperCase()}
         </div>
         <div class="overflow-hidden">
           <p class="text-sm font-medium text-gray-900 truncate">
-            {$user?.username}
+            {$user?.username || "Guest"}
           </p>
           <p class="text-xs text-gray-500 truncate">{$user?.email}</p>
         </div>
@@ -120,7 +168,7 @@
   </aside>
 
   <main class="flex-1 flex flex-col h-full overflow-hidden relative">
-    {#if activeTab === "home"}
+    {#if $route.page === "workspace"}
       <header
         class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between gap-4 z-10"
       >
@@ -223,13 +271,17 @@
           </div>
         </div>
       {/if}
-    {:else if activeTab === "analytics"}
+    {:else if $route.page === "analytics"}
       <div class="flex-1 overflow-auto p-6">
         <TokenUsageChart />
       </div>
-    {:else if activeTab === "settings"}
+    {:else if $route.page === "settings"}
       <div class="flex-1 overflow-auto p-6">
         <Settings />
+      </div>
+    {:else if $route.page === "login"}
+      <div class="flex-1 overflow-auto p-6">
+        <Login />
       </div>
     {/if}
   </main>

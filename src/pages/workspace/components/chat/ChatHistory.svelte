@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import { chatStore } from "../../../../stores/chat.js";
   import { workspaceStore } from "../../../../stores/workspace.js";
+  import { navigate } from "../../../../stores/router.js";
 
   /** @typedef {import('../../../../models/chat.js').ChatSession} ChatSession */
 
@@ -20,9 +21,7 @@
 
   /** @param {string} id */
   async function selectSession(id) {
-    workspaceStore.setCurrentSession(id);
-    chatStore.setCurrentSession(id);
-    await chatStore.loadMessages(id);
+    navigate(`/workspace/${id}`);
   }
 </script>
 
