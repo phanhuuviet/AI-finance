@@ -10,6 +10,7 @@
   import StudioModalReport from "./modal/StudioModalReport.svelte";
   import StudioModalQuiz from "./modal/StudioModalQuiz.svelte";
   import StudioModalData from "./modal/StudioModalData.svelte";
+  import StudioToolIcon from "../../../../components/icons/StudioToolIcon.svelte";
 
   /** @typedef {import('../../../../models/studio.js').StudioOutput} StudioOutput */
 
@@ -246,12 +247,20 @@
     <div class="grid grid-cols-2 lg:grid-cols-3 gap-3">
       {#each tools as t}
         <button
-          class={`rounded-xl border px-4 py-3 text-left transition border-gray-200 hover:bg-gray-50 hover:border-blue-300 hover:bg-blue-50 hover:cursor-pointer`}
+          class={`group rounded-xl border px-4 py-3 text-left transition border-gray-200 hover:bg-gray-50 hover:border-blue-300 hover:bg-blue-50 hover:cursor-pointer`}
           on:click={() => openToolModal(t.key)}
           type="button"
         >
-          <div class="text-sm font-medium text-gray-900">{t.title}</div>
-          <div class="mt-1 text-xs text-gray-500">{t.subtitle}</div>
+          <div class="flex items-start gap-3">
+            <div class="mt-0.5 shrink-0 text-gray-500">
+              <StudioToolIcon name={t.key} className="h-5 w-5" />
+            </div>
+
+            <div class="min-w-0">
+              <div class="text-sm font-medium text-gray-900">{t.title}</div>
+              <div class="mt-1 text-xs text-gray-500">{t.subtitle}</div>
+            </div>
+          </div>
         </button>
       {/each}
     </div>
