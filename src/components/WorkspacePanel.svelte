@@ -4,6 +4,8 @@
   import ChatInterface from "./ChatInterfaceSectioned.svelte";
   import ChatHistory from "./ChatHistoryPickSession.svelte";
 
+  import { fade } from "svelte/transition";
+
   import { workspaceStore } from "../stores/workspace.js";
 
   /** @typedef {import('../models/workspace').WorkspaceSection} WorkspaceSection */
@@ -79,7 +81,9 @@
       {#if section === "documents"}
         <DocumentUploadV2 />
       {:else if section === "studio"}
-        <StudioPanel />
+        <div class="h-full" transition:fade={{ duration: 180 }}>
+          <StudioPanel />
+        </div>
       {:else}
         <ChatInterface {sessionId} />
       {/if}
