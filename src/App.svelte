@@ -1,0 +1,47 @@
+<script>
+  import { onMount, onDestroy } from "svelte";
+  import { user, fetchUser } from "./stores/auth.js";
+  import { connectWebSocket, disconnectWebSocket } from "./utils/websocket2.js";
+  import DashboardNotebookLM from "./components/DashboardNotebookLM.svelte";
+
+  let loading = true;
+
+  onMount(async () => {
+    try {
+      if (localStorage.getItem("token")) {
+        await fetchUser();
+        connectWebSocket();
+      }
+    } catch {
+      // ignore
+    } finally {
+      loading = false;
+    }
+  });
+
+  onDestroy(() => {
+    disconnectWebSocket();
+  });
+
+  $: if ($user) {
+    connectWebSocket();
+  } else {
+    disconnectWebSocket();
+  }
+</script>
+
+<main class="min-h-screen bg-gray-50 text-gray-900">
+  {#if loading}
+    <div class="p-6 text-sm text-gray-600">Loading...</div>
+  {:else}
+    <DashboardNotebookLM />
+  {/if}
+</main>
+
+<style>
+  :global(body) {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      Helvetica, Arial, sans-serif;
+  }
+</style>
