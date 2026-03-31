@@ -8,6 +8,9 @@
   /** @type {string} */
   export let title = "";
 
+  /** @type {boolean} */
+  export let isOpen = false;
+
   /** @type {string | null} */
   export let sessionId = null;
 
@@ -35,23 +38,24 @@
   }
 </script>
 
-<div
-  class="fixed inset-0 z-50 flex items-center justify-center"
-  role="dialog"
-  aria-modal="true"
-  transition:fade={{ duration: 180 }}
->
-  <button
-    class="absolute inset-0 bg-black/40"
-    on:click={close}
-    type="button"
-    aria-label="Close"
-  ></button>
-
+{#if isOpen}
   <div
-    class="relative w-full max-w-2xl mx-4 rounded-2xl bg-white border border-gray-200 shadow-sm overflow-hidden"
-    transition:scale={{ start: 0.94, duration: 220, easing: cubicOut }}
+    class="fixed inset-0 z-50 flex items-center justify-center"
+    role="dialog"
+    aria-modal="true"
+    transition:fade={{ duration: 180, easing: cubicOut }}
   >
+    <button
+      class="absolute inset-0 bg-black/40"
+      on:click={close}
+      type="button"
+      aria-label="Close"
+    ></button>
+
+    <div
+      class="relative w-full max-w-2xl mx-4 rounded-2xl bg-white border border-gray-200 shadow-sm overflow-hidden"
+      transition:scale={{ start: 0.94, duration: 220, easing: cubicOut }}
+    >
     <div
       class="px-5 py-4 border-b border-gray-200 bg-white flex items-start justify-between gap-4"
     >
@@ -177,5 +181,6 @@
         Tạo
       </button>
     </div>
+    </div>
   </div>
-</div>
+{/if}

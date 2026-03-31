@@ -411,63 +411,65 @@
   </div>
 </div>
 
-{#if isModalOpen && modalTool}
-  {#if modalTool === "audio_overview"}
-    <StudioModalAudioOverview
-      title={toolTitle(modalTool)}
-      sessionId={sessionId}
-      bind:commonLanguage
-      bind:commonRequirements
-      on:close={closeModal}
-      on:create={createStudioOutput}
-    />
-  {:else if modalTool === "video_overview"}
-    <StudioModalVideoOverview
-      title={toolTitle(modalTool)}
-      sessionId={sessionId}
-      bind:commonLanguage
-      bind:videoFormat
-      bind:videoStyle
-      bind:aspectRatio
-      bind:videoFocus
-      on:close={closeModal}
-      on:create={createStudioOutput}
-    />
-  {:else if modalTool === "mindmap"}
-    <StudioModalMindmap
-      title={toolTitle(modalTool)}
-      sessionId={sessionId}
-      bind:commonLanguage
-      bind:commonRequirements
-      on:close={closeModal}
-      on:create={createStudioOutput}
-    />
-  {:else if modalTool === "report"}
-    <StudioModalReport
-      title={toolTitle(modalTool)}
-      sessionId={sessionId}
-      bind:commonLanguage
-      bind:commonRequirements
-      on:close={closeModal}
-      on:create={createStudioOutput}
-    />
-  {:else if modalTool === "quiz"}
-    <StudioModalQuiz
-      title={toolTitle(modalTool)}
-      sessionId={sessionId}
-      bind:commonLanguage
-      bind:commonRequirements
-      on:close={closeModal}
-      on:create={createStudioOutput}
-    />
-  {:else if modalTool === "data"}
-    <StudioModalData
-      title={toolTitle(modalTool)}
-      sessionId={sessionId}
-      bind:commonLanguage
-      bind:commonRequirements
-      on:close={closeModal}
-      on:create={createStudioOutput}
-    />
-  {/if}
-{/if}
+<StudioModalAudioOverview
+  isOpen={isModalOpen && modalTool === "audio_overview"}
+  title={toolTitle("audio_overview")}
+  sessionId={sessionId}
+  bind:commonLanguage
+  bind:commonRequirements
+  on:close={closeModal}
+  on:create={createStudioOutput}
+/>
+
+<StudioModalVideoOverview
+  isOpen={isModalOpen && modalTool === "video_overview"}
+  title={toolTitle("video_overview")}
+  sessionId={sessionId}
+  bind:commonLanguage
+  bind:videoFormat
+  bind:videoStyle
+  bind:aspectRatio
+  bind:videoFocus
+  on:close={closeModal}
+  on:create={createStudioOutput}
+/>
+
+<StudioModalMindmap
+  isOpen={isModalOpen && modalTool === "mindmap"}
+  title={toolTitle("mindmap")}
+  sessionId={sessionId}
+  bind:commonLanguage
+  bind:commonRequirements
+  on:close={closeModal}
+  on:create={createStudioOutput}
+/>
+
+<StudioModalReport
+  isOpen={isModalOpen && modalTool === "report"}
+  title={toolTitle("report")}
+  sessionId={sessionId}
+  bind:commonLanguage
+  bind:commonRequirements
+  on:close={closeModal}
+  on:create={createStudioOutput}
+/>
+
+<StudioModalQuiz
+  isOpen={isModalOpen && modalTool === "quiz"}
+  title={toolTitle("quiz")}
+  sessionId={sessionId}
+  bind:commonLanguage
+  bind:commonRequirements
+  on:close={closeModal}
+  on:create={createStudioOutput}
+/>
+
+<StudioModalData
+  isOpen={isModalOpen && modalTool === "data"}
+  title={toolTitle("data")}
+  sessionId={sessionId}
+  bind:commonLanguage
+  bind:commonRequirements
+  on:close={closeModal}
+  on:create={createStudioOutput}
+/>
