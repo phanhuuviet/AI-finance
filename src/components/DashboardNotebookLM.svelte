@@ -7,11 +7,16 @@
   import { workspaceStore } from "../stores/workspace.js";
   import WorkspacePanel from "./WorkspacePanel.svelte";
 
+  /** @typedef {import('../models/document').DocumentItem} DocumentItem */
+  /** @typedef {import('../models/chat').ChatSession} ChatSession */
+
   let activeTab = "home"; // home | analytics | settings
 
   let isNewChatModalOpen = false;
   let newChatTitle = "";
+  /** @type {string[]} */
   let selectedDocs = [];
+  /** @type {DocumentItem[]} */
   let availableDocs = [];
 
   async function fetchDocs() {
@@ -24,7 +29,7 @@
           },
         }
       );
-      if (res.ok) availableDocs = await res.json();
+      if (res.ok) availableDocs = /** @type {DocumentItem[]} */ (await res.json());
     } catch (e) {
       console.error("Failed to fetch docs", e);
     }
@@ -33,6 +38,7 @@
   async function handleNewChat() {
     if (!newChatTitle.trim()) return;
     try {
+      /** @type {ChatSession} */
       const created = await chatStore.createSession(newChatTitle, selectedDocs);
       isNewChatModalOpen = false;
       newChatTitle = "";

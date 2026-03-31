@@ -3,6 +3,8 @@
   import { chatStore } from "../stores/chat.js";
   import { workspaceStore } from "../stores/workspace.js";
 
+  /** @typedef {import('../models/chat').ChatSession} ChatSession */
+
   let searchTerm = "";
 
   onMount(() => {
@@ -11,10 +13,12 @@
 
   $: selectedSessionId = $workspaceStore.currentSessionId;
 
+  /** @type {ChatSession[]} */
   $: filteredSessions = $chatStore.sessions.filter((session) =>
     session.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  /** @param {string} id */
   async function selectSession(id) {
     workspaceStore.setCurrentSession(id);
     chatStore.setCurrentSession(id);

@@ -6,11 +6,19 @@
 
   import { workspaceStore } from "../stores/workspace.js";
 
+  /** @typedef {import('../models/workspace').WorkspaceSection} WorkspaceSection */
+
+  /** @type {string | null} */
+  let sessionId = null;
+  /** @type {WorkspaceSection} */
+  let section = 'chat';
+
   $: sessionId = $workspaceStore.currentSessionId;
   $: section = sessionId
     ? ($workspaceStore.activeSectionBySession?.[sessionId] ?? "chat")
     : "chat";
 
+  /** @param {WorkspaceSection} next */
   function setSection(next) {
     if (!sessionId) return;
     workspaceStore.setActiveSectionForCurrentSession(next);

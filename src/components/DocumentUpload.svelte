@@ -4,11 +4,15 @@
   import { workspaceStore } from "../stores/workspace.js";
   import { attachmentsStore } from "../stores/attachments.js";
 
-  let file;
+  /** @typedef {import('../models/document').DocumentItem} DocumentItem */
+
+  /** @type {FileList | null} */
+  let file = null;
   let url = "";
   let uploading = false;
   let error = "";
   let success = "";
+  /** @type {DocumentItem[]} */
   let documents = [
     {
       _id: "1",
@@ -33,6 +37,11 @@
     },
   ];
 
+  /** @type {string | null} */
+  let sessionId = null;
+  /** @type {Set<string>} */
+  let selectedSet = new Set();
+
   $: sessionId = $workspaceStore.currentSessionId;
   $: selectedSet = sessionId
     ? ($attachmentsStore[sessionId] ?? new Set())
@@ -42,7 +51,7 @@
 
   async function fetchDocuments() {
     try {
-      documents = await fetchWithAuth("/documents/");
+      documents = /** @type {DocumentItem[]} */ (await fetchWithAuth("/documents/"));
     } catch (e) {
       console.error("Failed to fetch documents", e);
     }
@@ -98,8 +107,13 @@
     }
   }
 
+  /**
+   * @param {string} docId
+   * @param {Event} e
+   */
   function toggleAttach(docId, e) {
-    attachmentsStore.toggleDocument(sessionId, docId, e.currentTarget.checked);
+    const target = /** @type {HTMLInputElement} */ (e.currentTarget);
+    attachmentsStore.toggleDocument(sessionId, docId, target.checked);
   }
 
   async function deleteDocument(id) {
@@ -245,7 +259,7 @@
                   {:else}
                     <span
                       class="text-red-600 flex items-center gap-1"
-                      title={doc.error_message}
+                      title={String(doc.error_message ?? "")}
                     >
                       <span class="w-2 h-2 rounded-full bg-red-500"></span> Failed
                     </span>

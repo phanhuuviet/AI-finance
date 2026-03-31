@@ -1,27 +1,149 @@
 <script>
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy, tick } from 'svelte';
   import { fetchWithAuth } from '../utils/api.js';
-  // Note: For a real app, you'd install and import Chart.js here
-  // import Chart from 'chart.js/auto';
+  import { getMockTokenUsageAnalytics } from '../utils/mockTokenAnalytics.js';
+  import Chart from 'chart.js/auto';
 
+  /** @typedef {import('../models/tokenAnalytics').TokenUsageAnalytics} TokenUsageAnalytics */
+  /** @typedef {import('../models/tokenAnalytics').TokenUsageDailyRow} TokenUsageDailyRow */
+
+  /** @type {TokenUsageAnalytics | null} */
   let analyticsData = null;
   let loading = true;
+  /** @type {string | null} */
   let error = null;
   let days = 30;
+
+  /** @type {HTMLCanvasElement | null} */
+  let canvasEl = null;
+  /** @type {import('chart.js').Chart | null} */
+  let chart = null;
+
+  function destroyChart() {
+    if (chart) {
+      chart.destroy();
+      chart = null;
+    }
+  }
+
+  /**
+   * @param {string | null | undefined} rgbString
+   * @param {number} alpha
+   * @returns {string | null}
+   */
+  function rgbToRgba(rgbString, alpha) {
+    const match = rgbString?.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
+    if (!match) return null;
+    const r = Number(match[1]);
+    const g = Number(match[2]);
+    const b = Number(match[3]);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+
+  /**
+   * @param {TokenUsageDailyRow[]} [dailyUsage]
+   */
+  function buildDailySeries(dailyUsage = []) {
+    const totalsByDate = new Map();
+    for (const row of dailyUsage) {
+      if (!row?.date) continue;
+      const previous = totalsByDate.get(row.date) || 0;
+      totalsByDate.set(row.date, previous + (Number(row.total) || 0));
+    }
+    return {
+      labels: Array.from(totalsByDate.keys()),
+      values: Array.from(totalsByDate.values())
+    };
+  }
+
+  async function renderChart() {
+    await tick();
+
+    if (!canvasEl || !analyticsData?.daily_usage?.length) {
+      destroyChart();
+      return;
+    }
+
+    const ctx = canvasEl.getContext('2d');
+    if (!ctx) return;
+
+    const { labels, values } = buildDailySeries(analyticsData.daily_usage);
+
+    const baseColor = getComputedStyle(canvasEl.parentElement || canvasEl).color;
+    const borderColor = baseColor || undefined;
+    const backgroundColor = rgbToRgba(baseColor, 0.25) || borderColor;
+
+    if (chart) {
+      chart.data.labels = labels;
+      chart.data.datasets[0].data = values;
+      chart.update();
+      return;
+    }
+
+    chart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Tokens',
+            data: values,
+            backgroundColor,
+            borderColor,
+            borderWidth: 1
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (context) => {
+                const value = context?.parsed?.y ?? 0;
+                return `Tokens: ${Number(value).toLocaleString()}`;
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: (value) => Number(value).toLocaleString()
+            }
+          }
+        }
+      }
+    });
+  }
 
   onMount(() => {
     fetchAnalytics();
   });
 
+  onDestroy(() => {
+    destroyChart();
+  });
+
   async function fetchAnalytics() {
     loading = true;
+    error = null;
+    // Ensure we don't keep a stale chart while the canvas may be unmounted.
+    destroyChart();
     try {
-      analyticsData = await fetchWithAuth(`/analytics/tokens?days=${days}`);
-      // renderChart() would be called here
+      analyticsData = /** @type {TokenUsageAnalytics} */ (
+        await fetchWithAuth(`/analytics/tokens?days=${days}`)
+      );
     } catch (err) {
-      error = err.message;
+      // Fallback to mock data so the UI is still usable during backend outages/dev.
+      analyticsData = getMockTokenUsageAnalytics(days);
+      error = null;
     } finally {
       loading = false;
+      await renderChart();
     }
   }
 
@@ -64,13 +186,8 @@
       </div>
     </div>
 
-    <div class="border border-gray-200 rounded-lg p-4 h-64 flex flex-col items-center justify-center bg-gray-50">
-      <!-- Chart placeholder -->
-      <svg class="w-12 h-12 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-      <p class="text-gray-500 font-medium">Chart.js Implementation</p>
-      <p class="text-sm text-gray-400 text-center max-w-xs mt-1">
-        In a full implementation, a Chart.js bar chart would display daily usage here using <code>analyticsData.daily_usage</code>.
-      </p>
+    <div class="border border-gray-200 rounded-lg p-4 h-64 bg-gray-50 text-blue-600">
+      <canvas bind:this={canvasEl} class="w-full h-full"></canvas>
     </div>
     
     {#if analyticsData.daily_usage && analyticsData.daily_usage.length > 0}

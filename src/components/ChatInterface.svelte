@@ -4,10 +4,14 @@
   import { wsStore } from "../stores/websocket.js";
   import { sendWebSocketMessage } from "../utils/websocket.js";
 
+  /** @typedef {import('../models/chat').ChatMessage} ChatMessage */
+
   let messageInput = "";
-  let chatContainer;
+  /** @type {HTMLDivElement | null} */
+  let chatContainer = null;
 
   $: currentSessionId = $chatStore.currentSessionId;
+  /** @type {ChatMessage[]} */
   $: messages = currentSessionId
     ? $chatStore.messages[currentSessionId] || []
     : [];
@@ -30,6 +34,7 @@
     messageInput = "";
   }
 
+  /** @param {KeyboardEvent} e */
   function handleKeydown(e) {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -106,6 +111,8 @@
         on:click={sendMessage}
         disabled={!messageInput.trim() || !currentSessionId || !isConnected}
         class="absolute right-2 p-2 text-blue-600 hover:text-blue-800 disabled:text-gray-400 disabled:cursor-not-allowed"
+        aria-label="Send message"
+        title="Send"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

@@ -1,10 +1,14 @@
 import { derived, writable } from 'svelte/store';
 import { workspaceStore } from './workspace.js';
 
+/** @typedef {import('../models/workspace').SelectedBySession} SelectedBySession */
+
 // Holds document selections per conversation (session)
 // shape: { [sessionId]: Set<string> }
-const selectedBySession = writable({});
+/** @type {import('svelte/store').Writable<SelectedBySession>} */
+const selectedBySession = writable(/** @type {SelectedBySession} */ ({}));
 
+/** @param {Set<string> | undefined} set */
 function toArray(set) {
   return set ? Array.from(set) : [];
 }
@@ -12,6 +16,11 @@ function toArray(set) {
 export const attachmentsStore = {
   subscribe: selectedBySession.subscribe,
 
+  /**
+   * @param {string | null} sessionId
+   * @param {string} docId
+   * @param {boolean} checked
+   */
   toggleDocument(sessionId, docId, checked) {
     if (!sessionId || !docId) return;
     selectedBySession.update((m) => {
@@ -22,11 +31,16 @@ export const attachmentsStore = {
     });
   },
 
+  /** @param {string | null} sessionId */
   clearSession(sessionId) {
     if (!sessionId) return;
     selectedBySession.update((m) => ({ ...m, [sessionId]: new Set() }));
   },
 
+  /**
+   * @param {string | null} sessionId
+   * @returns {string[]}
+   */
   getSelectedIds(sessionId) {
     let ids = [];
     selectedBySession.update((m) => {

@@ -1,12 +1,27 @@
 import { writable } from 'svelte/store';
 import { fetchWithAuth } from '../utils/api.js';
 
+/** @typedef {import('../models/chat').ChatSession} ChatSession */
+/** @typedef {import('../models/chat').ChatSessionDetail} ChatSessionDetail */
+/** @typedef {import('../models/chat').ChatMessage} ChatMessage */
+
+/**
+ * @typedef {{
+ *  sessions: ChatSession[];
+ *  currentSessionId: string | null;
+ *  messages: Record<string, ChatMessage[]>;
+ * }} ChatState
+ */
+
 function createChatStore() {
-  const { subscribe, set, update } = writable({
-    sessions: [],
-    currentSessionId: null,
-    messages: {} // Map of chatId -> messages array
-  });
+  const { subscribe, set, update } = writable(
+    /** @type {ChatState} */
+    ({
+      sessions: [],
+      currentSessionId: null,
+      messages: {} // Map of chatId -> messages array
+    })
+  );
 
   return {
     subscribe,
@@ -15,6 +30,7 @@ function createChatStore() {
     fetchSessions: async () => {
       try {
         // const data = await fetchWithAuth('/chat/sessions');
+        /** @type {ChatSession[]} */
         const data = [
           {
             "_id": "session1",
@@ -28,8 +44,14 @@ function createChatStore() {
         console.error('Failed to fetch chat sessions:', error);
       }
     },
+    /**
+     * @param {string} title
+     * @param {string[]} [documentIds]
+     * @returns {Promise<ChatSession>}
+     */
     createSession: async (title, documentIds = []) => {
       try {
+        /** @type {ChatSession} */
         const data = await fetchWithAuth('/chat/sessions', {
           method: 'POST',
           body: JSON.stringify({ title, document_ids: documentIds })
@@ -45,11 +67,17 @@ function createChatStore() {
         throw error;
       }
     },
+    /** @param {string | null} sessionId */
     setCurrentSession: (sessionId) => {
       update(state => ({ ...state, currentSessionId: sessionId }));
     },
+    /**
+     * @param {string} sessionId
+     * @returns {Promise<void>}
+     */
     loadMessages: async (sessionId) => {
       try {
+        /** @type {ChatSessionDetail} */
         const data = await fetchWithAuth(`/chat/sessions/${sessionId}`);
         update(state => {
           const newMessages = { ...state.messages };
@@ -60,6 +88,10 @@ function createChatStore() {
         console.error('Failed to load chat messages:', error);
       }
     },
+    /**
+     * @param {string} chatId
+     * @param {ChatMessage} message
+     */
     addMessage: (chatId, message) => {
       update(state => {
         const chatMessages = state.messages[chatId] || [];
@@ -76,6 +108,11 @@ function createChatStore() {
         return state;
       });
     },
+    /**
+     * @param {string} chatId
+     * @param {string} messageId
+     * @param {string} chunk
+     */
     appendChunk: (chatId, messageId, chunk) => {
       update(state => {
         const chatMessages = [...(state.messages[chatId] || [])];

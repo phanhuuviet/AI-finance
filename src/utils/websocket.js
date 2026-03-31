@@ -3,15 +3,22 @@ import { user } from '../stores/auth.js';
 import { wsStore } from '../stores/websocket.js';
 import { chatStore } from '../stores/chat.js';
 
+/** @typedef {import('../models/user').User} User */
+/** @typedef {import('../models/websocket').WsInboundMessage} WsInboundMessage */
+/** @typedef {import('../models/websocket').WsSendMessage} WsSendMessage */
+
 const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8000/chat/ws';
+/** @type {WebSocket | null} */
 let ws = null;
 
 export function connectWebSocket() {
+  /** @type {User | null} */
   const currentUser = get(user);
   if (!currentUser) return;
 
   // Simple client_id using user._id for this example
-  const clientId = currentUser._id;
+  const clientId = currentUser._id ?? currentUser.id;
+  if (!clientId) return;
   
   if (ws) {
     ws.close();
@@ -24,6 +31,7 @@ export function connectWebSocket() {
   };
 
   ws.onmessage = (event) => {
+    /** @type {WsInboundMessage} */
     const data = JSON.parse(event.data);
     
     switch (data.type) {
@@ -61,12 +69,18 @@ export function connectWebSocket() {
   };
 }
 
+/**
+ * @param {string} chatId
+ * @param {string} content
+ */
 export function sendWebSocketMessage(chatId, content) {
   if (ws && ws.readyState === WebSocket.OPEN) {
-    ws.send(JSON.stringify({
+    /** @type {WsSendMessage} */
+    const payload = {
       chat_id: chatId,
-      content: content
-    }));
+      content
+    };
+    ws.send(JSON.stringify(payload));
   } else {
     console.error('WebSocket is not connected');
   }

@@ -1,5 +1,8 @@
 import { writable } from 'svelte/store';
 
+/** @typedef {import('../models/workspace').WorkspaceStateB} WorkspaceStateB */
+/** @typedef {import('../models/workspace').WorkspaceSection} WorkspaceSection */
+
 // Behavior B:
 // - Must pick a conversation (session) first.
 // - Documents/Chat/Studio shown only after session is selected.
@@ -10,12 +13,16 @@ const initial = {
 };
 
 function createWorkspaceStore() {
-  const { subscribe, update, set } = writable(structuredClone(initial));
+  const { subscribe, update, set } = writable(
+    /** @type {WorkspaceStateB} */
+    (structuredClone(initial))
+  );
 
   return {
     subscribe,
     reset: () => set(structuredClone(initial)),
 
+    /** @param {string | null} sessionId */
     setCurrentSession: (sessionId) =>
       update((s) => ({
         ...s,
@@ -26,6 +33,7 @@ function createWorkspaceStore() {
         }
       })),
 
+    /** @param {WorkspaceSection} section */
     setActiveSectionForCurrentSession: (section) =>
       update((s) => {
         if (!s.currentSessionId) return s;

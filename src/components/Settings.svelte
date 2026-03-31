@@ -1,24 +1,56 @@
 <script>
   import { user } from '../stores/auth.js';
+  import { fetchWithAuth } from '../utils/api.js';
+
+  /** @typedef {import('../models/user').User} User */
+  /** @typedef {import('../models/user').UserPreferences} UserPreferences */
   
-  // Local state initialized from store
-  let preferences = $user?.preferences || { model: 'gpt-3.5-turbo' };
+  let initialized = false;
+  let username = '';
+  let email = '';
+  /** @type {UserPreferences} */
+  let preferences = { model: 'gpt-3.5-turbo' };
   let saving = false;
   let message = '';
+  let errorMessage = '';
+
+  $: if (!$user) {
+    initialized = false;
+  }
+
+  $: if ($user && !initialized) {
+    username = $user.username || '';
+    email = $user.email || '';
+    preferences = {
+      model: $user.preferences?.model || 'gpt-3.5-turbo'
+    };
+    initialized = true;
+  }
 
   async function saveSettings() {
     saving = true;
     message = '';
+    errorMessage = '';
     
-    // In a real app, you would have a settings/update endpoint
-    // For now, we simulate success
-    setTimeout(() => {
+    try {
+      /** @type {User} */
+      const updated = await fetchWithAuth('/auth/me', {
+        method: 'PUT',
+        body: JSON.stringify({
+          username,
+          email,
+          preferences
+        })
+      });
+
+      user.set(updated);
       message = 'Settings saved successfully.';
+      setTimeout(() => (message = ''), 3000);
+    } catch (err) {
+      errorMessage = err?.message || 'Failed to save settings.';
+    } finally {
       saving = false;
-      
-      // Clear message after 3 seconds
-      setTimeout(() => message = '', 3000);
-    }, 800);
+    }
   }
 </script>
 
@@ -31,6 +63,12 @@
     </div>
   {/if}
 
+  {#if errorMessage}
+    <div class="p-3 mb-6 text-sm text-red-700 bg-red-100 rounded-md transition-opacity">
+      {errorMessage}
+    </div>
+  {/if}
+
   <div class="space-y-6">
     <!-- Profile Info -->
     <div class="pb-6 border-b border-gray-200">
@@ -38,24 +76,24 @@
       
       <div class="grid grid-cols-1 gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+          <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
           <input 
+            id="username"
             type="text" 
-            value={$user?.username} 
-            disabled
-            class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 cursor-not-allowed"
+            bind:value={username}
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 outline-none"
           />
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
           <input 
+            id="email"
             type="email" 
-            value={$user?.email} 
-            disabled
-            class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 cursor-not-allowed"
+            bind:value={email}
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 outline-none"
           />
         </div>
-        <p class="text-xs text-gray-500">Profile information cannot be changed currently.</p>
+        <p class="text-xs text-gray-500">Changes are saved via a mocked API when backend is unavailable.</p>
       </div>
     </div>
 

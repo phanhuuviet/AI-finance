@@ -6,12 +6,17 @@
   import { sendWebSocketMessage } from "../utils/websocket2.js";
   import { currentSessionSelectedDocIds } from "../stores/attachments.js";
 
+  /** @typedef {import('../models/chat').ChatMessage} ChatMessage */
+
   // Session-scoped: caller passes the sessionId belonging to a section
+  /** @type {string | null} */
   export let sessionId = null;
 
   let messageInput = "";
-  let chatContainer;
+  /** @type {HTMLDivElement | null} */
+  let chatContainer = null;
 
+  /** @type {ChatMessage[]} */
   $: messages = sessionId ? $chatStore.messages[sessionId] || [] : [];
   $: isConnected = $wsStore.status === "connected";
   $: selectedDocIds = $currentSessionSelectedDocIds;
@@ -29,6 +34,7 @@
     messageInput = "";
   }
 
+  /** @param {KeyboardEvent} e */
   function handleKeydown(e) {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();

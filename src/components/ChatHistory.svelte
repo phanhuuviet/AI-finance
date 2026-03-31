@@ -2,16 +2,20 @@
   import { onMount } from "svelte";
   import { chatStore } from "../stores/chat.js";
 
+  /** @typedef {import('../models/chat').ChatSession} ChatSession */
+
   let searchTerm = "";
 
   onMount(() => {
     chatStore.fetchSessions();
   });
 
+  /** @type {ChatSession[]} */
   $: filteredSessions = $chatStore.sessions.filter((session) =>
     session.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  /** @param {string} id */
   async function selectSession(id) {
     chatStore.setCurrentSession(id);
     await chatStore.loadMessages(id);
@@ -44,12 +48,10 @@
       <ul class="divide-y divide-gray-100">
         {#each filteredSessions as session}
           <li>
-            <!-- svelte-ignore a11y_missing_attribute -->
-            <!-- svelte-ignore a11y_interactive_supports_focus -->
-            <!-- svelte-ignore a11y_click_events_have_key_events -->
-            <a
-              class={`block p-4 hover:bg-blue-50 cursor-pointer transition-colors ${$chatStore.currentSessionId === session._id ? "bg-blue-50 border-l-4 border-blue-600" : "border-l-4 border-transparent"}`}
+            <button
+              class={`w-full text-left block p-4 hover:bg-blue-50 cursor-pointer transition-colors ${$chatStore.currentSessionId === session._id ? "bg-blue-50 border-l-4 border-blue-600" : "border-l-4 border-transparent"}`}
               on:click={() => selectSession(session._id)}
+              type="button"
             >
               <div class="font-medium text-gray-900 truncate">
                 {session.title}
@@ -57,7 +59,7 @@
               <div class="text-xs text-gray-500 mt-1">
                 {new Date(session.updated_at).toLocaleDateString()}
               </div>
-            </a>
+            </button>
           </li>
         {/each}
       </ul>
