@@ -3,7 +3,7 @@
   import { cubicOut } from "svelte/easing";
   import { fade, fly, scale } from "svelte/transition";
   import { workspaceStore } from "../../../../stores/workspace.js";
-  import { dashboardService } from "../../../../lib/services/dashboard.service";
+  import { dashboardStore } from "../../../../stores/dashboard.js";
   import StudioModalAudioOverview from "./modal/StudioModalAudioOverview.svelte";
   import StudioModalVideoOverview from "./modal/StudioModalVideoOverview.svelte";
   import StudioModalMindmap from "./modal/StudioModalMindmap.svelte";
@@ -11,6 +11,8 @@
   import StudioModalQuiz from "./modal/StudioModalQuiz.svelte";
   import StudioModalData from "./modal/StudioModalData.svelte";
   import StudioToolIcon from "../../../../components/icons/StudioToolIcon.svelte";
+  import LoadingBlock from "../../../../lib/components/common/LoadingBlock.svelte";
+  import ErrorFallback from "../../../../lib/components/common/ErrorFallback.svelte";
 
   /** @typedef {import('../../../../lib/models').StudioOutput} StudioOutput */
 
@@ -90,6 +92,20 @@
     outputs = [];
   }
 
+  $: rawStudioState = sessionId ? $dashboardStore.studioBySession?.[sessionId] : null;
+  /** @type {{ data: StudioOutput[] | null; loading: boolean; showLoading: boolean; error: string | null }} */
+  $: studioState = {
+    data: Array.isArray(rawStudioState?.data)
+      ? /** @type {StudioOutput[]} */ (rawStudioState.data)
+      : null,
+    loading: Boolean(rawStudioState?.loading),
+    showLoading: Boolean(rawStudioState?.showLoading),
+    error: rawStudioState?.error ? String(rawStudioState.error) : null
+  };
+  $: outputs = /** @type {StudioOutput[]} */ (studioState.data || []);
+  $: loadingOutputs = studioState.showLoading;
+  $: outputsError = studioState.error || "";
+
   function openToolModal(toolKey) {
     activeTool = toolKey;
     modalTool = toolKey;
@@ -121,16 +137,7 @@
 
   async function refreshOutputs() {
     if (!sessionId) return;
-    loadingOutputs = true;
-    outputsError = "";
-    try {
-      outputs = await dashboardService.getStudioOutputs(sessionId);
-    } catch (e) {
-      outputsError = e?.message || "Không thể tải danh sách studio outputs.";
-      outputs = [];
-    } finally {
-      loadingOutputs = false;
-    }
+    await dashboardStore.fetchStudioOutputs(sessionId);
   }
 
   async function createStudioOutput() {
@@ -153,12 +160,9 @@
     }
 
     try {
-      const created = await dashboardService.createStudioOutput(sessionId, modalTool, payload);
+      await dashboardStore.createStudioOutput(sessionId, modalTool, payload);
 
-      // Optimistically prepend.
-      if (created?.id) outputs = [created, ...outputs];
       closeModal();
-      void refreshOutputs();
     } catch (e) {
       alert(e?.message || "Tạo studio output thất bại.");
     }
@@ -168,8 +172,7 @@
     const nextTitle = prompt("Đổi tên", String(item?.title ?? ""));
     if (!nextTitle) return;
     try {
-      await dashboardService.renameStudioOutput(item.id, nextTitle);
-      void refreshOutputs();
+      await dashboardStore.renameStudioOutput(sessionId, item.id, nextTitle);
     } catch (e) {
       alert(e?.message || "Đổi tên thất bại.");
     }
@@ -178,8 +181,7 @@
   async function deleteOutput(item) {
     if (!confirm("Xoá studio output này?")) return;
     try {
-      await dashboardService.deleteStudioOutput(item.id);
-      outputs = outputs.filter((o) => o.id !== item.id);
+      await dashboardStore.deleteStudioOutput(sessionId, item.id);
     } catch (e) {
       alert(e?.message || "Xoá thất bại.");
     }
@@ -187,7 +189,7 @@
 
   async function shareOutput(item) {
     try {
-      const res = await dashboardService.shareStudioOutput(item.id);
+      const res = await dashboardStore.shareStudioOutput(item.id);
       const url = res?.share_url || res?.url;
       if (url && navigator?.clipboard?.writeText) {
         await navigator.clipboard.writeText(String(url));
@@ -202,7 +204,7 @@
 
   async function downloadOutput(item) {
     try {
-      const res = await dashboardService.downloadStudioOutput(item.id);
+      const res = await dashboardStore.downloadStudioOutput(item.id);
       const url = res?.download_url || item?.result_url;
       if (url) window.open(String(url), "_blank", "noopener,noreferrer");
       else alert("Output chưa có file tải xuống.");
@@ -269,18 +271,20 @@
           Chọn một cuộc trò chuyện trước để xem/tạo Studio.
         </div>
       {:else if outputsError}
-        <div
-          class="mt-3 p-4 rounded-xl bg-red-50 border border-red-200 text-sm text-red-700"
-          transition:fade={{ duration: 140 }}
-        >
-          {outputsError}
+        <div class="mt-3" transition:fade={{ duration: 140 }}>
+          <ErrorFallback
+            compact={true}
+            message={outputsError}
+            retryLabel="Retry outputs"
+            on:retry={refreshOutputs}
+          />
         </div>
       {:else if loadingOutputs}
         <div
           class="mt-3 p-4 rounded-xl bg-gray-50 border border-gray-200 text-sm text-gray-600"
           transition:fade={{ duration: 140 }}
         >
-          Đang tải...
+          <LoadingBlock rows={4} rowHeight="h-10" />
         </div>
       {:else if outputs.length === 0}
         <div

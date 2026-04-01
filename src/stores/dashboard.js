@@ -1,0 +1,282 @@
+import { writable } from 'svelte/store';
+import { dashboardService } from '../lib/services/dashboard.service';
+import { createLoadingGate } from '../lib/utils/loading.js';
+
+/** @typedef {import('../lib/models').DocumentItem} DocumentItem */
+/** @typedef {import('../lib/models').TokenUsageAnalytics} TokenUsageAnalytics */
+/** @typedef {import('../lib/models').StudioOutput} StudioOutput */
+
+/**
+ * @template T
+ * @returns {{ data: T | null; loading: boolean; showLoading: boolean; error: string | null }}
+ */
+function createAsyncState() {
+  return {
+    data: null,
+    loading: false,
+    showLoading: false,
+    error: null
+  };
+}
+
+/**
+ * @param {unknown} error
+ */
+function toMessage(error) {
+  if (error && typeof error === 'object' && 'message' in error) {
+    return String(error.message);
+  }
+  return 'Request failed.';
+}
+
+function createDashboardStore() {
+  const { subscribe, update } = writable({
+    documents: createAsyncState(),
+    tokenUsage: createAsyncState(),
+    studioBySession: /** @type {Record<string, ReturnType<typeof createAsyncState>>} */ ({})
+  });
+
+  const documentsGate = createLoadingGate(() => {
+    update((state) => ({
+      ...state,
+      documents: {
+        ...state.documents,
+        showLoading: true
+      }
+    }));
+  });
+
+  const tokenUsageGate = createLoadingGate(() => {
+    update((state) => ({
+      ...state,
+      tokenUsage: {
+        ...state.tokenUsage,
+        showLoading: true
+      }
+    }));
+  });
+
+  /** @param {string} sessionId */
+  function ensureStudioState(sessionId) {
+    update((state) => {
+      if (state.studioBySession[sessionId]) return state;
+      return {
+        ...state,
+        studioBySession: {
+          ...state.studioBySession,
+          [sessionId]: createAsyncState()
+        }
+      };
+    });
+  }
+
+  /** @param {string} sessionId */
+  function createStudioGate(sessionId) {
+    return createLoadingGate(() => {
+      update((state) => ({
+        ...state,
+        studioBySession: {
+          ...state.studioBySession,
+          [sessionId]: {
+            ...(state.studioBySession[sessionId] || createAsyncState()),
+            showLoading: true
+          }
+        }
+      }));
+    });
+  }
+
+  return {
+    subscribe,
+
+    async fetchDocuments() {
+      documentsGate.start();
+      update((state) => ({
+        ...state,
+        documents: {
+          ...state.documents,
+          loading: true,
+          error: null,
+          showLoading: false
+        }
+      }));
+
+      try {
+        const data = /** @type {DocumentItem[]} */ (await dashboardService.getDocuments());
+        update((state) => ({
+          ...state,
+          documents: {
+            ...state.documents,
+            data,
+            error: null
+          }
+        }));
+        return data;
+      } catch (error) {
+        update((state) => ({
+          ...state,
+          documents: {
+            ...state.documents,
+            error: toMessage(error)
+          }
+        }));
+        throw error;
+      } finally {
+        documentsGate.stop();
+        update((state) => ({
+          ...state,
+          documents: {
+            ...state.documents,
+            loading: false,
+            showLoading: false
+          }
+        }));
+      }
+    },
+
+    async uploadDocument(file) {
+      await dashboardService.uploadDocument(file);
+      return this.fetchDocuments();
+    },
+
+    async crawlWebsite(url) {
+      await dashboardService.crawlWebsite(url);
+      return this.fetchDocuments();
+    },
+
+    async deleteDocument(id) {
+      await dashboardService.deleteDocument(id);
+      return this.fetchDocuments();
+    },
+
+    async fetchTokenUsage(days) {
+      tokenUsageGate.start();
+      update((state) => ({
+        ...state,
+        tokenUsage: {
+          ...state.tokenUsage,
+          loading: true,
+          error: null,
+          showLoading: false
+        }
+      }));
+
+      try {
+        const data = /** @type {TokenUsageAnalytics} */ (await dashboardService.getTokenUsage(days));
+        update((state) => ({
+          ...state,
+          tokenUsage: {
+            ...state.tokenUsage,
+            data,
+            error: null
+          }
+        }));
+        return data;
+      } catch (error) {
+        update((state) => ({
+          ...state,
+          tokenUsage: {
+            ...state.tokenUsage,
+            error: toMessage(error)
+          }
+        }));
+        throw error;
+      } finally {
+        tokenUsageGate.stop();
+        update((state) => ({
+          ...state,
+          tokenUsage: {
+            ...state.tokenUsage,
+            loading: false,
+            showLoading: false
+          }
+        }));
+      }
+    },
+
+    async fetchStudioOutputs(sessionId) {
+      ensureStudioState(sessionId);
+      const gate = createStudioGate(sessionId);
+      gate.start();
+      update((state) => ({
+        ...state,
+        studioBySession: {
+          ...state.studioBySession,
+          [sessionId]: {
+            ...(state.studioBySession[sessionId] || createAsyncState()),
+            loading: true,
+            error: null,
+            showLoading: false
+          }
+        }
+      }));
+
+      try {
+        const data = /** @type {StudioOutput[]} */ (await dashboardService.getStudioOutputs(sessionId));
+        update((state) => ({
+          ...state,
+          studioBySession: {
+            ...state.studioBySession,
+            [sessionId]: {
+              ...(state.studioBySession[sessionId] || createAsyncState()),
+              data,
+              error: null
+            }
+          }
+        }));
+        return data;
+      } catch (error) {
+        update((state) => ({
+          ...state,
+          studioBySession: {
+            ...state.studioBySession,
+            [sessionId]: {
+              ...(state.studioBySession[sessionId] || createAsyncState()),
+              error: toMessage(error)
+            }
+          }
+        }));
+        throw error;
+      } finally {
+        gate.stop();
+        update((state) => ({
+          ...state,
+          studioBySession: {
+            ...state.studioBySession,
+            [sessionId]: {
+              ...(state.studioBySession[sessionId] || createAsyncState()),
+              loading: false,
+              showLoading: false
+            }
+          }
+        }));
+      }
+    },
+
+    async createStudioOutput(sessionId, type, payload) {
+      const created = await dashboardService.createStudioOutput(sessionId, type, payload);
+      await this.fetchStudioOutputs(sessionId);
+      return created;
+    },
+
+    async renameStudioOutput(sessionId, outputId, title) {
+      await dashboardService.renameStudioOutput(outputId, title);
+      await this.fetchStudioOutputs(sessionId);
+    },
+
+    async deleteStudioOutput(sessionId, outputId) {
+      await dashboardService.deleteStudioOutput(outputId);
+      await this.fetchStudioOutputs(sessionId);
+    },
+
+    shareStudioOutput(outputId) {
+      return dashboardService.shareStudioOutput(outputId);
+    },
+
+    downloadStudioOutput(outputId) {
+      return dashboardService.downloadStudioOutput(outputId);
+    }
+  };
+}
+
+export const dashboardStore = createDashboardStore();

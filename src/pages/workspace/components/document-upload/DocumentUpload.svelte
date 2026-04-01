@@ -1,22 +1,20 @@
 <script>
-  import { dashboardService } from "../../../../lib/services/dashboard.service";
+  import { fade } from "svelte/transition";
   import { onMount } from "svelte";
+  import { dashboardStore } from "../../../../stores/dashboard.js";
   import { workspaceStore } from "../../../../stores/workspace.js";
   import { attachmentsStore } from "../../../../stores/attachments.js";
   import Button from "../../../../components/common/Button.svelte";
   import TextField from "../../../../components/common/form/TextField.svelte";
+  import LoadingBlock from "../../../../lib/components/common/LoadingBlock.svelte";
+  import ErrorFallback from "../../../../lib/components/common/ErrorFallback.svelte";
 
   /** @typedef {import('../../../../lib/models').DocumentItem} DocumentItem */
 
   /** @type {FileList | null} */
   let file = null;
   let url = "";
-  let uploading = false;
-  let error = "";
   let success = "";
-  /** @type {DocumentItem[]} */
-  let documents = [
-  ];
 
   /** @type {string | null} */
   let sessionId = null;
@@ -24,55 +22,46 @@
   let selectedSet = new Set();
 
   $: sessionId = $workspaceStore.currentSessionId;
+  $: documentsState = $dashboardStore.documents;
+  /** @type {DocumentItem[]} */
+  $: documents = documentsState.data || [];
   $: selectedSet = sessionId
     ? ($attachmentsStore[sessionId] ?? new Set())
     : new Set();
 
-  onMount(fetchDocuments);
+  onMount(() => {
+    dashboardStore.fetchDocuments();
+  });
 
   async function fetchDocuments() {
-    try {
-      documents = /** @type {DocumentItem[]} */ (await dashboardService.getDocuments());
-    } catch (e) {
-      console.error("Failed to fetch documents", e);
-    }
+    await dashboardStore.fetchDocuments();
   }
 
   async function handleFileUpload() {
     if (!file) return;
 
-    uploading = true;
-    error = "";
     success = "";
 
     try {
-      await dashboardService.uploadDocument(file[0]);
+      await dashboardStore.uploadDocument(file[0]);
       success = "Document uploaded successfully and is being processed.";
       file = null;
-      await fetchDocuments();
     } catch (err) {
-      error = err.message || "Failed to upload document";
-    } finally {
-      uploading = false;
+      console.error(err);
     }
   }
 
   async function handleCrawl() {
     if (!url) return;
 
-    uploading = true;
-    error = "";
     success = "";
 
     try {
-      await dashboardService.crawlWebsite(url);
+      await dashboardStore.crawlWebsite(url);
       success = "Website crawling started.";
       url = "";
-      await fetchDocuments();
     } catch (err) {
-      error = err.message || "Failed to crawl website";
-    } finally {
-      uploading = false;
+      console.error(err);
     }
   }
 
@@ -89,8 +78,7 @@
     if (!confirm("Are you sure you want to delete this document?")) return;
 
     try {
-      await dashboardService.deleteDocument(id);
-      await fetchDocuments();
+      await dashboardStore.deleteDocument(id);
     } catch (err) {
       alert("Failed to delete document: " + err.message);
     }
@@ -101,11 +89,6 @@
   <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
     <h2 class="text-xl font-semibold mb-4 text-gray-800">Add Documents</h2>
 
-    {#if error}
-      <div class="p-3 mb-4 text-sm text-red-700 bg-red-100 rounded-md">
-        {error}
-      </div>
-    {/if}
     {#if success}
       <div class="p-3 mb-4 text-sm text-green-700 bg-green-100 rounded-md">
         {success}
@@ -128,10 +111,10 @@
         <Button
           block
           on:click={handleFileUpload}
-          disabled={!file || uploading}
+          disabled={!file || documentsState.loading}
           rounded="rounded-md"
         >
-          {uploading && file ? "Uploading..." : "Upload File"}
+          {documentsState.loading && file ? "Uploading..." : "Upload File"}
         </Button>
       </div>
 
@@ -153,10 +136,10 @@
         <Button
           block
           on:click={handleCrawl}
-          disabled={!url || uploading}
+          disabled={!url || documentsState.loading}
           rounded="rounded-md"
         >
-          {uploading && url ? "Crawling..." : "Extract Content"}
+          {documentsState.loading && url ? "Crawling..." : "Extract Content"}
         </Button>
       </div>
     </div>
@@ -183,10 +166,24 @@
       </div>
     {/if}
 
-    {#if documents.length === 0}
+    {#if documentsState.showLoading}
+      <div class="overflow-x-auto" aria-live="polite">
+        <div class="space-y-3 py-2">
+          <LoadingBlock rows={1} rowHeight="h-8" />
+          <LoadingBlock rows={6} rowHeight="h-12" />
+        </div>
+      </div>
+    {:else if documentsState.error}
+      <ErrorFallback
+        compact={true}
+        message={documentsState.error}
+        retryLabel="Retry documents"
+        on:retry={fetchDocuments}
+      />
+    {:else if documents.length === 0}
       <p class="text-gray-500 text-center py-4">No documents added yet.</p>
     {:else}
-      <div class="overflow-x-auto">
+      <div class="overflow-x-auto" transition:fade={{ duration: 180 }}>
         <table class="w-full text-sm text-left text-gray-500">
           <thead class="text-xs text-gray-700 uppercase bg-gray-50">
             <tr>

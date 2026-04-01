@@ -1,9 +1,11 @@
 <script>
-  import { user } from '../../stores/auth.js';
-  import { authService } from '../../lib/services/auth.service';
+  import { fade } from 'svelte/transition';
+  import { user, authState, updateProfile, fetchUser } from '../../stores/auth.js';
   import Button from '../../components/common/Button.svelte';
   import TextField from '../../components/common/form/TextField.svelte';
   import SelectField from '../../components/common/form/SelectField.svelte';
+  import LoadingBlock from '../../lib/components/common/LoadingBlock.svelte';
+  import ErrorFallback from '../../lib/components/common/ErrorFallback.svelte';
 
   /** @typedef {import('../../lib/models').User} User */
   /** @typedef {import('../../lib/models').UserPreferences} UserPreferences */
@@ -13,9 +15,10 @@
   let email = '';
   /** @type {UserPreferences} */
   let preferences = { model: 'gpt-3.5-turbo' };
-  let saving = false;
   let message = '';
   let errorMessage = '';
+
+  $: profileState = $authState;
 
   $: if (!$user) {
     initialized = false;
@@ -36,25 +39,21 @@
   ];
 
   async function saveSettings() {
-    saving = true;
     message = '';
     errorMessage = '';
     
     try {
       /** @type {User} */
-      const updated = await authService.updateUser({
+      const updated = await updateProfile({
         username,
         email,
         preferences
       });
 
-      user.set(updated);
       message = 'Settings saved successfully.';
       setTimeout(() => (message = ''), 3000);
     } catch (err) {
       errorMessage = err?.message || 'Failed to save settings.';
-    } finally {
-      saving = false;
     }
   }
 </script>
@@ -74,7 +73,21 @@
     </div>
   {/if}
 
-  <div class="space-y-6">
+  {#if profileState.showLoading && !$user}
+    <div class="space-y-6" aria-live="polite">
+      <LoadingBlock rows={1} rowHeight="h-7" className="w-48" />
+      <LoadingBlock rows={3} rowHeight="h-11" />
+      <LoadingBlock rows={1} rowHeight="h-7" className="w-48" />
+      <LoadingBlock rows={2} rowHeight="h-11" />
+    </div>
+  {:else if profileState.error && !$user}
+    <ErrorFallback
+      message={profileState.error}
+      retryLabel="Retry loading profile"
+      on:retry={fetchUser}
+    />
+  {:else}
+  <div class="space-y-6" transition:fade={{ duration: 180 }}>
     <!-- Profile Info -->
     <div class="pb-6 border-b border-gray-200">
       <h3 class="text-lg font-medium text-gray-900 mb-4">Profile Information</h3>
@@ -105,12 +118,13 @@
     <div class="pt-4 flex justify-end">
       <Button
         on:click={saveSettings}
-        disabled={saving}
+        disabled={profileState.updating}
         rounded="rounded-lg"
         className="px-6"
       >
-        {saving ? 'Saving...' : 'Save Changes'}
+        {profileState.updating ? 'Saving...' : 'Save Changes'}
       </Button>
     </div>
   </div>
+  {/if}
 </div>

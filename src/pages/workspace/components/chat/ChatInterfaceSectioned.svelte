@@ -1,10 +1,13 @@
 <script>
   import { afterUpdate } from "svelte";
+  import { fade } from "svelte/transition";
   import { chatStore } from "../../../../stores/chat.js";
   import { wsStore } from "../../../../stores/websocket.js";
 
   import { sendWebSocketMessage } from "../../../../lib/services/websocket.service";
   import { currentSessionSelectedDocIds } from "../../../../stores/attachments.js";
+  import LoadingBlock from "../../../../lib/components/common/LoadingBlock.svelte";
+  import ErrorFallback from "../../../../lib/components/common/ErrorFallback.svelte";
 
   /** @typedef {import('../../../../lib/models').ChatMessage} ChatMessage */
 
@@ -18,6 +21,14 @@
 
   /** @type {ChatMessage[]} */
   $: messages = sessionId ? $chatStore.messages[sessionId] || [] : [];
+  $: messageState = sessionId
+    ? ($chatStore.messagesState?.[sessionId] || {
+        data: null,
+        loading: false,
+        showLoading: false,
+        error: null
+      })
+    : { data: null, loading: false, showLoading: false, error: null };
   $: isConnected = $wsStore.status === "connected";
   $: selectedDocIds = $currentSessionSelectedDocIds;
   $: selectedCount = selectedDocIds?.length ?? 0;
@@ -67,28 +78,45 @@
       <div class="h-full flex items-center justify-center text-gray-400">
         Select a chat from history or start a new one
       </div>
+    {:else if messageState.showLoading}
+      <div class="space-y-4" aria-live="polite">
+        <LoadingBlock rows={2} rowHeight="h-10" className="max-w-[75%]" />
+        <div class="flex justify-end">
+          <LoadingBlock rows={1} rowHeight="h-10" className="w-[60%]" />
+        </div>
+        <LoadingBlock rows={2} rowHeight="h-10" className="max-w-[70%]" />
+      </div>
+    {:else if messageState.error}
+      <ErrorFallback
+        compact={true}
+        message={messageState.error}
+        retryLabel="Retry loading messages"
+        on:retry={() => sessionId && chatStore.loadMessages(sessionId)}
+      />
     {:else if messages.length === 0}
       <div class="h-full flex items-center justify-center text-gray-400">
         No messages yet. Send a message to start!
       </div>
     {:else}
-      {#each messages as msg}
-        <div
-          class={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-        >
+      <div transition:fade={{ duration: 180 }}>
+        {#each messages as msg}
           <div
-            class={`max-w-[75%] rounded-lg p-3 ${
-              msg.role === "user"
-                ? "bg-blue-600 text-white rounded-br-none"
-                : "bg-gray-100 text-gray-800 rounded-bl-none"
-            }`}
+            class={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
           >
-            <div class="whitespace-pre-wrap font-sans text-sm leading-relaxed">
-              {msg.content}
+            <div
+              class={`max-w-[75%] rounded-lg p-3 ${
+                msg.role === "user"
+                  ? "bg-blue-600 text-white rounded-br-none"
+                  : "bg-gray-100 text-gray-800 rounded-bl-none"
+              }`}
+            >
+              <div class="whitespace-pre-wrap font-sans text-sm leading-relaxed">
+                {msg.content}
+              </div>
             </div>
           </div>
-        </div>
-      {/each}
+        {/each}
+      </div>
     {/if}
   </div>
 

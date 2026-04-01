@@ -1,8 +1,11 @@
 <script>
   import { onMount } from "svelte";
+  import { fade } from "svelte/transition";
   import { chatStore } from "../../../../stores/chat.js";
   import { workspaceStore } from "../../../../stores/workspace.js";
   import { navigate } from "../../../../stores/router.js";
+  import LoadingBlock from "../../../../lib/components/common/LoadingBlock.svelte";
+  import ErrorFallback from "../../../../lib/components/common/ErrorFallback.svelte";
 
   /** @typedef {import('../../../../lib/models').ChatSession} ChatSession */
 
@@ -13,9 +16,10 @@
   });
 
   $: selectedSessionId = $workspaceStore.currentSessionId;
+  $: sessionsState = $chatStore.sessionsState;
 
   /** @type {ChatSession[]} */
-  $: filteredSessions = $chatStore.sessions.filter((session) =>
+  $: filteredSessions = ($chatStore.sessions || []).filter((session) =>
     session.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -39,7 +43,21 @@
   </div>
 
   <div class="flex-1 overflow-y-auto">
-    {#if $chatStore.sessions.length === 0}
+    {#if sessionsState.showLoading}
+      <div class="p-4 space-y-4">
+        <LoadingBlock rows={1} rowHeight="h-10" className="mb-2" />
+        <LoadingBlock rows={6} rowHeight="h-14" />
+      </div>
+    {:else if sessionsState.error}
+      <div class="p-4">
+        <ErrorFallback
+          compact={true}
+          message={sessionsState.error}
+          retryLabel="Retry loading chats"
+          on:retry={() => chatStore.fetchSessions()}
+        />
+      </div>
+    {:else if $chatStore.sessions.length === 0}
       <div class="p-4 text-center text-gray-500 text-sm">
         No chat history found.
       </div>
@@ -48,24 +66,26 @@
         No chats match your search.
       </div>
     {:else}
-      <ul class="divide-y divide-gray-100">
-        {#each filteredSessions as session}
-          <li>
-            <button
-              class={`w-full text-left block p-4 hover:bg-blue-50 cursor-pointer transition-colors ${selectedSessionId === session._id ? "bg-blue-50 border-l-4 border-blue-600" : "border-l-4 border-transparent"}`}
-              on:click={() => selectSession(session._id)}
-              type="button"
-            >
-              <div class="font-medium text-gray-900 truncate">
-                {session.title}
-              </div>
-              <div class="text-xs text-gray-500 mt-1">
-                {new Date(session.updated_at).toLocaleDateString()}
-              </div>
-            </button>
-          </li>
-        {/each}
-      </ul>
+      <div transition:fade={{ duration: 180 }}>
+        <ul class="divide-y divide-gray-100">
+          {#each filteredSessions as session}
+            <li>
+              <button
+                class={`w-full text-left block p-4 hover:bg-blue-50 cursor-pointer transition-colors ${selectedSessionId === session._id ? "bg-blue-50 border-l-4 border-blue-600" : "border-l-4 border-transparent"}`}
+                on:click={() => selectSession(session._id)}
+                type="button"
+              >
+                <div class="font-medium text-gray-900 truncate">
+                  {session.title}
+                </div>
+                <div class="text-xs text-gray-500 mt-1">
+                  {new Date(session.updated_at).toLocaleDateString()}
+                </div>
+              </button>
+            </li>
+          {/each}
+        </ul>
+      </div>
     {/if}
   </div>
 </div>
