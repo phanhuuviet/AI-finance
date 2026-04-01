@@ -3,6 +3,7 @@
   import { user, fetchUser } from "./stores/auth.js";
   import { route } from "./stores/router.js";
   import { connectWebSocket, disconnectWebSocket } from "./lib/services/websocket.service";
+  import { initLanguage, t } from "./lib/i18n";
   import DashboardNotebookLM from "./components/DashboardNotebookLM.svelte";
   import Login from "./pages/login/Login.svelte";
   import { initRouter } from "./stores/router.js";
@@ -10,6 +11,7 @@
   let loading = true;
 
   onMount(async () => {
+    initLanguage();
     initRouter();
     try {
       if (localStorage.getItem("token")) {
@@ -36,7 +38,7 @@
 
 <main class="min-h-screen bg-gray-50 text-gray-900">
   {#if loading}
-    <div class="p-6 text-sm text-gray-600">Loading...</div>
+    <div class="p-6 text-sm text-gray-600">{$t("common.loading")}</div>
   {:else}
     {#if $route.page === "login"}
       <Login />

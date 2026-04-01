@@ -5,6 +5,7 @@
   import Chart from 'chart.js/auto';
   import LoadingBlock from '../../lib/components/common/LoadingBlock.svelte';
   import ErrorFallback from '../../lib/components/common/ErrorFallback.svelte';
+  import { t } from '../../lib/i18n';
 
   /** @typedef {import('../../lib/models').TokenUsageAnalytics} TokenUsageAnalytics */
   /** @typedef {import('../../lib/models').TokenUsageDailyRow} TokenUsageDailyRow */
@@ -85,7 +86,7 @@
         labels,
         datasets: [
           {
-            label: 'Tokens',
+            label: $t('analytics.datasetLabel'),
             data: values,
             backgroundColor,
             borderColor,
@@ -102,7 +103,7 @@
             callbacks: {
               label: (context) => {
                 const value = context?.parsed?.y ?? 0;
-                return `Tokens: ${Number(value).toLocaleString()}`;
+                return $t('analytics.tooltipTokens', { value: Number(value).toLocaleString() });
               }
             }
           }
@@ -143,15 +144,15 @@
 
 <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 max-w-4xl mx-auto">
   <div class="flex justify-between items-center mb-6">
-    <h2 class="text-xl font-semibold text-gray-800">Token Usage Analytics</h2>
+    <h2 class="text-xl font-semibold text-gray-800">{$t('analytics.title')}</h2>
     <select 
       bind:value={days} 
       on:change={fetchAnalytics}
       class="border border-gray-300 rounded-md text-sm px-3 py-1 focus:ring-blue-500 focus:border-blue-500"
     >
-      <option value={7}>Last 7 Days</option>
-      <option value={30}>Last 30 Days</option>
-      <option value={90}>Last 90 Days</option>
+      <option value={7}>{$t('analytics.last7Days')}</option>
+      <option value={30}>{$t('analytics.last30Days')}</option>
+      <option value={90}>{$t('analytics.last90Days')}</option>
     </select>
   </div>
 
@@ -169,25 +170,25 @@
     </div>
   {:else if tokenUsageState.error}
     <ErrorFallback
-      message={`Failed to load analytics: ${tokenUsageState.error}`}
-      retryLabel="Retry analytics"
+      message={$t('analytics.failedToLoad', { message: tokenUsageState.error })}
+      retryLabel={$t('analytics.retry')}
       on:retry={fetchAnalytics}
     />
   {:else if analyticsData}
     <div transition:fade={{ duration: 180 }}>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
-          <h3 class="text-sm font-medium text-blue-800 mb-1">Total Tokens</h3>
+          <h3 class="text-sm font-medium text-blue-800 mb-1">{$t('analytics.totalTokens')}</h3>
           <p class="text-2xl font-bold text-blue-900">{analyticsData.summary.total_tokens_period.toLocaleString()}</p>
         </div>
         <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-100">
-          <h3 class="text-sm font-medium text-indigo-800 mb-1">Period</h3>
-          <p class="text-2xl font-bold text-indigo-900">{analyticsData.summary.period_days} Days</p>
+          <h3 class="text-sm font-medium text-indigo-800 mb-1">{$t('analytics.period')}</h3>
+          <p class="text-2xl font-bold text-indigo-900">{$t('analytics.days', { count: analyticsData.summary.period_days })}</p>
         </div>
         <div class="bg-green-50 p-4 rounded-lg border border-green-100">
-          <h3 class="text-sm font-medium text-green-800 mb-1">Est. Cost</h3>
+          <h3 class="text-sm font-medium text-green-800 mb-1">{$t('analytics.estimatedCost')}</h3>
           <p class="text-2xl font-bold text-green-900">${((analyticsData.summary.total_tokens_period / 1000) * 0.002).toFixed(4)}</p>
-          <p class="text-xs text-green-600 mt-1">Based on GPT-3.5 average pricing</p>
+          <p class="text-xs text-green-600 mt-1">{$t('analytics.pricingNote')}</p>
         </div>
       </div>
 
@@ -197,14 +198,14 @@
       
       {#if analyticsData.daily_usage && analyticsData.daily_usage.length > 0}
         <div class="mt-6">
-          <h3 class="text-sm font-medium text-gray-700 mb-3">Daily Breakdown (Raw Data)</h3>
+          <h3 class="text-sm font-medium text-gray-700 mb-3">{$t('analytics.dailyBreakdown')}</h3>
           <div class="max-h-40 overflow-y-auto border border-gray-200 rounded-md text-sm">
             <table class="w-full text-left">
               <thead class="bg-gray-50 sticky top-0">
                 <tr>
-                  <th class="px-4 py-2 font-medium text-gray-600">Date</th>
-                  <th class="px-4 py-2 font-medium text-gray-600">Model</th>
-                  <th class="px-4 py-2 font-medium text-gray-600 text-right">Tokens</th>
+                  <th class="px-4 py-2 font-medium text-gray-600">{$t('analytics.date')}</th>
+                  <th class="px-4 py-2 font-medium text-gray-600">{$t('analytics.model')}</th>
+                  <th class="px-4 py-2 font-medium text-gray-600 text-right">{$t('analytics.tokens')}</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-100">

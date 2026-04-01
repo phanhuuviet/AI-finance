@@ -1,5 +1,6 @@
 <script>
   import { forwardEventsBuilder } from "../../utils/forwardEvents.js";
+  import { t } from "../../lib/i18n";
 
   export let type = "button";
   export let variant = "primary";
@@ -55,7 +56,7 @@
   disabled={disabled || loading}
 >
   {#if loading}
-    <slot name="loading">Loading...</slot>
+    <slot name="loading">{$t("common.loading")}</slot>
   {:else}
     <slot />
   {/if}

@@ -3,6 +3,7 @@
   import { cubicOut } from "svelte/easing";
   import { fade, scale } from "svelte/transition";
   import { portal } from "../../utils/portal.js";
+  import { t } from "../../lib/i18n";
 
   /** Control modal visibility */
   export let isOpen = false;
@@ -25,7 +26,7 @@
   /** Controls whether the footer wrapper is rendered */
   export let showFooter = true;
   /** Accessible label for the close actions */
-  export let closeButtonAriaLabel = "Close dialog";
+  export let closeButtonAriaLabel = "";
   /** Selector or element the dialog should portal into */
   export let portalTarget = "body";
 
@@ -35,6 +36,8 @@
     event?.stopPropagation?.();
     dispatch("close");
   }
+
+  $: resolvedCloseButtonAriaLabel = closeButtonAriaLabel || $t("modal.closeDialog");
 </script>
 
 {#if isOpen}
@@ -47,7 +50,7 @@
   >
     <button
       class="absolute inset-0 bg-black/40"
-      aria-label={closeButtonAriaLabel}
+      aria-label={resolvedCloseButtonAriaLabel}
       type="button"
       on:click={handleClose}
     ></button>
@@ -66,8 +69,8 @@
         <button
           class="rounded-lg px-3 py-1.5 text-sm border border-[var(--color-border-soft)] bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-highlight)]"
           type="button"
-          title="Close"
-          aria-label={closeButtonAriaLabel}
+          title={$t("common.close")}
+          aria-label={resolvedCloseButtonAriaLabel}
           on:click={handleClose}
         >
           ✕

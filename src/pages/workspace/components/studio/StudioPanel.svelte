@@ -13,6 +13,7 @@
   import StudioToolIcon from "../../../../components/icons/StudioToolIcon.svelte";
   import LoadingBlock from "../../../../lib/components/common/LoadingBlock.svelte";
   import ErrorFallback from "../../../../lib/components/common/ErrorFallback.svelte";
+  import { t } from "../../../../lib/i18n";
 
   /** @typedef {import('../../../../lib/models').StudioOutput} StudioOutput */
 
@@ -20,22 +21,22 @@
   let sessionId = null;
   $: sessionId = $workspaceStore.currentSessionId;
 
-  const tools = /** @type {{ key: string; title: string; subtitle: string }[]} */ (
+  const tools = /** @type {{ key: string; titleKey: string; subtitleKey: string }[]} */ (
     [
       {
         key: "audio_overview",
-        title: "Tổng quan bằng âm thanh",
-        subtitle: "Chỉnh yêu cầu trước khi tạo"
+        titleKey: "studio.tool.audio.title",
+        subtitleKey: "studio.tool.audio.subtitle"
       },
       {
         key: "video_overview",
-        title: "Tổng quan bằng video",
-        subtitle: "Chỉnh yêu cầu trước khi tạo"
+        titleKey: "studio.tool.video.title",
+        subtitleKey: "studio.tool.video.subtitle"
       },
-      { key: "mindmap", title: "Bản đồ tư duy", subtitle: "Chỉnh yêu cầu" },
-      { key: "report", title: "Báo cáo", subtitle: "Chỉnh yêu cầu" },
-      { key: "quiz", title: "Bài kiểm tra", subtitle: "Chỉnh yêu cầu" },
-      { key: "data", title: "Bảng dữ liệu", subtitle: "Chỉnh yêu cầu" }
+      { key: "mindmap", titleKey: "studio.tool.mindmap.title", subtitleKey: "studio.tool.mindmap.subtitle" },
+      { key: "report", titleKey: "studio.tool.report.title", subtitleKey: "studio.tool.report.subtitle" },
+      { key: "quiz", titleKey: "studio.tool.quiz.title", subtitleKey: "studio.tool.quiz.subtitle" },
+      { key: "data", titleKey: "studio.tool.data.title", subtitleKey: "studio.tool.data.subtitle" }
     ]
   );
 
@@ -49,8 +50,11 @@
 
   // Tool requirements (minimal)
   let commonLanguage = "vi";
-  let commonRequirements =
-    "Sử dụng ví dụ đời thường để giải thích các khái niệm phức tạp.";
+  let commonRequirements = "";
+  $: if (!commonRequirements) {
+    commonRequirements = $t("studio.defaultRequirements");
+  }
+
 
   // Video-specific requirements
   let videoFormat = "explainer"; // explainer | summary
@@ -123,8 +127,8 @@
     modalTool = null;
   }
 
-  function toolTitle(key) {
-    return tools.find((t) => t.key === key)?.title ?? key;
+  function toolTitleKey(key) {
+    return tools.find((t) => t.key === key)?.titleKey ?? "studio.title";
   }
 
   function formatDate(iso) {
@@ -164,26 +168,26 @@
 
       closeModal();
     } catch (e) {
-      alert(e?.message || "Tạo studio output thất bại.");
+      alert(e?.message || $t("studio.createFailed"));
     }
   }
 
   async function renameOutput(item) {
-    const nextTitle = prompt("Đổi tên", String(item?.title ?? ""));
+    const nextTitle = prompt($t("studio.renamePrompt"), String(item?.title ?? ""));
     if (!nextTitle) return;
     try {
       await dashboardStore.renameStudioOutput(sessionId, item.id, nextTitle);
     } catch (e) {
-      alert(e?.message || "Đổi tên thất bại.");
+      alert(e?.message || $t("studio.renameFailed"));
     }
   }
 
   async function deleteOutput(item) {
-    if (!confirm("Xoá studio output này?")) return;
+    if (!confirm($t("studio.confirmDelete"))) return;
     try {
       await dashboardStore.deleteStudioOutput(sessionId, item.id);
     } catch (e) {
-      alert(e?.message || "Xoá thất bại.");
+      alert(e?.message || $t("studio.deleteFailed"));
     }
   }
 
@@ -193,12 +197,12 @@
       const url = res?.share_url || res?.url;
       if (url && navigator?.clipboard?.writeText) {
         await navigator.clipboard.writeText(String(url));
-        alert("Đã copy link chia sẻ vào clipboard.");
+        alert($t("studio.copiedShareLink"));
       } else {
-        alert(url ? `Link chia sẻ: ${url}` : "Không có link chia sẻ.");
+        alert(url ? $t("studio.shareLink", { url }) : $t("studio.shareUnavailable"));
       }
     } catch (e) {
-      alert(e?.message || "Chia sẻ thất bại.");
+      alert(e?.message || $t("studio.shareFailed"));
     }
   }
 
@@ -207,9 +211,9 @@
       const res = await dashboardStore.downloadStudioOutput(item.id);
       const url = res?.download_url || item?.result_url;
       if (url) window.open(String(url), "_blank", "noopener,noreferrer");
-      else alert("Output chưa có file tải xuống.");
+      else alert($t("studio.downloadUnavailable"));
     } catch (e) {
-      alert(e?.message || "Tải xuống thất bại.");
+      alert(e?.message || $t("studio.downloadFailed"));
     }
   }
 </script>
@@ -219,28 +223,28 @@
 >
   <div class="px-5 py-4 border-b border-gray-200 bg-white">
     <div class="flex items-center justify-between">
-      <h2 class="text-base font-semibold text-gray-900">Studio</h2>
-      <div class="text-xs text-gray-500">Theo session chat</div>
+      <h2 class="text-base font-semibold text-gray-900">{$t("studio.title")}</h2>
+      <div class="text-xs text-gray-500">{$t("studio.perSession")}</div>
     </div>
   </div>
 
   <div class="p-5">
     <!-- Tools grid -->
     <div class="grid grid-cols-2 lg:grid-cols-3 gap-3">
-      {#each tools as t}
+      {#each tools as tool}
         <button
           class={`group rounded-xl border px-4 py-3 text-left transition border-gray-200 hover:bg-gray-50 hover:border-blue-300 hover:bg-blue-50 hover:cursor-pointer`}
-          on:click={() => openToolModal(t.key)}
+          on:click={() => openToolModal(tool.key)}
           type="button"
         >
           <div class="flex items-start gap-3">
             <div class="mt-0.5 shrink-0 text-gray-500">
-              <StudioToolIcon name={t.key} className="h-5 w-5" />
+              <StudioToolIcon name={tool.key} className="h-5 w-5" />
             </div>
 
             <div class="min-w-0">
-              <div class="text-sm font-medium text-gray-900">{t.title}</div>
-              <div class="mt-1 text-xs text-gray-500">{t.subtitle}</div>
+              <div class="text-sm font-medium text-gray-900">{$t(tool.titleKey)}</div>
+              <div class="mt-1 text-xs text-gray-500">{$t(tool.subtitleKey)}</div>
             </div>
           </div>
         </button>
@@ -251,7 +255,7 @@
     <div class="mt-6">
       <div class="flex items-center justify-between">
         <div class="text-sm font-semibold text-gray-900">
-          Studio đã tạo trong chat này
+          {$t("studio.createdInSession")}
         </div>
         <button
           class="text-sm text-blue-600 hover:underline disabled:opacity-50"
@@ -259,7 +263,7 @@
           disabled={!sessionId || loadingOutputs}
           type="button"
         >
-          Refresh
+          {$t("common.refresh")}
         </button>
       </div>
 
@@ -268,14 +272,14 @@
           class="mt-3 p-4 rounded-xl bg-gray-50 border border-gray-200 text-sm text-gray-600"
           transition:fade={{ duration: 140 }}
         >
-          Chọn một cuộc trò chuyện trước để xem/tạo Studio.
+          {$t("studio.selectSessionHint")}
         </div>
       {:else if outputsError}
         <div class="mt-3" transition:fade={{ duration: 140 }}>
           <ErrorFallback
             compact={true}
             message={outputsError}
-            retryLabel="Retry outputs"
+            retryLabel={$t("studio.retryOutputs")}
             on:retry={refreshOutputs}
           />
         </div>
@@ -291,7 +295,7 @@
           class="mt-3 p-6 rounded-2xl border border-gray-200 bg-gray-50 text-sm text-gray-600"
           transition:fade={{ duration: 140 }}
         >
-          Chưa có studio output nào cho session này.
+          {$t("studio.empty")}
         </div>
       {:else}
         <div class="mt-3 space-y-2">
@@ -302,7 +306,7 @@
             >
               <div class="min-w-0">
                 <div class="text-sm font-medium text-gray-900 truncate">
-                  {item.title || toolTitle(item.type)}
+                  {item.title || $t(toolTitleKey(item.type))}
                 </div>
                 <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500">
                   <span class="capitalize">{String(item.type).replaceAll("_", " ")}</span>
@@ -310,9 +314,9 @@
                   <span>{formatDate(item.created_at)}</span>
                   <span>•</span>
                   {#if item.status === "ready"}
-                    <span class="text-green-700">Ready</span>
+                    <span class="text-green-700">{$t("studio.statusReady")}</span>
                   {:else if item.status === "processing"}
-                    <span class="text-yellow-700">Processing</span>
+                    <span class="text-yellow-700">{$t("studio.statusProcessing")}</span>
                   {:else}
                     <span class="text-red-700">{String(item.status)}</span>
                   {/if}
@@ -326,7 +330,7 @@
                     on:click={() => window.open(String(item.result_url), "_blank", "noopener,noreferrer")}
                     type="button"
                   >
-                    Mở
+                    {$t("common.open")}
                   </button>
                 {/if}
 
@@ -337,7 +341,7 @@
                     aria-expanded={openMenuForId === item.id}
                     on:click={() => (openMenuForId = openMenuForId === item.id ? null : item.id)}
                     type="button"
-                    title="Menu"
+                    title={$t("studio.menu")}
                   >
                     ⋮
                   </button>
@@ -357,7 +361,7 @@
                         type="button"
                         role="menuitem"
                       >
-                        Đổi tên
+                        {$t("common.rename")}
                       </button>
                       <button
                         class="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
@@ -368,7 +372,7 @@
                         type="button"
                         role="menuitem"
                       >
-                        Tải xuống
+                        {$t("common.download")}
                       </button>
                       <button
                         class="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
@@ -379,7 +383,7 @@
                         type="button"
                         role="menuitem"
                       >
-                        Chia sẻ
+                        {$t("common.share")}
                       </button>
                       <button
                         class="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50"
@@ -390,7 +394,7 @@
                         type="button"
                         role="menuitem"
                       >
-                        Xoá
+                        {$t("common.delete")}
                       </button>
                     </div>
                   {/if}
@@ -406,7 +410,7 @@
 
 <StudioModalAudioOverview
   isOpen={isModalOpen && modalTool === "audio_overview"}
-  title={toolTitle("audio_overview")}
+  title={$t(toolTitleKey("audio_overview"))}
   sessionId={sessionId}
   bind:commonLanguage
   bind:commonRequirements
@@ -416,7 +420,7 @@
 
 <StudioModalVideoOverview
   isOpen={isModalOpen && modalTool === "video_overview"}
-  title={toolTitle("video_overview")}
+  title={$t(toolTitleKey("video_overview"))}
   sessionId={sessionId}
   bind:commonLanguage
   bind:videoFormat
@@ -429,7 +433,7 @@
 
 <StudioModalMindmap
   isOpen={isModalOpen && modalTool === "mindmap"}
-  title={toolTitle("mindmap")}
+  title={$t(toolTitleKey("mindmap"))}
   sessionId={sessionId}
   bind:commonLanguage
   bind:commonRequirements
@@ -439,7 +443,7 @@
 
 <StudioModalReport
   isOpen={isModalOpen && modalTool === "report"}
-  title={toolTitle("report")}
+  title={$t(toolTitleKey("report"))}
   sessionId={sessionId}
   bind:commonLanguage
   bind:commonRequirements
@@ -449,7 +453,7 @@
 
 <StudioModalQuiz
   isOpen={isModalOpen && modalTool === "quiz"}
-  title={toolTitle("quiz")}
+  title={$t(toolTitleKey("quiz"))}
   sessionId={sessionId}
   bind:commonLanguage
   bind:commonRequirements
@@ -459,7 +463,7 @@
 
 <StudioModalData
   isOpen={isModalOpen && modalTool === "data"}
-  title={toolTitle("data")}
+  title={$t(toolTitleKey("data"))}
   sessionId={sessionId}
   bind:commonLanguage
   bind:commonRequirements

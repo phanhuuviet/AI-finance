@@ -4,6 +4,7 @@
   import Button from "../../../../../components/common/Button.svelte";
   import SelectField from "../../../../../components/common/form/SelectField.svelte";
   import TextareaField from "../../../../../components/common/form/TextareaField.svelte";
+  import { t } from "../../../../../lib/i18n";
 
   const dispatch = createEventDispatcher();
 
@@ -22,9 +23,9 @@
   /** @type {string} */
   export let commonRequirements = "";
 
-  const languageOptions = [
-    { value: "vi", label: "Tiếng Việt" },
-    { value: "en", label: "English" }
+  $: languageOptions = [
+    { value: "vi", label: $t("studio.languageVietnamese") },
+    { value: "en", label: $t("studio.languageEnglish") }
   ];
 
   function close() {
@@ -39,19 +40,19 @@
 <ModalDialog
   isOpen={isOpen}
   title={title}
-  description="Chỉnh sửa yêu cầu, sau đó bấm Tạo."
+  description={$t("studio.modalDescription")}
   on:close={close}
 >
   <SelectField
     id="studio_lang_audio"
-    label="Ngôn ngữ"
+    label={$t("common.language")}
     bind:value={commonLanguage}
     options={languageOptions}
   />
 
   <TextareaField
     id="studio_requirements_audio"
-    label="Yêu cầu"
+    label={$t("studio.requirementLabel")}
     bind:value={commonRequirements}
     rows={6}
     textareaClass="min-h-[160px]"
@@ -64,7 +65,7 @@
       on:click={close}
       type="button"
     >
-      Huỷ
+      {$t("common.cancel")}
     </Button>
     <Button
       rounded="rounded-xl"
@@ -72,7 +73,7 @@
       disabled={!sessionId}
       type="button"
     >
-      Tạo
+      {$t("common.create")}
     </Button>
   </svelte:fragment>
 </ModalDialog>

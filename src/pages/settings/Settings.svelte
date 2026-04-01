@@ -6,6 +6,7 @@
   import SelectField from '../../components/common/form/SelectField.svelte';
   import LoadingBlock from '../../lib/components/common/LoadingBlock.svelte';
   import ErrorFallback from '../../lib/components/common/ErrorFallback.svelte';
+  import { t } from '../../lib/i18n';
 
   /** @typedef {import('../../lib/models').User} User */
   /** @typedef {import('../../lib/models').UserPreferences} UserPreferences */
@@ -33,9 +34,9 @@
     initialized = true;
   }
 
-  const modelOptions = [
-    { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo (Fast, efficient)' },
-    { value: 'gpt-4-turbo-preview', label: 'GPT-4 Turbo (More capable, higher cost)' }
+  $: modelOptions = [
+    { value: 'gpt-3.5-turbo', label: $t('settings.modelFast') },
+    { value: 'gpt-4-turbo-preview', label: $t('settings.modelCapable') }
   ];
 
   async function saveSettings() {
@@ -50,16 +51,16 @@
         preferences
       });
 
-      message = 'Settings saved successfully.';
+      message = $t('settings.saved');
       setTimeout(() => (message = ''), 3000);
     } catch (err) {
-      errorMessage = err?.message || 'Failed to save settings.';
+      errorMessage = err?.message || $t('settings.saveFailed');
     }
   }
 </script>
 
 <div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-  <h2 class="text-xl font-semibold text-gray-800 mb-6">Account Settings</h2>
+  <h2 class="text-xl font-semibold text-gray-800 mb-6">{$t('settings.accountSettings')}</h2>
 
   {#if message}
     <div class="p-3 mb-6 text-sm text-green-700 bg-green-100 rounded-md transition-opacity">
@@ -83,34 +84,34 @@
   {:else if profileState.error && !$user}
     <ErrorFallback
       message={profileState.error}
-      retryLabel="Retry loading profile"
+      retryLabel={$t('settings.retryLoadingProfile')}
       on:retry={fetchUser}
     />
   {:else}
   <div class="space-y-6" transition:fade={{ duration: 180 }}>
     <!-- Profile Info -->
     <div class="pb-6 border-b border-gray-200">
-      <h3 class="text-lg font-medium text-gray-900 mb-4">Profile Information</h3>
+      <h3 class="text-lg font-medium text-gray-900 mb-4">{$t('settings.profileInformation')}</h3>
       
       <div class="grid grid-cols-1 gap-4">
-        <TextField id="username" label="Username" bind:value={username} />
-        <TextField id="email" type="email" label="Email" bind:value={email} />
-        <p class="text-xs text-gray-500">Changes are saved through the centralized API service layer.</p>
+        <TextField id="username" label={$t('auth.username')} bind:value={username} />
+        <TextField id="email" type="email" label={$t('auth.email')} bind:value={email} />
+        <p class="text-xs text-gray-500">{$t('settings.apiLayerNote')}</p>
       </div>
     </div>
 
     <!-- AI Preferences -->
     <div>
-      <h3 class="text-lg font-medium text-gray-900 mb-4">AI Preferences</h3>
+      <h3 class="text-lg font-medium text-gray-900 mb-4">{$t('settings.aiPreferences')}</h3>
       
       <div>
         <SelectField
           id="model"
-          label="Default Model"
+          label={$t('settings.defaultModel')}
           bind:value={preferences.model}
           options={modelOptions}
         />
-        <p class="mt-2 text-sm text-gray-500">Higher capacity models will consume more tokens.</p>
+        <p class="mt-2 text-sm text-gray-500">{$t('settings.modelHint')}</p>
       </div>
     </div>
 
@@ -122,7 +123,7 @@
         rounded="rounded-lg"
         className="px-6"
       >
-        {profileState.updating ? 'Saving...' : 'Save Changes'}
+        {profileState.updating ? $t('settings.saving') : $t('settings.saveChanges')}
       </Button>
     </div>
   </div>

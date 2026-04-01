@@ -1,0 +1,214 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "cancel": "Cancel",
+    "create": "Create",
+    "close": "Close",
+    "refresh": "Refresh",
+    "save": "Save",
+    "delete": "Delete",
+    "retry": "Retry",
+    "processing": "Processing...",
+    "search": "Search",
+    "session": "Session",
+    "open": "Open",
+    "rename": "Rename",
+    "download": "Download",
+    "share": "Share",
+    "language": "Language",
+    "actions": "Actions",
+    "status": "Status"
+  },
+  "header": {
+    "workspace": "Workspace",
+    "analytics": "Analytics",
+    "settings": "Settings",
+    "newChat": "New Chat",
+    "language": "Language",
+    "signOut": "Sign Out",
+    "guest": "Guest",
+    "brand": "AI DocChat"
+  },
+  "auth": {
+    "loginTitle": "Login to your account",
+    "registerTitle": "Create an account",
+    "username": "Username",
+    "email": "Email",
+    "password": "Password",
+    "login": "Login",
+    "register": "Register",
+    "needAccount": "Need an account?",
+    "alreadyHaveAccount": "Already have an account?"
+  },
+  "workspace": {
+    "selectConversation": "Select a conversation",
+    "selectConversationHint": "Select a conversation first, then the Documents / Chat / Studio UI will appear.",
+    "documents": "Documents",
+    "chat": "Chat",
+    "studio": "Studio"
+  },
+  "chat": {
+    "session": "Chat Session",
+    "selectChat": "Select a Chat",
+    "connected": "Connected",
+    "disconnected": "Disconnected",
+    "selectChatHint": "Select a chat from history or start a new one",
+    "empty": "No messages yet. Send a message to start!",
+    "selectChatFirst": "Select a chat first...",
+    "typeMessage": "Type your message...",
+    "selectedDocuments": "Selected documents",
+    "documentsSelected": "{{count}} documents selected",
+    "sendMessage": "Send message",
+    "send": "Send",
+    "history": "Conversations",
+    "searchPlaceholder": "Search chats...",
+    "retryLoadingChats": "Retry loading chats",
+    "noHistory": "No chat history found.",
+    "noSearchMatches": "No chats match your search.",
+    "retryLoadingMessages": "Retry loading messages",
+    "startNew": "Start New Chat",
+    "chatTitle": "Chat Title",
+    "chatTitlePlaceholder": "E.g., Financial Report Analysis",
+    "linkDocumentsOptional": "Link Documents (Optional)",
+    "noDocumentsAvailable": "No documents available. Upload some first.",
+    "createChat": "Create Chat",
+    "newChatButton": "+ New Chat",
+    "createFailed": "Failed to create chat: {{message}}"
+  },
+  "documents": {
+    "addDocuments": "Add Documents",
+    "uploadFile": "Upload File",
+    "uploading": "Uploading...",
+    "supportedFormats": "Supported: PDF, TXT, CSV, JSON (Max 50MB)",
+    "crawlWebsite": "Crawl Website",
+    "crawlHint": "Enter a valid URL to extract content",
+    "crawlPlaceholder": "https://example.com",
+    "crawling": "Crawling...",
+    "extractContent": "Extract Content",
+    "yourDocuments": "Your Documents",
+    "selectSessionHint": "Select a conversation first to enable attaching documents to chat.",
+    "retryDocuments": "Retry documents",
+    "empty": "No documents added yet.",
+    "attach": "Attach",
+    "title": "Title",
+    "source": "Source",
+    "dateAdded": "Date Added",
+    "confirmDelete": "Are you sure you want to delete this document?",
+    "deleteFailed": "Failed to delete document: {{message}}",
+    "uploadedSuccess": "Document uploaded successfully and is being processed.",
+    "crawlStarted": "Website crawling started.",
+    "statusReady": "Ready",
+    "statusProcessing": "Processing",
+    "statusFailed": "Failed",
+    "attachToChat": "Attach {{title}} to chat"
+  },
+  "studio": {
+    "title": "Studio",
+    "perSession": "Per chat session",
+    "createdInSession": "Created in this chat",
+    "selectSessionHint": "Select a conversation first to view/create Studio outputs.",
+    "empty": "No studio outputs for this session yet.",
+    "retryOutputs": "Retry outputs",
+    "menu": "Menu",
+    "createFailed": "Failed to create studio output.",
+    "renamePrompt": "Rename",
+    "renameFailed": "Rename failed.",
+    "confirmDelete": "Delete this studio output?",
+    "deleteFailed": "Delete failed.",
+    "copiedShareLink": "Share link copied to clipboard.",
+    "shareLink": "Share link: {{url}}",
+    "shareUnavailable": "No share link available.",
+    "shareFailed": "Share failed.",
+    "downloadUnavailable": "Output is not available for download yet.",
+    "downloadFailed": "Download failed.",
+    "statusReady": "Ready",
+    "statusProcessing": "Processing",
+    "modalDescription": "Adjust the request, then click Create.",
+    "requirementLabel": "Requirements",
+    "defaultRequirements": "Use everyday examples to explain complex concepts.",
+    "tool": {
+      "audio": {
+        "title": "Audio Overview",
+        "subtitle": "Adjust request before generating"
+      },
+      "video": {
+        "title": "Video Overview",
+        "subtitle": "Adjust request before generating"
+      },
+      "mindmap": {
+        "title": "Mindmap",
+        "subtitle": "Adjust request"
+      },
+      "report": {
+        "title": "Report",
+        "subtitle": "Adjust request"
+      },
+      "quiz": {
+        "title": "Quiz",
+        "subtitle": "Adjust request"
+      },
+      "data": {
+        "title": "Data Table",
+        "subtitle": "Adjust request"
+      }
+    },
+    "video": {
+      "format": "Format",
+      "explainer": "Explainer Video",
+      "explainerHint": "Structured overview.",
+      "summary": "Summary",
+      "summaryHint": "Concise.",
+      "moreOptions": "More options",
+      "imageStyle": "Image style",
+      "auto": "Auto",
+      "custom": "Custom",
+      "aspectRatio": "Video aspect ratio",
+      "focus": "What should AI focus on?"
+    },
+    "languageVietnamese": "Vietnamese",
+    "languageEnglish": "English"
+  },
+  "analytics": {
+    "title": "Token Usage Analytics",
+    "last7Days": "Last 7 Days",
+    "last30Days": "Last 30 Days",
+    "last90Days": "Last 90 Days",
+    "retry": "Retry analytics",
+    "failedToLoad": "Failed to load analytics: {{message}}",
+    "totalTokens": "Total Tokens",
+    "period": "Period",
+    "days": "{{count}} Days",
+    "estimatedCost": "Est. Cost",
+    "pricingNote": "Based on GPT-3.5 average pricing",
+    "dailyBreakdown": "Daily Breakdown (Raw Data)",
+    "date": "Date",
+    "model": "Model",
+    "tokens": "Tokens",
+    "datasetLabel": "Tokens",
+    "tooltipTokens": "Tokens: {{value}}"
+  },
+  "settings": {
+    "saved": "Settings saved successfully.",
+    "saveFailed": "Failed to save settings.",
+    "accountSettings": "Account Settings",
+    "retryLoadingProfile": "Retry loading profile",
+    "profileInformation": "Profile Information",
+    "apiLayerNote": "Changes are saved through the centralized API service layer.",
+    "aiPreferences": "AI Preferences",
+    "defaultModel": "Default Model",
+    "modelHint": "Higher capacity models will consume more tokens.",
+    "saving": "Saving...",
+    "saveChanges": "Save Changes",
+    "modelFast": "GPT-3.5 Turbo (Fast, efficient)",
+    "modelCapable": "GPT-4 Turbo (More capable, higher cost)"
+  },
+  "modal": {
+    "closeDialog": "Close dialog"
+  },
+  "errors": {
+    "unableLoadData": "Unable to load data."
+  },
+  "counter": {
+    "countIs": "Count is {{count}}"
+  }
+}

@@ -6,6 +6,7 @@
   import { navigate } from "../../../../stores/router.js";
   import LoadingBlock from "../../../../lib/components/common/LoadingBlock.svelte";
   import ErrorFallback from "../../../../lib/components/common/ErrorFallback.svelte";
+  import { t } from "../../../../lib/i18n";
 
   /** @typedef {import('../../../../lib/models').ChatSession} ChatSession */
 
@@ -33,11 +34,11 @@
   class="flex flex-col h-full bg-white rounded-lg shadow-sm border border-gray-200"
 >
   <div class="p-4 border-b border-gray-200">
-    <h2 class="text-lg font-semibold text-gray-800 mb-4">Conversations</h2>
+    <h2 class="text-lg font-semibold text-gray-800 mb-4">{$t("chat.history")}</h2>
     <input
       type="text"
       bind:value={searchTerm}
-      placeholder="Search chats..."
+      placeholder={$t("chat.searchPlaceholder")}
       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
     />
   </div>
@@ -53,17 +54,17 @@
         <ErrorFallback
           compact={true}
           message={sessionsState.error}
-          retryLabel="Retry loading chats"
+          retryLabel={$t("chat.retryLoadingChats")}
           on:retry={() => chatStore.fetchSessions()}
         />
       </div>
     {:else if $chatStore.sessions.length === 0}
       <div class="p-4 text-center text-gray-500 text-sm">
-        No chat history found.
+        {$t("chat.noHistory")}
       </div>
     {:else if filteredSessions.length === 0}
       <div class="p-4 text-center text-gray-500 text-sm">
-        No chats match your search.
+        {$t("chat.noSearchMatches")}
       </div>
     {:else}
       <div transition:fade={{ duration: 180 }}>

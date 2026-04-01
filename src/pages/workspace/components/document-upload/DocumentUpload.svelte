@@ -8,6 +8,7 @@
   import TextField from "../../../../components/common/form/TextField.svelte";
   import LoadingBlock from "../../../../lib/components/common/LoadingBlock.svelte";
   import ErrorFallback from "../../../../lib/components/common/ErrorFallback.svelte";
+  import { t } from "../../../../lib/i18n";
 
   /** @typedef {import('../../../../lib/models').DocumentItem} DocumentItem */
 
@@ -44,7 +45,7 @@
 
     try {
       await dashboardStore.uploadDocument(file[0]);
-      success = "Document uploaded successfully and is being processed.";
+      success = $t("documents.uploadedSuccess");
       file = null;
     } catch (err) {
       console.error(err);
@@ -58,7 +59,7 @@
 
     try {
       await dashboardStore.crawlWebsite(url);
-      success = "Website crawling started.";
+      success = $t("documents.crawlStarted");
       url = "";
     } catch (err) {
       console.error(err);
@@ -75,19 +76,19 @@
   }
 
   async function deleteDocument(id) {
-    if (!confirm("Are you sure you want to delete this document?")) return;
+    if (!confirm($t("documents.confirmDelete"))) return;
 
     try {
       await dashboardStore.deleteDocument(id);
     } catch (err) {
-      alert("Failed to delete document: " + err.message);
+      alert($t("documents.deleteFailed", { message: err.message }));
     }
   }
 </script>
 
 <div class="max-w-4xl mx-auto space-y-8">
   <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-    <h2 class="text-xl font-semibold mb-4 text-gray-800">Add Documents</h2>
+    <h2 class="text-xl font-semibold mb-4 text-gray-800">{$t("documents.addDocuments")}</h2>
 
     {#if success}
       <div class="p-3 mb-4 text-sm text-green-700 bg-green-100 rounded-md">
@@ -97,9 +98,9 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div class="border border-gray-200 rounded-lg p-4">
-        <h3 class="font-medium mb-3 text-gray-700">Upload File</h3>
+        <h3 class="font-medium mb-3 text-gray-700">{$t("documents.uploadFile")}</h3>
         <p class="text-xs text-gray-500 mb-4">
-          Supported: PDF, TXT, CSV, JSON (Max 50MB)
+          {$t("documents.supportedFormats")}
         </p>
 
         <input
@@ -114,21 +115,21 @@
           disabled={!file || documentsState.loading}
           rounded="rounded-md"
         >
-          {documentsState.loading && file ? "Uploading..." : "Upload File"}
+          {documentsState.loading && file ? $t("documents.uploading") : $t("documents.uploadFile")}
         </Button>
       </div>
 
       <div class="border border-gray-200 rounded-lg p-4">
-        <h3 class="font-medium mb-3 text-gray-700">Crawl Website</h3>
+        <h3 class="font-medium mb-3 text-gray-700">{$t("documents.crawlWebsite")}</h3>
         <p class="text-xs text-gray-500 mb-4">
-          Enter a valid URL to extract content
+          {$t("documents.crawlHint")}
         </p>
 
         <TextField
           type="url"
           label=" "
           hideLabel={true}
-          placeholder="https://example.com"
+          placeholder={$t("documents.crawlPlaceholder")}
           bind:value={url}
           containerClass="mb-4"
         />
@@ -139,7 +140,7 @@
           disabled={!url || documentsState.loading}
           rounded="rounded-md"
         >
-          {documentsState.loading && url ? "Crawling..." : "Extract Content"}
+          {documentsState.loading && url ? $t("documents.crawling") : $t("documents.extractContent")}
         </Button>
       </div>
     </div>
@@ -147,14 +148,14 @@
 
   <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
     <div class="flex justify-between items-center mb-4">
-      <h2 class="text-xl font-semibold text-gray-800">Your Documents</h2>
+      <h2 class="text-xl font-semibold text-gray-800">{$t("documents.yourDocuments")}</h2>
       <Button
         variant="ghost"
         size="sm"
         className="px-0"
         on:click={fetchDocuments}
       >
-        Refresh
+        {$t("common.refresh")}
       </Button>
     </div>
 
@@ -162,7 +163,7 @@
       <div
         class="p-4 rounded-md bg-gray-50 border border-gray-200 text-sm text-gray-600"
       >
-        Chọn một cuộc trò chuyện trước để bật lựa chọn “đính kèm vào chat”.
+        {$t("documents.selectSessionHint")}
       </div>
     {/if}
 
@@ -177,22 +178,22 @@
       <ErrorFallback
         compact={true}
         message={documentsState.error}
-        retryLabel="Retry documents"
+        retryLabel={$t("documents.retryDocuments")}
         on:retry={fetchDocuments}
       />
     {:else if documents.length === 0}
-      <p class="text-gray-500 text-center py-4">No documents added yet.</p>
+      <p class="text-gray-500 text-center py-4">{$t("documents.empty")}</p>
     {:else}
       <div class="overflow-x-auto" transition:fade={{ duration: 180 }}>
         <table class="w-full text-sm text-left text-gray-500">
           <thead class="text-xs text-gray-700 uppercase bg-gray-50">
             <tr>
-              <th scope="col" class="px-6 py-3">Attach</th>
-              <th scope="col" class="px-6 py-3">Title</th>
-              <th scope="col" class="px-6 py-3">Source</th>
-              <th scope="col" class="px-6 py-3">Status</th>
-              <th scope="col" class="px-6 py-3">Date Added</th>
-              <th scope="col" class="px-6 py-3 text-right">Actions</th>
+              <th scope="col" class="px-6 py-3">{$t("documents.attach")}</th>
+              <th scope="col" class="px-6 py-3">{$t("documents.title")}</th>
+              <th scope="col" class="px-6 py-3">{$t("documents.source")}</th>
+              <th scope="col" class="px-6 py-3">{$t("common.status")}</th>
+              <th scope="col" class="px-6 py-3">{$t("documents.dateAdded")}</th>
+              <th scope="col" class="px-6 py-3 text-right">{$t("common.actions")}</th>
             </tr>
           </thead>
           <tbody>
@@ -204,7 +205,7 @@
                     disabled={!sessionId}
                     checked={selectedSet.has(doc._id)}
                     on:change={(e) => toggleAttach(doc._id, e)}
-                    aria-label={`Attach ${doc.title} to chat`}
+                    aria-label={$t("documents.attachToChat", { title: doc.title })}
                     class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50"
                   />
                 </td>
@@ -222,20 +223,20 @@
                 <td class="px-6 py-4">
                   {#if doc.status === "ready"}
                     <span class="text-green-600 flex items-center gap-1">
-                      <span class="w-2 h-2 rounded-full bg-green-500"></span> Ready
+                      <span class="w-2 h-2 rounded-full bg-green-500"></span> {$t("documents.statusReady")}
                     </span>
                   {:else if doc.status === "processing"}
                     <span class="text-yellow-600 flex items-center gap-1">
                       <span
                         class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"
-                      ></span> Processing
+                      ></span> {$t("documents.statusProcessing")}
                     </span>
                   {:else}
                     <span
                       class="text-red-600 flex items-center gap-1"
                       title={String(doc.error_message ?? "")}
                     >
-                      <span class="w-2 h-2 rounded-full bg-red-500"></span> Failed
+                      <span class="w-2 h-2 rounded-full bg-red-500"></span> {$t("documents.statusFailed")}
                     </span>
                   {/if}
                 </td>
@@ -249,7 +250,7 @@
                     className="px-0 py-0 hover:underline"
                     on:click={() => deleteDocument(doc._id)}
                   >
-                    Delete
+                    {$t("common.delete")}
                   </Button>
                 </td>
               </tr>

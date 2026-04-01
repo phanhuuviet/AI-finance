@@ -5,6 +5,7 @@
   import ChatHistory from "./components/chat/ChatHistory.svelte";
 
   import { fade } from "svelte/transition";
+  import { t } from "../../lib/i18n";
 
   import { workspaceStore } from "../../stores/workspace.js";
 
@@ -39,11 +40,10 @@
       >
         <div class="max-w-md text-center">
           <div class="text-lg font-semibold text-gray-900">
-            Chọn một cuộc trò chuyện
+            {$t("workspace.selectConversation")}
           </div>
           <div class="mt-2 text-sm text-gray-600">
-            Bạn cần chọn 1 cuộc trò chuyện trước, sau đó mới hiển thị UI để chọn
-            <span class="font-medium"> Documents / Chat / Studio</span>.
+            {$t("workspace.selectConversationHint")}
           </div>
         </div>
       </div>
@@ -57,25 +57,25 @@
             on:click={() => setSection("documents")}
             type="button"
           >
-            Documents
+            {$t("workspace.documents")}
           </button>
           <button
             class={`px-3 py-1.5 rounded-lg text-sm ${section === "chat" ? "bg-white shadow-sm border border-gray-200 text-gray-900" : "text-gray-600 hover:text-gray-900"}`}
             on:click={() => setSection("chat")}
             type="button"
           >
-            Chat
+            {$t("workspace.chat")}
           </button>
           <button
             class={`px-3 py-1.5 rounded-lg text-sm ${section === "studio" ? "bg-white shadow-sm border border-gray-200 text-gray-900" : "text-gray-600 hover:text-gray-900"}`}
             on:click={() => setSection("studio")}
             type="button"
           >
-            Studio
+            {$t("workspace.studio")}
           </button>
         </div>
 
-        <div class="text-xs text-gray-500">Session: {sessionId}</div>
+        <div class="text-xs text-gray-500">{$t("common.session")}: {sessionId}</div>
       </div>
 
       {#if section === "documents"}

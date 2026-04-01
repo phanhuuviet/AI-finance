@@ -8,6 +8,7 @@
   import WorkspacePanel from "../pages/workspace/WorkspacePanel.svelte";
   import { route, navigate } from "../stores/router.js";
   import { dashboardService } from "../lib/services/dashboard.service";
+  import { language, setLanguage, t } from "../lib/i18n";
 
   /** @typedef {import('../lib/models').DocumentItem} DocumentItem */
   /** @typedef {import('../lib/models').ChatSession} ChatSession */
@@ -62,8 +63,14 @@
       // Route reflects the newly created chat
       navigate(`/workspace/${created?._id}`);
     } catch (error) {
-      alert("Failed to create chat: " + error.message);
+      alert($t("chat.createFailed", { message: error.message }));
     }
+  }
+
+  function pageTitle(page) {
+    if (page === "analytics") return $t("header.analytics");
+    if (page === "settings") return $t("header.settings");
+    return $t("header.workspace");
   }
 
   $: if (isNewChatModalOpen) fetchDocs();
@@ -111,7 +118,7 @@
             clip-rule="evenodd"
           />
         </svg>
-        AI DocChat
+        {$t("header.brand")}
       </h1>
     </div>
 
@@ -120,19 +127,19 @@
         class={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${activeTab === "home" ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-gray-100"}`}
         on:click={() => goToTab("home")}
       >
-        Workspace
+        {$t("header.workspace")}
       </button>
       <button
         class={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${activeTab === "analytics" ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-gray-100"}`}
         on:click={() => goToTab("analytics")}
       >
-        Analytics
+        {$t("header.analytics")}
       </button>
       <button
         class={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${activeTab === "settings" ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-gray-100"}`}
         on:click={() => goToTab("settings")}
       >
-        Settings
+        {$t("header.settings")}
       </button>
     </nav>
 
@@ -145,7 +152,7 @@
         </div>
         <div class="overflow-hidden">
           <p class="text-sm font-medium text-gray-900 truncate">
-            {$user?.username || "Guest"}
+            {$user?.username || $t("header.guest")}
           </p>
           <p class="text-xs text-gray-500 truncate">{$user?.email}</p>
         </div>
@@ -154,26 +161,49 @@
         on:click={logout}
         class="w-full px-4 py-2 text-sm text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
       >
-        Sign Out
+        {$t("header.signOut")}
       </button>
     </div>
   </aside>
 
   <main class="flex-1 flex flex-col h-full overflow-hidden relative">
+    <header
+      class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between gap-4 z-10"
+    >
+      <h2 class="text-xl font-semibold text-gray-900">{pageTitle($route.page)}</h2>
+
+      <div class="flex items-center gap-2">
+        <div class="inline-flex items-center rounded-lg border border-gray-200 p-1" role="group" aria-label={$t("header.language")}>
+          <button
+            type="button"
+            class={`px-2 py-1 text-sm rounded-md ${$language === "vi" ? "bg-blue-100 text-blue-700" : "text-gray-600 hover:bg-gray-100"}`}
+            on:click={() => setLanguage("vi")}
+            aria-pressed={$language === "vi"}
+          >
+            🇻🇳 VI
+          </button>
+          <button
+            type="button"
+            class={`px-2 py-1 text-sm rounded-md ${$language === "en" ? "bg-blue-100 text-blue-700" : "text-gray-600 hover:bg-gray-100"}`}
+            on:click={() => setLanguage("en")}
+            aria-pressed={$language === "en"}
+          >
+            🇺🇸 EN
+          </button>
+        </div>
+
+        {#if $route.page === "workspace"}
+          <button
+            on:click={() => (isNewChatModalOpen = true)}
+            class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+          >
+            {$t("chat.newChatButton")}
+          </button>
+        {/if}
+      </div>
+    </header>
+
     {#if $route.page === "workspace"}
-      <header
-        class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between gap-4 z-10"
-      >
-        <h2 class="text-xl font-semibold text-gray-900">Workspace</h2>
-
-        <button
-          on:click={() => (isNewChatModalOpen = true)}
-          class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
-        >
-          + New Chat
-        </button>
-      </header>
-
       <div class="flex-1 overflow-auto p-6">
         <WorkspacePanel />
       </div>
@@ -187,7 +217,7 @@
           >
             <div class="p-6 border-b border-gray-100">
               <h3 class="text-xl font-semibold text-gray-900">
-                Start New Chat
+                {$t("chat.startNew")}
               </h3>
             </div>
 
@@ -196,24 +226,24 @@
                 <label
                   for="title"
                   class="block text-sm font-medium text-gray-700 mb-1"
-                  >Chat Title</label
+                  >{$t("chat.chatTitle")}</label
                 >
                 <input
                   id="title"
                   type="text"
                   bind:value={newChatTitle}
-                  placeholder="E.g., Financial Report Analysis"
+                  placeholder={$t("chat.chatTitlePlaceholder")}
                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                 />
               </div>
 
               <div>
                 <div class="block text-sm font-medium text-gray-700 mb-1">
-                  Link Documents (Optional)
+                  {$t("chat.linkDocumentsOptional")}
                 </div>
                 {#if availableDocs.length === 0}
                   <p class="text-sm text-gray-500 italic">
-                    No documents available. Upload some first.
+                    {$t("chat.noDocumentsAvailable")}
                   </p>
                 {:else}
                   <div
@@ -250,14 +280,14 @@
                 on:click={() => (isNewChatModalOpen = false)}
                 class="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
               >
-                Cancel
+                {$t("common.cancel")}
               </button>
               <button
                 on:click={handleNewChat}
                 disabled={!newChatTitle.trim()}
                 class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
               >
-                Create Chat
+                {$t("chat.createChat")}
               </button>
             </div>
           </div>

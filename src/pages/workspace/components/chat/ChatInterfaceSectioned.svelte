@@ -8,6 +8,7 @@
   import { currentSessionSelectedDocIds } from "../../../../stores/attachments.js";
   import LoadingBlock from "../../../../lib/components/common/LoadingBlock.svelte";
   import ErrorFallback from "../../../../lib/components/common/ErrorFallback.svelte";
+  import { t } from "../../../../lib/i18n";
 
   /** @typedef {import('../../../../lib/models').ChatMessage} ChatMessage */
 
@@ -61,14 +62,14 @@
     class="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 rounded-t-lg"
   >
     <h2 class="text-lg font-semibold text-gray-800">
-      {sessionId ? "Chat Session" : "Select a Chat"}
+      {sessionId ? $t("chat.session") : $t("chat.selectChat")}
     </h2>
     <div class="flex items-center gap-2">
       <div
         class={`w-3 h-3 rounded-full ${isConnected ? "bg-green-500" : "bg-red-500"}`}
       ></div>
       <span class="text-sm text-gray-500"
-        >{isConnected ? "Connected" : "Disconnected"}</span
+        >{isConnected ? $t("chat.connected") : $t("chat.disconnected")}</span
       >
     </div>
   </div>
@@ -76,7 +77,7 @@
   <div bind:this={chatContainer} class="flex-1 overflow-y-auto p-4 space-y-4">
     {#if !sessionId}
       <div class="h-full flex items-center justify-center text-gray-400">
-        Select a chat from history or start a new one
+        {$t("chat.selectChatHint")}
       </div>
     {:else if messageState.loading}
       <div class="space-y-4" aria-live="polite">
@@ -90,12 +91,12 @@
       <ErrorFallback
         compact={true}
         message={messageState.error}
-        retryLabel="Retry loading messages"
+        retryLabel={$t("chat.retryLoadingMessages")}
         on:retry={() => sessionId && chatStore.loadMessages(sessionId)}
       />
     {:else if messages.length === 0}
       <div class="h-full flex items-center justify-center text-gray-400">
-        No messages yet. Send a message to start!
+        {$t("chat.empty")}
       </div>
     {:else}
       <div transition:fade={{ duration: 180 }}>
@@ -127,8 +128,8 @@
         on:keydown={handleKeydown}
         disabled={!sessionId || !isConnected}
         placeholder={!sessionId
-          ? "Select a chat first..."
-          : "Type your message..."}
+          ? $t("chat.selectChatFirst")
+          : $t("chat.typeMessage")}
         class="w-full pl-4 pr-20 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none h-14"
         rows="1"
       ></textarea>
@@ -138,8 +139,8 @@
         <button
           type="button"
           class="relative p-2 text-gray-500 hover:text-gray-700"
-          aria-label="Selected documents"
-          title="Selected documents"
+          aria-label={$t("chat.selectedDocuments")}
+          title={$t("chat.selectedDocuments")}
           disabled
         >
           <svg
@@ -155,7 +156,7 @@
           {#if selectedCount > 0}
             <span
               class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-blue-600 text-black text-[10px] leading-[18px] text-center"
-              aria-label={`${selectedCount} documents selected`}
+              aria-label={$t("chat.documentsSelected", { count: selectedCount })}
               >{selectedCount}</span
             >
           {/if}
@@ -166,8 +167,8 @@
         on:click={sendMessage}
         disabled={!messageInput.trim() || !sessionId || !isConnected}
         class="absolute right-2 p-2 text-blue-600 hover:text-blue-800 disabled:text-gray-400 disabled:cursor-not-allowed"
-        aria-label="Send message"
-        title="Send"
+        aria-label={$t("chat.sendMessage")}
+        title={$t("chat.send")}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

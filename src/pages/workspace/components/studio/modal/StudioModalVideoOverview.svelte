@@ -4,6 +4,7 @@
   import Button from "../../../../../components/common/Button.svelte";
   import SelectField from "../../../../../components/common/form/SelectField.svelte";
   import TextareaField from "../../../../../components/common/form/TextareaField.svelte";
+  import { t } from "../../../../../lib/i18n";
 
   const dispatch = createEventDispatcher();
 
@@ -31,9 +32,9 @@
   /** @type {string} */
   export let videoFocus = "";
 
-  const languageOptions = [
-    { value: "vi", label: "Tiếng Việt" },
-    { value: "en", label: "English" }
+  $: languageOptions = [
+    { value: "vi", label: $t("studio.languageVietnamese") },
+    { value: "en", label: $t("studio.languageEnglish") }
   ];
 
   function close() {
@@ -48,41 +49,41 @@
 <ModalDialog
   isOpen={isOpen}
   title={title}
-  description="Chỉnh sửa yêu cầu, sau đó bấm Tạo."
+  description={$t("studio.modalDescription")}
   on:close={close}
 >
   <SelectField
     id="studio_lang_video"
-    label="Ngôn ngữ"
+    label={$t("common.language")}
     bind:value={commonLanguage}
     options={languageOptions}
   />
 
   <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
     <div class="rounded-xl border border-gray-200 bg-gray-50 p-4">
-      <div class="text-sm font-medium text-gray-900">Định dạng</div>
+      <div class="text-sm font-medium text-gray-900">{$t("studio.video.format")}</div>
       <div class="mt-3 space-y-2">
         <label class="flex items-start gap-2">
           <input type="radio" name="format" value="explainer" bind:group={videoFormat} />
           <div>
-            <div class="text-sm text-gray-900">Video giải thích</div>
-            <div class="text-xs text-gray-500">Bản tổng quan có cấu trúc.</div>
+            <div class="text-sm text-gray-900">{$t("studio.video.explainer")}</div>
+            <div class="text-xs text-gray-500">{$t("studio.video.explainerHint")}</div>
           </div>
         </label>
         <label class="flex items-start gap-2">
           <input type="radio" name="format" value="summary" bind:group={videoFormat} />
           <div>
-            <div class="text-sm text-gray-900">Tóm tắt</div>
-            <div class="text-xs text-gray-500">Ngắn gọn.</div>
+            <div class="text-sm text-gray-900">{$t("studio.video.summary")}</div>
+            <div class="text-xs text-gray-500">{$t("studio.video.summaryHint")}</div>
           </div>
         </label>
       </div>
     </div>
 
     <div class="rounded-xl border border-gray-200 bg-gray-50 p-4">
-      <div class="text-sm font-medium text-gray-900">Tuỳ chọn thêm</div>
+      <div class="text-sm font-medium text-gray-900">{$t("studio.video.moreOptions")}</div>
 
-      <div class="block mt-3 text-xs font-medium text-gray-600">Phong cách hình ảnh</div>
+      <div class="block mt-3 text-xs font-medium text-gray-600">{$t("studio.video.imageStyle")}</div>
       <div class="mt-1 flex gap-2">
         <button
           class={`flex-1 rounded-lg border px-3 py-2 text-sm ${
@@ -93,7 +94,7 @@
           on:click={() => (videoStyle = "auto")}
           type="button"
         >
-          Tự động
+          {$t("studio.video.auto")}
         </button>
         <button
           class={`flex-1 rounded-lg border px-3 py-2 text-sm ${
@@ -104,11 +105,11 @@
           on:click={() => (videoStyle = "custom")}
           type="button"
         >
-          Tuỳ chỉnh
+          {$t("studio.video.custom")}
         </button>
       </div>
 
-      <div class="block mt-3 text-xs font-medium text-gray-600">Tỷ lệ video</div>
+      <div class="block mt-3 text-xs font-medium text-gray-600">{$t("studio.video.aspectRatio")}</div>
       <div class="mt-1 flex gap-2">
         <button
           class={`flex-1 rounded-lg border px-3 py-2 text-sm ${
@@ -138,7 +139,7 @@
 
   <TextareaField
     id="video_focus"
-    label="AI nên tập trung vào điều gì?"
+    label={$t("studio.video.focus")}
     bind:value={videoFocus}
     rows={6}
     textareaClass="min-h-[140px]"
@@ -151,7 +152,7 @@
       on:click={close}
       type="button"
     >
-      Huỷ
+      {$t("common.cancel")}
     </Button>
     <Button
       rounded="rounded-xl"
@@ -159,7 +160,7 @@
       disabled={!sessionId}
       type="button"
     >
-      Tạo
+      {$t("common.create")}
     </Button>
   </svelte:fragment>
 </ModalDialog>

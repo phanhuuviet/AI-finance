@@ -1,0 +1,214 @@
+{
+  "common": {
+    "loading": "Đang tải...",
+    "cancel": "Hủy",
+    "create": "Tạo",
+    "close": "Đóng",
+    "refresh": "Làm mới",
+    "save": "Lưu",
+    "delete": "Xóa",
+    "retry": "Thử lại",
+    "processing": "Đang xử lý...",
+    "search": "Tìm kiếm",
+    "session": "Phiên",
+    "open": "Mở",
+    "rename": "Đổi tên",
+    "download": "Tải xuống",
+    "share": "Chia sẻ",
+    "language": "Ngôn ngữ",
+    "actions": "Thao tác",
+    "status": "Trạng thái"
+  },
+  "header": {
+    "workspace": "Workspace",
+    "analytics": "Phân tích",
+    "settings": "Cài đặt",
+    "newChat": "Chat mới",
+    "language": "Ngôn ngữ",
+    "signOut": "Đăng xuất",
+    "guest": "Khách",
+    "brand": "AI DocChat"
+  },
+  "auth": {
+    "loginTitle": "Đăng nhập vào tài khoản",
+    "registerTitle": "Tạo tài khoản",
+    "username": "Tên người dùng",
+    "email": "Email",
+    "password": "Mật khẩu",
+    "login": "Đăng nhập",
+    "register": "Đăng ký",
+    "needAccount": "Bạn chưa có tài khoản?",
+    "alreadyHaveAccount": "Bạn đã có tài khoản?"
+  },
+  "workspace": {
+    "selectConversation": "Chọn một cuộc trò chuyện",
+    "selectConversationHint": "Bạn cần chọn một cuộc trò chuyện trước, sau đó mới hiển thị giao diện Documents / Chat / Studio.",
+    "documents": "Tài liệu",
+    "chat": "Chat",
+    "studio": "Studio"
+  },
+  "chat": {
+    "session": "Phiên chat",
+    "selectChat": "Chọn cuộc trò chuyện",
+    "connected": "Đã kết nối",
+    "disconnected": "Mất kết nối",
+    "selectChatHint": "Chọn một cuộc trò chuyện từ lịch sử hoặc tạo mới",
+    "empty": "Chưa có tin nhắn nào. Hãy gửi tin nhắn để bắt đầu!",
+    "selectChatFirst": "Hãy chọn cuộc trò chuyện trước...",
+    "typeMessage": "Nhập tin nhắn của bạn...",
+    "selectedDocuments": "Tài liệu đã chọn",
+    "documentsSelected": "Đã chọn {{count}} tài liệu",
+    "sendMessage": "Gửi tin nhắn",
+    "send": "Gửi",
+    "history": "Cuộc trò chuyện",
+    "searchPlaceholder": "Tìm cuộc trò chuyện...",
+    "retryLoadingChats": "Thử tải lại cuộc trò chuyện",
+    "noHistory": "Không tìm thấy lịch sử trò chuyện.",
+    "noSearchMatches": "Không có cuộc trò chuyện nào khớp với tìm kiếm.",
+    "retryLoadingMessages": "Thử tải lại tin nhắn",
+    "startNew": "Bắt đầu chat mới",
+    "chatTitle": "Tiêu đề cuộc trò chuyện",
+    "chatTitlePlaceholder": "Ví dụ: Phân tích báo cáo tài chính",
+    "linkDocumentsOptional": "Liên kết tài liệu (Tùy chọn)",
+    "noDocumentsAvailable": "Không có tài liệu nào. Hãy tải lên trước.",
+    "createChat": "Tạo cuộc trò chuyện",
+    "newChatButton": "+ Chat mới",
+    "createFailed": "Tạo cuộc trò chuyện thất bại: {{message}}"
+  },
+  "documents": {
+    "addDocuments": "Thêm tài liệu",
+    "uploadFile": "Tải tệp lên",
+    "uploading": "Đang tải lên...",
+    "supportedFormats": "Hỗ trợ: PDF, TXT, CSV, JSON (Tối đa 50MB)",
+    "crawlWebsite": "Quét website",
+    "crawlHint": "Nhập URL hợp lệ để trích xuất nội dung",
+    "crawlPlaceholder": "https://example.com",
+    "crawling": "Đang quét...",
+    "extractContent": "Trích xuất nội dung",
+    "yourDocuments": "Tài liệu của bạn",
+    "selectSessionHint": "Chọn một cuộc trò chuyện trước để bật gắn tài liệu vào chat.",
+    "retryDocuments": "Thử tải lại tài liệu",
+    "empty": "Chưa có tài liệu nào.",
+    "attach": "Đính kèm",
+    "title": "Tiêu đề",
+    "source": "Nguồn",
+    "dateAdded": "Ngày thêm",
+    "confirmDelete": "Bạn có chắc muốn xóa tài liệu này?",
+    "deleteFailed": "Xóa tài liệu thất bại: {{message}}",
+    "uploadedSuccess": "Tài liệu đã được tải lên và đang được xử lý.",
+    "crawlStarted": "Đã bắt đầu quét website.",
+    "statusReady": "Sẵn sàng",
+    "statusProcessing": "Đang xử lý",
+    "statusFailed": "Thất bại",
+    "attachToChat": "Đính kèm {{title}} vào chat"
+  },
+  "studio": {
+    "title": "Studio",
+    "perSession": "Theo session chat",
+    "createdInSession": "Studio đã tạo trong chat này",
+    "selectSessionHint": "Chọn một cuộc trò chuyện trước để xem/tạo Studio.",
+    "empty": "Chưa có studio output nào cho session này.",
+    "retryOutputs": "Thử tải lại output",
+    "menu": "Menu",
+    "createFailed": "Tạo studio output thất bại.",
+    "renamePrompt": "Đổi tên",
+    "renameFailed": "Đổi tên thất bại.",
+    "confirmDelete": "Xóa studio output này?",
+    "deleteFailed": "Xóa thất bại.",
+    "copiedShareLink": "Đã copy link chia sẻ vào clipboard.",
+    "shareLink": "Link chia sẻ: {{url}}",
+    "shareUnavailable": "Không có link chia sẻ.",
+    "shareFailed": "Chia sẻ thất bại.",
+    "downloadUnavailable": "Output chưa có file tải xuống.",
+    "downloadFailed": "Tải xuống thất bại.",
+    "statusReady": "Sẵn sàng",
+    "statusProcessing": "Đang xử lý",
+    "modalDescription": "Chỉnh sửa yêu cầu, sau đó bấm Tạo.",
+    "requirementLabel": "Yêu cầu",
+    "defaultRequirements": "Sử dụng ví dụ đời thường để giải thích các khái niệm phức tạp.",
+    "tool": {
+      "audio": {
+        "title": "Tổng quan bằng âm thanh",
+        "subtitle": "Chỉnh yêu cầu trước khi tạo"
+      },
+      "video": {
+        "title": "Tổng quan bằng video",
+        "subtitle": "Chỉnh yêu cầu trước khi tạo"
+      },
+      "mindmap": {
+        "title": "Bản đồ tư duy",
+        "subtitle": "Chỉnh yêu cầu"
+      },
+      "report": {
+        "title": "Báo cáo",
+        "subtitle": "Chỉnh yêu cầu"
+      },
+      "quiz": {
+        "title": "Bài kiểm tra",
+        "subtitle": "Chỉnh yêu cầu"
+      },
+      "data": {
+        "title": "Bảng dữ liệu",
+        "subtitle": "Chỉnh yêu cầu"
+      }
+    },
+    "video": {
+      "format": "Định dạng",
+      "explainer": "Video giải thích",
+      "explainerHint": "Bản tổng quan có cấu trúc.",
+      "summary": "Tóm tắt",
+      "summaryHint": "Ngắn gọn.",
+      "moreOptions": "Tùy chọn thêm",
+      "imageStyle": "Phong cách hình ảnh",
+      "auto": "Tự động",
+      "custom": "Tùy chỉnh",
+      "aspectRatio": "Tỷ lệ video",
+      "focus": "AI nên tập trung vào điều gì?"
+    },
+    "languageVietnamese": "Tiếng Việt",
+    "languageEnglish": "English"
+  },
+  "analytics": {
+    "title": "Phân tích sử dụng token",
+    "last7Days": "7 ngày gần nhất",
+    "last30Days": "30 ngày gần nhất",
+    "last90Days": "90 ngày gần nhất",
+    "retry": "Thử tải lại phân tích",
+    "failedToLoad": "Tải phân tích thất bại: {{message}}",
+    "totalTokens": "Tổng token",
+    "period": "Khoảng thời gian",
+    "days": "{{count}} ngày",
+    "estimatedCost": "Chi phí ước tính",
+    "pricingNote": "Dựa trên giá trung bình GPT-3.5",
+    "dailyBreakdown": "Chi tiết theo ngày (Dữ liệu thô)",
+    "date": "Ngày",
+    "model": "Mô hình",
+    "tokens": "Token",
+    "datasetLabel": "Token",
+    "tooltipTokens": "Token: {{value}}"
+  },
+  "settings": {
+    "saved": "Lưu cài đặt thành công.",
+    "saveFailed": "Lưu cài đặt thất bại.",
+    "accountSettings": "Cài đặt tài khoản",
+    "retryLoadingProfile": "Thử tải lại hồ sơ",
+    "profileInformation": "Thông tin hồ sơ",
+    "apiLayerNote": "Các thay đổi được lưu thông qua lớp dịch vụ API tập trung.",
+    "aiPreferences": "Tùy chọn AI",
+    "defaultModel": "Mô hình mặc định",
+    "modelHint": "Mô hình năng lực cao sẽ tiêu tốn nhiều token hơn.",
+    "saving": "Đang lưu...",
+    "saveChanges": "Lưu thay đổi",
+    "modelFast": "GPT-3.5 Turbo (Nhanh, tiết kiệm)",
+    "modelCapable": "GPT-4 Turbo (Mạnh hơn, chi phí cao hơn)"
+  },
+  "modal": {
+    "closeDialog": "Đóng hộp thoại"
+  },
+  "errors": {
+    "unableLoadData": "Không thể tải dữ liệu."
+  },
+  "counter": {
+    "countIs": "Số đếm là {{count}}"
+  }
+}
