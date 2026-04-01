@@ -8,7 +8,7 @@
 
   import { workspaceStore } from "../../stores/workspace.js";
 
-  /** @typedef {import('../../models/workspace').WorkspaceSection} WorkspaceSection */
+  /** @typedef {import('../../lib/models').WorkspaceSection} WorkspaceSection */
 
   /** @type {string | null} */
   let sessionId = null;

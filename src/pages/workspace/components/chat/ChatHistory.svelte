@@ -4,7 +4,7 @@
   import { workspaceStore } from "../../../../stores/workspace.js";
   import { navigate } from "../../../../stores/router.js";
 
-  /** @typedef {import('../../../../models/chat.js').ChatSession} ChatSession */
+  /** @typedef {import('../../../../lib/models').ChatSession} ChatSession */
 
   let searchTerm = "";
 

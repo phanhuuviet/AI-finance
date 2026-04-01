@@ -1,4 +1,4 @@
-import type { Id, ISODateString } from './common';
+import type { ISODateString, Id } from './common.model';
 
 export type DocumentStatus = 'ready' | 'processing' | 'failed' | string;
 export type DocumentSourceType = 'Video' | 'Website' | 'File' | string;

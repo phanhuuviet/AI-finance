@@ -1,12 +1,12 @@
 <script>
   import { user } from '../../stores/auth.js';
-  import { fetchWithAuth } from '../../utils/api.js';
+  import { authService } from '../../lib/services/auth.service';
   import Button from '../../components/common/Button.svelte';
   import TextField from '../../components/common/form/TextField.svelte';
   import SelectField from '../../components/common/form/SelectField.svelte';
 
-  /** @typedef {import('../../models/user.js').User} User */
-  /** @typedef {import('../../models/user.js').UserPreferences} UserPreferences */
+  /** @typedef {import('../../lib/models').User} User */
+  /** @typedef {import('../../lib/models').UserPreferences} UserPreferences */
   
   let initialized = false;
   let username = '';
@@ -42,13 +42,10 @@
     
     try {
       /** @type {User} */
-      const updated = await fetchWithAuth('/auth/me', {
-        method: 'PUT',
-        body: JSON.stringify({
-          username,
-          email,
-          preferences
-        })
+      const updated = await authService.updateUser({
+        username,
+        email,
+        preferences
       });
 
       user.set(updated);
@@ -85,7 +82,7 @@
       <div class="grid grid-cols-1 gap-4">
         <TextField id="username" label="Username" bind:value={username} />
         <TextField id="email" type="email" label="Email" bind:value={email} />
-        <p class="text-xs text-gray-500">Changes are saved via a mocked API when backend is unavailable.</p>
+        <p class="text-xs text-gray-500">Changes are saved through the centralized API service layer.</p>
       </div>
     </div>
 

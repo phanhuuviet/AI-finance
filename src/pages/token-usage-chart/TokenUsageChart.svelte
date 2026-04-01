@@ -1,11 +1,10 @@
 <script>
   import { onMount, onDestroy, tick } from 'svelte';
-  import { fetchWithAuth } from '../../utils/api.js';
-  import { getMockTokenUsageAnalytics } from '../../utils/mockTokenAnalytics.js';
+  import { dashboardService } from '../../lib/services/dashboard.service';
   import Chart from 'chart.js/auto';
 
-  /** @typedef {import('../../models/tokenAnalytics.js').TokenUsageAnalytics} TokenUsageAnalytics */
-  /** @typedef {import('../../models/tokenAnalytics.js').TokenUsageDailyRow} TokenUsageDailyRow */
+  /** @typedef {import('../../lib/models').TokenUsageAnalytics} TokenUsageAnalytics */
+  /** @typedef {import('../../lib/models').TokenUsageDailyRow} TokenUsageDailyRow */
 
   /** @type {TokenUsageAnalytics | null} */
   let analyticsData = null;
@@ -135,12 +134,11 @@
     destroyChart();
     try {
       analyticsData = /** @type {TokenUsageAnalytics} */ (
-        await fetchWithAuth(`/analytics/tokens?days=${days}`)
+        await dashboardService.getTokenUsage(days)
       );
     } catch (err) {
-      // Fallback to mock data so the UI is still usable during backend outages/dev.
-      analyticsData = getMockTokenUsageAnalytics(days);
-      error = null;
+      error = err?.message || 'Failed to fetch token analytics.';
+      analyticsData = null;
     } finally {
       loading = false;
       await renderChart();

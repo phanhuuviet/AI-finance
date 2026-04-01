@@ -1,4 +1,4 @@
-import type { Id } from './common';
+import type { Id } from './common.model';
 
 export type WorkspaceSection = 'documents' | 'chat' | 'studio';
 

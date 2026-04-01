@@ -1,12 +1,12 @@
 <script>
-  import { fetchWithAuth } from "../../../../utils/api.js";
+  import { dashboardService } from "../../../../lib/services/dashboard.service";
   import { onMount } from "svelte";
   import { workspaceStore } from "../../../../stores/workspace.js";
   import { attachmentsStore } from "../../../../stores/attachments.js";
   import Button from "../../../../components/common/Button.svelte";
   import TextField from "../../../../components/common/form/TextField.svelte";
 
-  /** @typedef {import('../../../../models/document.js').DocumentItem} DocumentItem */
+  /** @typedef {import('../../../../lib/models').DocumentItem} DocumentItem */
 
   /** @type {FileList | null} */
   let file = null;
@@ -53,7 +53,7 @@
 
   async function fetchDocuments() {
     try {
-      documents = /** @type {DocumentItem[]} */ (await fetchWithAuth("/documents/"));
+      documents = /** @type {DocumentItem[]} */ (await dashboardService.getDocuments());
     } catch (e) {
       console.error("Failed to fetch documents", e);
     }
@@ -66,14 +66,8 @@
     error = "";
     success = "";
 
-    const formData = new FormData();
-    formData.append("file", file[0]);
-
     try {
-      await fetchWithAuth("/documents/upload", {
-        method: "POST",
-        body: formData,
-      });
+      await dashboardService.uploadDocument(file[0]);
       success = "Document uploaded successfully and is being processed.";
       file = null;
       await fetchDocuments();
@@ -91,14 +85,8 @@
     error = "";
     success = "";
 
-    const formData = new FormData();
-    formData.append("url", url);
-
     try {
-      await fetchWithAuth("/documents/crawl", {
-        method: "POST",
-        body: formData,
-      });
+      await dashboardService.crawlWebsite(url);
       success = "Website crawling started.";
       url = "";
       await fetchDocuments();
@@ -122,7 +110,7 @@
     if (!confirm("Are you sure you want to delete this document?")) return;
 
     try {
-      await fetchWithAuth(`/documents/${id}`, { method: "DELETE" });
+      await dashboardService.deleteDocument(id);
       await fetchDocuments();
     } catch (err) {
       alert("Failed to delete document: " + err.message);

@@ -1,7 +1,7 @@
 import { derived, writable } from 'svelte/store';
 import { workspaceStore } from './workspace.js';
 
-/** @typedef {import('../models/workspace').SelectedBySession} SelectedBySession */
+/** @typedef {import('../lib/models').SelectedBySession} SelectedBySession */
 
 // Holds document selections per conversation (session)
 // shape: { [sessionId]: Set<string> }

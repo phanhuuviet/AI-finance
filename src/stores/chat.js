@@ -1,9 +1,9 @@
 import { writable } from 'svelte/store';
-import { fetchWithAuth } from '../utils/api.js';
+import { chatService } from '../lib/services/chat.service';
 
-/** @typedef {import('../models/chat').ChatSession} ChatSession */
-/** @typedef {import('../models/chat').ChatSessionDetail} ChatSessionDetail */
-/** @typedef {import('../models/chat').ChatMessage} ChatMessage */
+/** @typedef {import('../lib/models').ChatSession} ChatSession */
+/** @typedef {import('../lib/models').ChatSessionDetail} ChatSessionDetail */
+/** @typedef {import('../lib/models').ChatMessage} ChatMessage */
 
 /**
  * @typedef {{
@@ -29,16 +29,8 @@ function createChatStore() {
     update,
     fetchSessions: async () => {
       try {
-        // const data = await fetchWithAuth('/chat/sessions');
         /** @type {ChatSession[]} */
-        const data = [
-          {
-            "_id": "session1",
-            "title": "Chat about Project Alpha",
-            "created_at": "2024-06-01T12:00:00Z",
-            "updated_at": "2024-06-01T12:30:00Z"
-          }
-        ]
+        const data = await chatService.getSessions();
         update(state => ({ ...state, sessions: data }));
       } catch (error) {
         console.error('Failed to fetch chat sessions:', error);
@@ -52,10 +44,7 @@ function createChatStore() {
     createSession: async (title, documentIds = []) => {
       try {
         /** @type {ChatSession} */
-        const data = await fetchWithAuth('/chat/sessions', {
-          method: 'POST',
-          body: JSON.stringify({ title, document_ids: documentIds })
-        });
+        const data = await chatService.createSession(title, documentIds);
         
         update(state => {
           const sessions = [data, ...state.sessions];
@@ -78,7 +67,7 @@ function createChatStore() {
     loadMessages: async (sessionId) => {
       try {
         /** @type {ChatSessionDetail} */
-        const data = await fetchWithAuth(`/chat/sessions/${sessionId}`);
+        const data = await chatService.getSessionDetail(sessionId);
         update(state => {
           const newMessages = { ...state.messages };
           newMessages[sessionId] = data.messages || [];

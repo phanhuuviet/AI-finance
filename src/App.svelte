@@ -2,7 +2,7 @@
   import { onMount, onDestroy } from "svelte";
   import { user, fetchUser } from "./stores/auth.js";
   import { route } from "./stores/router.js";
-  import { connectWebSocket, disconnectWebSocket } from "./utils/websocket2.js";
+  import { connectWebSocket, disconnectWebSocket } from "./lib/services/websocket.service";
   import DashboardNotebookLM from "./components/DashboardNotebookLM.svelte";
   import Login from "./pages/login/Login.svelte";
   import { initRouter } from "./stores/router.js";

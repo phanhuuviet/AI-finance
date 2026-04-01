@@ -3,10 +3,10 @@
   import { chatStore } from "../../../../stores/chat.js";
   import { wsStore } from "../../../../stores/websocket.js";
 
-  import { sendWebSocketMessage } from "../../../../utils/websocket2.js";
+  import { sendWebSocketMessage } from "../../../../lib/services/websocket.service";
   import { currentSessionSelectedDocIds } from "../../../../stores/attachments.js";
 
-  /** @typedef {import('../../../../models/chat.js').ChatMessage} ChatMessage */
+  /** @typedef {import('../../../../lib/models').ChatMessage} ChatMessage */
 
   // Session-scoped: caller passes the sessionId belonging to a section
   /** @type {string | null} */

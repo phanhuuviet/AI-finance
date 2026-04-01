@@ -1,4 +1,4 @@
-import type { Id } from './common';
+import type { Id } from './common.model';
 
 export interface UserPreferences {
   model: string;
@@ -6,7 +6,6 @@ export interface UserPreferences {
 }
 
 export interface User {
-  /** Backend commonly uses `_id`, mock may use `id`. */
   _id?: Id;
   id?: Id;
   username: string;

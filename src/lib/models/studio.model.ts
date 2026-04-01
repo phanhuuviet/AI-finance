@@ -1,4 +1,4 @@
-import type { Id, ISODateString } from './common';
+import type { Id, ISODateString } from './common.model';
 
 export type StudioOutputType =
   | 'video_overview'

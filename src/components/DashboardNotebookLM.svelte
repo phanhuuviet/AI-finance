@@ -7,9 +7,10 @@
   import { workspaceStore } from "../stores/workspace.js";
   import WorkspacePanel from "../pages/workspace/WorkspacePanel.svelte";
   import { route, navigate } from "../stores/router.js";
+  import { dashboardService } from "../lib/services/dashboard.service";
 
-  /** @typedef {import('../models/document').DocumentItem} DocumentItem */
-  /** @typedef {import('../models/chat').ChatSession} ChatSession */
+  /** @typedef {import('../lib/models').DocumentItem} DocumentItem */
+  /** @typedef {import('../lib/models').ChatSession} ChatSession */
 
   let activeTab = "home"; // home | analytics | settings
 
@@ -43,15 +44,7 @@
 
   async function fetchDocs() {
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL || "http://localhost:8000"}/documents`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      if (res.ok) availableDocs = /** @type {DocumentItem[]} */ (await res.json());
+      availableDocs = /** @type {DocumentItem[]} */ (await dashboardService.getDocuments());
     } catch (e) {
       console.error("Failed to fetch docs", e);
     }

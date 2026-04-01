@@ -3,7 +3,7 @@
   import { cubicOut } from "svelte/easing";
   import { fade, fly, scale } from "svelte/transition";
   import { workspaceStore } from "../../../../stores/workspace.js";
-  import { fetchWithAuth } from "../../../../utils/api.js";
+  import { dashboardService } from "../../../../lib/services/dashboard.service";
   import StudioModalAudioOverview from "./modal/StudioModalAudioOverview.svelte";
   import StudioModalVideoOverview from "./modal/StudioModalVideoOverview.svelte";
   import StudioModalMindmap from "./modal/StudioModalMindmap.svelte";
@@ -12,7 +12,7 @@
   import StudioModalData from "./modal/StudioModalData.svelte";
   import StudioToolIcon from "../../../../components/icons/StudioToolIcon.svelte";
 
-  /** @typedef {import('../../../../models/studio.js').StudioOutput} StudioOutput */
+  /** @typedef {import('../../../../lib/models').StudioOutput} StudioOutput */
 
   /** @type {string | null} */
   let sessionId = null;
@@ -124,10 +124,7 @@
     loadingOutputs = true;
     outputsError = "";
     try {
-      const res = await fetchWithAuth(
-        `/studio/outputs?session_id=${encodeURIComponent(sessionId)}`
-      );
-      outputs = Array.isArray(res?.items) ? res.items : [];
+      outputs = await dashboardService.getStudioOutputs(sessionId);
     } catch (e) {
       outputsError = e?.message || "Không thể tải danh sách studio outputs.";
       outputs = [];
@@ -156,14 +153,7 @@
     }
 
     try {
-      const created = await fetchWithAuth("/studio/outputs", {
-        method: "POST",
-        body: JSON.stringify({
-          session_id: sessionId,
-          type: modalTool,
-          payload
-        })
-      });
+      const created = await dashboardService.createStudioOutput(sessionId, modalTool, payload);
 
       // Optimistically prepend.
       if (created?.id) outputs = [created, ...outputs];
@@ -178,10 +168,7 @@
     const nextTitle = prompt("Đổi tên", String(item?.title ?? ""));
     if (!nextTitle) return;
     try {
-      await fetchWithAuth(`/studio/outputs/${encodeURIComponent(item.id)}`, {
-        method: "PATCH",
-        body: JSON.stringify({ title: nextTitle })
-      });
+      await dashboardService.renameStudioOutput(item.id, nextTitle);
       void refreshOutputs();
     } catch (e) {
       alert(e?.message || "Đổi tên thất bại.");
@@ -191,9 +178,7 @@
   async function deleteOutput(item) {
     if (!confirm("Xoá studio output này?")) return;
     try {
-      await fetchWithAuth(`/studio/outputs/${encodeURIComponent(item.id)}`, {
-        method: "DELETE"
-      });
+      await dashboardService.deleteStudioOutput(item.id);
       outputs = outputs.filter((o) => o.id !== item.id);
     } catch (e) {
       alert(e?.message || "Xoá thất bại.");
@@ -202,10 +187,7 @@
 
   async function shareOutput(item) {
     try {
-      const res = await fetchWithAuth(
-        `/studio/outputs/${encodeURIComponent(item.id)}/share`,
-        { method: "POST" }
-      );
+      const res = await dashboardService.shareStudioOutput(item.id);
       const url = res?.share_url || res?.url;
       if (url && navigator?.clipboard?.writeText) {
         await navigator.clipboard.writeText(String(url));
@@ -220,9 +202,7 @@
 
   async function downloadOutput(item) {
     try {
-      const res = await fetchWithAuth(
-        `/studio/outputs/${encodeURIComponent(item.id)}/download`
-      );
+      const res = await dashboardService.downloadStudioOutput(item.id);
       const url = res?.download_url || item?.result_url;
       if (url) window.open(String(url), "_blank", "noopener,noreferrer");
       else alert("Output chưa có file tải xuống.");

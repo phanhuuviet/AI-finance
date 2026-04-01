@@ -1,6 +1,6 @@
 import { writable } from 'svelte/store';
 
-/** @typedef {import('../models/websocket').WebSocketStatus} WebSocketStatus */
+/** @typedef {import('../lib/models').WebSocketStatus} WebSocketStatus */
 
 /**
  * @typedef {{

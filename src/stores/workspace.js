@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store';
 
-/** @typedef {import('../models/workspace').WorkspaceStateB} WorkspaceStateB */
-/** @typedef {import('../models/workspace').WorkspaceSection} WorkspaceSection */
+/** @typedef {import('../lib/models').WorkspaceStateB} WorkspaceStateB */
+/** @typedef {import('../lib/models').WorkspaceSection} WorkspaceSection */
 
 // Behavior B:
 // - Must pick a conversation (session) first.

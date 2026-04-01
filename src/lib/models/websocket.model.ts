@@ -1,5 +1,5 @@
-import type { Id } from './common';
-import type { ChatMessage } from './chat';
+import type { Id } from './common.model';
+import type { ChatMessage } from './chat.model';
 
 export type WebSocketStatus = 'disconnected' | 'connecting' | 'connected' | 'error';
 
