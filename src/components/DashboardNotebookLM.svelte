@@ -2,7 +2,6 @@
   import { user, logout } from "../stores/auth.js";
   import TokenUsageChart from "../pages/token-usage-chart/TokenUsageChart.svelte";
   import Settings from "../pages/settings/Settings.svelte";
-  import Login from "../pages/login/Login.svelte";
 
   import { chatStore } from "../stores/chat.js";
   import { workspaceStore } from "../stores/workspace.js";
@@ -278,10 +277,6 @@
     {:else if $route.page === "settings"}
       <div class="flex-1 overflow-auto p-6">
         <Settings />
-      </div>
-    {:else if $route.page === "login"}
-      <div class="flex-1 overflow-auto p-6">
-        <Login />
       </div>
     {/if}
   </main>

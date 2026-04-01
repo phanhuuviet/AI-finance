@@ -1,5 +1,6 @@
 <script>
   import { login as loginStore, register as registerStore } from '../../stores/auth.js';
+  import { navigate } from '../../stores/router.js';
   
   let isLogin = true;
   let username = '';
@@ -17,6 +18,8 @@
       } else {
         await registerStore(username, email, password);
       }
+
+      navigate('/workspace');
     } catch (err) {
       error = err.message;
     } finally {

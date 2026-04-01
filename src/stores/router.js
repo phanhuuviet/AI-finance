@@ -1,11 +1,13 @@
-import { writable } from 'svelte/store';
+import { get, writable } from 'svelte/store';
+import { ROUTE_DEFINITIONS, DEFAULT_PROTECTED_ROUTE, LOGIN_ROUTE, ROOT_REDIRECT_PATH } from '../routes/definitions.js';
+import { token } from './auth.js';
 
 /**
  * @typedef {'workspace' | 'analytics' | 'settings' | 'login'} Page
  * @typedef {{
- *  pathname: string;
- *  page: Page;
- *  chatId: string | null;
+ *   pathname: string;
+ *   page: Page;
+ *   chatId: string | null;
  * }} Route
  */
 
@@ -26,50 +28,39 @@ function normalizePath(path) {
   return out;
 }
 
-/** @param {string} pathname */
-function parseRoute(pathname) {
+/**
+ * @param {string} pathname
+ * @param {string | null} [tokenValue]
+ */
+function parseRoute(pathname, tokenValue) {
   const normalized = normalizePath(pathname);
-  const parts = normalized.split('/').filter(Boolean);
+  const snapshot = tokenValue ?? get(token);
 
-  /** @type {Route} */
-  const route = {
-    pathname: normalized,
-    page: 'workspace',
-    chatId: null
-  };
-
-  if (parts.length === 0) {
-    route.page = 'workspace';
-    return route;
+  if (normalized === '/' || normalized === '') {
+    return coerceRoute(DEFAULT_PROTECTED_ROUTE, null, snapshot);
   }
 
-  const [first, second] = parts;
-  if (first === 'workspace') {
-    route.page = 'workspace';
-    route.chatId = second || null;
-    return route;
+  for (const definition of ROUTE_DEFINITIONS) {
+    const match = normalized.match(definition.pattern);
+    if (match) {
+      return coerceRoute(definition, match, snapshot);
+    }
   }
 
-  if (first === 'analytics') {
-    route.page = 'analytics';
-    return route;
+  return coerceRoute(DEFAULT_PROTECTED_ROUTE, null, snapshot);
+}
+
+/**
+ * @param {{ requiresAuth: boolean; build: (match: RegExpMatchArray | null) => Route }} definition
+ * @param {RegExpMatchArray | null} match
+ * @param {string | null} tokenValue
+ */
+function coerceRoute(definition, match, tokenValue) {
+  if (definition.requiresAuth && !tokenValue) {
+    return LOGIN_ROUTE.build(null);
   }
 
-  if (first === 'settings') {
-    route.page = 'settings';
-    return route;
-  }
-
-  if (first === 'login') {
-    route.page = 'login';
-    return route;
-  }
-
-  // Unknown path -> treat as workspace (caller may redirect)
-  route.page = 'workspace';
-  route.pathname = '/workspace';
-  route.chatId = null;
-  return route;
+  return definition.build(match);
 }
 
 const store = writable(
@@ -97,9 +88,8 @@ export function initRouter() {
 
   const current = normalizePath(window.location.pathname);
 
-  // Root redirect: / -> /workspace
   if (current === '/' || current === '') {
-    navigate('/workspace', { replace: true });
+    navigate(ROOT_REDIRECT_PATH, { replace: true });
   } else {
     const parsed = parseRoute(current);
     if (parsed.pathname !== current) {
@@ -124,11 +114,12 @@ export function initRouter() {
  */
 export function navigate(to, opts = {}) {
   if (typeof window === 'undefined') return;
-  const target = normalizePath(to);
+  const parsedTarget = parseRoute(to);
+  const target = parsedTarget.pathname;
   const current = normalizePath(window.location.pathname);
 
   if (target === current) {
-    syncFromLocation();
+    store.set(parsedTarget);
     return;
   }
 
@@ -140,3 +131,16 @@ export function navigate(to, opts = {}) {
 
   syncFromLocation();
 }
+
+token.subscribe((value) => {
+  if (typeof window === 'undefined') return;
+  const current = normalizePath(window.location.pathname);
+  const parsed = parseRoute(current, value);
+
+  if (parsed.pathname !== current) {
+    navigate(parsed.pathname, { replace: true });
+    return;
+  }
+
+  store.set(parsed);
+});
