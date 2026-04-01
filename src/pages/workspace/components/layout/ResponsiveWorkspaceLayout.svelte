@@ -60,7 +60,7 @@
 
 <svelte:window bind:innerWidth={viewportWidth} />
 
-<div class="relative flex h-full min-h-0">
+<div class="relative flex h-full min-h-0 gap-4">
   {#if layoutMode === "desktop"}
     <div class="h-full w-[320px] shrink-0 xl:w-[360px]">
       <slot name="list" {openDetailView} {layoutMode} />
