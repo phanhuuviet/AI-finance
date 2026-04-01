@@ -1,6 +1,8 @@
 <script>
   import { login as loginStore, register as registerStore } from '../../stores/auth.js';
   import { navigate } from '../../stores/router.js';
+  import Button from '../../components/common/Button.svelte';
+  import TextField from '../../components/common/form/TextField.svelte';
   
   let isLogin = true;
   let username = '';
@@ -40,29 +42,48 @@
 
     <form on:submit|preventDefault={handleSubmit} class="mt-4">
       <div class="mt-4">
-        <label class="block" for="username">Username</label>
-        <input type="text" placeholder="Username" bind:value={username} required
-               class="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600">
+        <TextField
+          id="username"
+          label="Username"
+          placeholder="Username"
+          bind:value={username}
+          required
+        />
       </div>
       
       {#if !isLogin}
         <div class="mt-4">
-          <label class="block" for="email">Email</label>
-          <input type="email" placeholder="Email" bind:value={email} required
-                 class="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600">
+          <TextField
+            id="email"
+            type="email"
+            label="Email"
+            placeholder="Email"
+            bind:value={email}
+            required
+          />
         </div>
       {/if}
 
       <div class="mt-4">
-        <label class="block" for="password">Password</label>
-        <input type="password" placeholder="Password" bind:value={password} required
-               class="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600">
+        <TextField
+          id="password"
+          type="password"
+          label="Password"
+          placeholder="Password"
+          bind:value={password}
+          required
+        />
       </div>
 
       <div class="flex items-baseline justify-between mt-6">
-        <button class="px-6 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-900 disabled:opacity-50" disabled={loading}>
+        <Button
+          type="submit"
+          rounded="rounded-lg"
+          className="px-6"
+          disabled={loading}
+        >
           {loading ? 'Processing...' : (isLogin ? 'Login' : 'Register')}
-        </button>
+        </Button>
         <!-- svelte-ignore a11y_missing_attribute -->
         <!-- svelte-ignore a11y_interactive_supports_focus -->
         <!-- svelte-ignore a11y_click_events_have_key_events -->

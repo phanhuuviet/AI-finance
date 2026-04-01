@@ -1,7 +1,9 @@
 <script>
   import { createEventDispatcher } from "svelte";
-  import { cubicOut } from "svelte/easing";
-  import { fade, scale } from "svelte/transition";
+  import ModalDialog from "../../../../../components/common/ModalDialog.svelte";
+  import Button from "../../../../../components/common/Button.svelte";
+  import SelectField from "../../../../../components/common/form/SelectField.svelte";
+  import TextareaField from "../../../../../components/common/form/TextareaField.svelte";
 
   const dispatch = createEventDispatcher();
 
@@ -20,6 +22,11 @@
   /** @type {string} */
   export let commonRequirements = "";
 
+  const languageOptions = [
+    { value: "vi", label: "Tiếng Việt" },
+    { value: "en", label: "English" }
+  ];
+
   function close() {
     dispatch("close");
   }
@@ -29,88 +36,43 @@
   }
 </script>
 
-{#if isOpen}
-  <div
-    class="fixed inset-0 z-50 flex items-center justify-center"
-    role="dialog"
-    aria-modal="true"
-    transition:fade={{ duration: 180, easing: cubicOut }}
-  >
-    <button
-      class="absolute inset-0 bg-black/40"
+<ModalDialog
+  isOpen={isOpen}
+  title={title}
+  description="Chỉnh sửa yêu cầu, sau đó bấm Tạo."
+  on:close={close}
+>
+  <SelectField
+    id="studio_lang_mindmap"
+    label="Ngôn ngữ"
+    bind:value={commonLanguage}
+    options={languageOptions}
+  />
+
+  <TextareaField
+    id="studio_requirements_mindmap"
+    label="Yêu cầu"
+    bind:value={commonRequirements}
+    rows={6}
+    textareaClass="min-h-[160px]"
+  />
+
+  <svelte:fragment slot="footer">
+    <Button
+      variant="secondary"
+      rounded="rounded-xl"
       on:click={close}
       type="button"
-      aria-label="Close"
-    ></button>
-
-    <div
-      class="relative w-full max-w-2xl mx-4 rounded-2xl bg-white border border-gray-200 shadow-sm overflow-hidden"
-      transition:scale={{ start: 0.94, duration: 220, easing: cubicOut }}
     >
-    <div
-      class="px-5 py-4 border-b border-gray-200 bg-white flex items-start justify-between gap-4"
+      Huỷ
+    </Button>
+    <Button
+      rounded="rounded-xl"
+      on:click={create}
+      disabled={!sessionId}
+      type="button"
     >
-      <div>
-        <div class="text-sm font-semibold text-gray-900">{title}</div>
-        <div class="text-xs text-gray-500 mt-1">
-          Chỉnh sửa yêu cầu, sau đó bấm Tạo.
-        </div>
-      </div>
-      <button
-        class="rounded-lg px-3 py-1.5 text-sm border border-gray-200 bg-white hover:bg-gray-50"
-        on:click={close}
-        type="button"
-        title="Close"
-      >
-        ✕
-      </button>
-    </div>
-
-    <div class="p-5 space-y-4">
-      <div>
-        <label for="studio_lang_mindmap" class="block text-xs font-medium text-gray-600"
-          >Ngôn ngữ</label
-        >
-        <select
-          id="studio_lang_mindmap"
-          bind:value={commonLanguage}
-          class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm"
-        >
-          <option value="vi">Tiếng Việt</option>
-          <option value="en">English</option>
-        </select>
-      </div>
-
-      <div>
-        <label
-          for="studio_requirements_mindmap"
-          class="block text-sm font-medium text-gray-900">Yêu cầu</label
-        >
-        <textarea
-          id="studio_requirements_mindmap"
-          bind:value={commonRequirements}
-          class="mt-2 w-full min-h-[160px] rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        ></textarea>
-      </div>
-    </div>
-
-    <div class="px-5 py-4 border-t border-gray-200 bg-white flex justify-end gap-2">
-      <button
-        class="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm hover:bg-gray-50"
-        on:click={close}
-        type="button"
-      >
-        Huỷ
-      </button>
-      <button
-        class="rounded-xl bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-        on:click={create}
-        disabled={!sessionId}
-        type="button"
-      >
-        Tạo
-      </button>
-    </div>
-    </div>
-  </div>
-{/if}
+      Tạo
+    </Button>
+  </svelte:fragment>
+</ModalDialog>

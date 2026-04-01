@@ -3,6 +3,8 @@
   import { onMount } from "svelte";
   import { workspaceStore } from "../../../../stores/workspace.js";
   import { attachmentsStore } from "../../../../stores/attachments.js";
+  import Button from "../../../../components/common/Button.svelte";
+  import TextField from "../../../../components/common/form/TextField.svelte";
 
   /** @typedef {import('../../../../models/document.js').DocumentItem} DocumentItem */
 
@@ -156,13 +158,14 @@
           class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 mb-4"
         />
 
-        <button
+        <Button
+          block
           on:click={handleFileUpload}
           disabled={!file || uploading}
-          class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors"
+          rounded="rounded-md"
         >
           {uploading && file ? "Uploading..." : "Upload File"}
-        </button>
+        </Button>
       </div>
 
       <div class="border border-gray-200 rounded-lg p-4">
@@ -171,20 +174,23 @@
           Enter a valid URL to extract content
         </p>
 
-        <input
+        <TextField
           type="url"
-          bind:value={url}
+          label=" "
+          hideLabel={true}
           placeholder="https://example.com"
-          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 mb-4"
+          bind:value={url}
+          containerClass="mb-4"
         />
 
-        <button
+        <Button
+          block
           on:click={handleCrawl}
           disabled={!url || uploading}
-          class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors"
+          rounded="rounded-md"
         >
           {uploading && url ? "Crawling..." : "Extract Content"}
-        </button>
+        </Button>
       </div>
     </div>
   </div>
@@ -192,10 +198,14 @@
   <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
     <div class="flex justify-between items-center mb-4">
       <h2 class="text-xl font-semibold text-gray-800">Your Documents</h2>
-      <button
+      <Button
+        variant="ghost"
+        size="sm"
+        className="px-0"
         on:click={fetchDocuments}
-        class="text-sm text-blue-600 hover:underline">Refresh</button
       >
+        Refresh
+      </Button>
     </div>
 
     {#if !sessionId}
@@ -269,10 +279,14 @@
                   >{new Date(doc.created_at).toLocaleDateString()}</td
                 >
                 <td class="px-6 py-4 text-right">
-                  <button
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    className="px-0 py-0 hover:underline"
                     on:click={() => deleteDocument(doc._id)}
-                    class="text-red-600 hover:underline">Delete</button
                   >
+                    Delete
+                  </Button>
                 </td>
               </tr>
             {/each}

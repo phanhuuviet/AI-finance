@@ -1,6 +1,9 @@
 <script>
   import { user } from '../../stores/auth.js';
   import { fetchWithAuth } from '../../utils/api.js';
+  import Button from '../../components/common/Button.svelte';
+  import TextField from '../../components/common/form/TextField.svelte';
+  import SelectField from '../../components/common/form/SelectField.svelte';
 
   /** @typedef {import('../../models/user.js').User} User */
   /** @typedef {import('../../models/user.js').UserPreferences} UserPreferences */
@@ -26,6 +29,11 @@
     };
     initialized = true;
   }
+
+  const modelOptions = [
+    { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo (Fast, efficient)' },
+    { value: 'gpt-4-turbo-preview', label: 'GPT-4 Turbo (More capable, higher cost)' }
+  ];
 
   async function saveSettings() {
     saving = true;
@@ -75,24 +83,8 @@
       <h3 class="text-lg font-medium text-gray-900 mb-4">Profile Information</h3>
       
       <div class="grid grid-cols-1 gap-4">
-        <div>
-          <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
-          <input 
-            id="username"
-            type="text" 
-            bind:value={username}
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 outline-none"
-          />
-        </div>
-        <div>
-          <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-          <input 
-            id="email"
-            type="email" 
-            bind:value={email}
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 outline-none"
-          />
-        </div>
+        <TextField id="username" label="Username" bind:value={username} />
+        <TextField id="email" type="email" label="Email" bind:value={email} />
         <p class="text-xs text-gray-500">Changes are saved via a mocked API when backend is unavailable.</p>
       </div>
     </div>
@@ -102,28 +94,26 @@
       <h3 class="text-lg font-medium text-gray-900 mb-4">AI Preferences</h3>
       
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1" for="model">Default Model</label>
-        <select 
+        <SelectField
           id="model"
+          label="Default Model"
           bind:value={preferences.model}
-          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 outline-none"
-        >
-          <option value="gpt-3.5-turbo">GPT-3.5 Turbo (Fast, efficient)</option>
-          <option value="gpt-4-turbo-preview">GPT-4 Turbo (More capable, higher cost)</option>
-        </select>
+          options={modelOptions}
+        />
         <p class="mt-2 text-sm text-gray-500">Higher capacity models will consume more tokens.</p>
       </div>
     </div>
 
     <!-- Save Button -->
     <div class="pt-4 flex justify-end">
-      <button 
+      <Button
         on:click={saveSettings}
         disabled={saving}
-        class="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors shadow-sm"
+        rounded="rounded-lg"
+        className="px-6"
       >
         {saving ? 'Saving...' : 'Save Changes'}
-      </button>
+      </Button>
     </div>
   </div>
 </div>
