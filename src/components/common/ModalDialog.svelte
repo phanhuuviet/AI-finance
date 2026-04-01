@@ -12,17 +12,17 @@
   /** Optional helper text under the title */
   export let description = "";
   /** Extra classes to append to the outer overlay */
-  export let overlayClass = "fixed inset-0 z-50 flex items-center justify-center";
+  export let overlayClass = "fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4";
   /** Additional classes for the dialog panel */
   export let panelClass = "";
   /** Additional classes for the body container */
   export let bodyClass = "p-5 space-y-4 bg-[var(--color-surface-elevated)]";
   /** Additional classes for the footer container */
   export let footerClass =
-    "px-5 py-4 border-t border-[var(--color-border-soft)] bg-[var(--color-surface)] flex justify-end gap-2";
+    "px-4 sm:px-5 py-4 border-t border-[var(--color-border-soft)] bg-[var(--color-surface)] flex flex-col-reverse sm:flex-row sm:justify-end gap-2";
   /** Allows overriding the default panel styling */
   export let contentClass =
-    "w-full max-w-2xl mx-4 rounded-2xl bg-[var(--color-surface-elevated)] border border-[var(--color-border-strong)] shadow-elevated overflow-hidden";
+    "w-full max-w-2xl rounded-2xl bg-[var(--color-surface-elevated)] border border-[var(--color-border-strong)] shadow-elevated overflow-hidden max-h-[90dvh]";
   /** Controls whether the footer wrapper is rendered */
   export let showFooter = true;
   /** Accessible label for the close actions */
@@ -77,7 +77,7 @@
         </button>
       </div>
 
-      <div class={bodyClass}>
+      <div class={`${bodyClass} overflow-y-auto max-h-[calc(90dvh-140px)]`}>
         <slot />
       </div>
 

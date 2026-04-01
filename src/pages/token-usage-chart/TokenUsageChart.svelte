@@ -142,13 +142,13 @@
 
 </script>
 
-<div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 max-w-4xl mx-auto">
-  <div class="flex justify-between items-center mb-6">
-    <h2 class="text-xl font-semibold text-gray-800">{$t('analytics.title')}</h2>
+<div class="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200 w-full max-w-5xl mx-auto">
+  <div class="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-6">
+    <h2 class="text-lg sm:text-xl font-semibold text-gray-800">{$t('analytics.title')}</h2>
     <select 
       bind:value={days} 
       on:change={fetchAnalytics}
-      class="border border-gray-300 rounded-md text-sm px-3 py-1 focus:ring-blue-500 focus:border-blue-500"
+      class="border border-gray-300 rounded-md text-sm px-3 py-2 min-h-11 focus:ring-blue-500 focus:border-blue-500"
     >
       <option value={7}>{$t('analytics.last7Days')}</option>
       <option value={30}>{$t('analytics.last30Days')}</option>
@@ -159,7 +159,7 @@
   {#if tokenUsageState.loading}
     <div class="space-y-6" aria-live="polite">
       <LoadingBlock rows={1} rowHeight="h-8" className="w-40" active={tokenUsageState.showLoading} />
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 mb-8">
         <LoadingBlock rows={2} rowHeight="h-6" className="p-4 border border-gray-200 rounded-lg" active={tokenUsageState.showLoading} />
         <LoadingBlock rows={2} rowHeight="h-6" className="p-4 border border-gray-200 rounded-lg" active={tokenUsageState.showLoading} />
         <LoadingBlock rows={2} rowHeight="h-6" className="p-4 border border-gray-200 rounded-lg" active={tokenUsageState.showLoading} />
@@ -176,7 +176,7 @@
     />
   {:else if analyticsData}
     <div transition:fade={{ duration: 180 }}>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 mb-8">
         <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
           <h3 class="text-sm font-medium text-blue-800 mb-1">{$t('analytics.totalTokens')}</h3>
           <p class="text-2xl font-bold text-blue-900">{analyticsData.summary.total_tokens_period.toLocaleString()}</p>
@@ -192,15 +192,15 @@
         </div>
       </div>
 
-      <div class="border border-gray-200 rounded-lg p-4 h-64 bg-gray-50 text-blue-600">
+      <div class="border border-gray-200 rounded-lg p-3 sm:p-4 h-64 bg-gray-50 text-blue-600">
         <canvas bind:this={canvasEl} class="w-full h-full"></canvas>
       </div>
       
       {#if analyticsData.daily_usage && analyticsData.daily_usage.length > 0}
         <div class="mt-6">
           <h3 class="text-sm font-medium text-gray-700 mb-3">{$t('analytics.dailyBreakdown')}</h3>
-          <div class="max-h-40 overflow-y-auto border border-gray-200 rounded-md text-sm">
-            <table class="w-full text-left">
+          <div class="max-h-40 overflow-y-auto overflow-x-auto border border-gray-200 rounded-md text-sm">
+            <table class="w-full min-w-[520px] text-left">
               <thead class="bg-gray-50 sticky top-0">
                 <tr>
                   <th class="px-4 py-2 font-medium text-gray-600">{$t('analytics.date')}</th>

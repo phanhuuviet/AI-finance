@@ -1,4 +1,5 @@
 <script>
+  import { createEventDispatcher } from "svelte";
   import { onMount } from "svelte";
   import { fade } from "svelte/transition";
   import { chatStore } from "../../../../stores/chat.js";
@@ -9,6 +10,8 @@
   import { t } from "../../../../lib/i18n";
 
   /** @typedef {import('../../../../lib/models').ChatSession} ChatSession */
+
+  const dispatch = createEventDispatcher();
 
   let searchTerm = "";
 
@@ -26,6 +29,7 @@
 
   /** @param {string} id */
   async function selectSession(id) {
+    dispatch("select", { id });
     navigate(`/workspace/${id}`);
   }
 </script>
@@ -33,13 +37,13 @@
 <div
   class="flex flex-col h-full bg-white rounded-lg shadow-sm border border-gray-200"
 >
-  <div class="p-4 border-b border-gray-200">
-    <h2 class="text-lg font-semibold text-gray-800 mb-4">{$t("chat.history")}</h2>
+  <div class="p-3 sm:p-4 border-b border-gray-200">
+    <h2 class="text-base sm:text-lg font-semibold text-gray-800 mb-3">{$t("chat.history")}</h2>
     <input
       type="text"
       bind:value={searchTerm}
       placeholder={$t("chat.searchPlaceholder")}
-      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+      class="w-full px-3 py-2.5 min-h-11 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
     />
   </div>
 
@@ -72,7 +76,7 @@
           {#each filteredSessions as session}
             <li>
               <button
-                class={`w-full text-left block p-4 hover:bg-blue-50 cursor-pointer transition-colors ${selectedSessionId === session._id ? "bg-blue-50 border-l-4 border-blue-600" : "border-l-4 border-transparent"}`}
+                class={`w-full text-left block p-3 sm:p-4 min-h-11 hover:bg-blue-50 cursor-pointer transition-colors ${selectedSessionId === session._id ? "bg-blue-50 border-l-4 border-blue-600" : "border-l-4 border-transparent"}`}
                 on:click={() => selectSession(session._id)}
                 type="button"
               >

@@ -25,9 +25,9 @@
   };
 
   const sizeClasses = {
-    sm: "text-sm px-3 py-1.5",
-    md: "text-sm px-4 py-2",
-    lg: "text-base px-5 py-2.5"
+    sm: "text-sm px-3 py-2 min-h-11",
+    md: "text-sm px-4 py-2 min-h-11",
+    lg: "text-base px-5 py-2.5 min-h-12"
   };
 
   const baseClasses =

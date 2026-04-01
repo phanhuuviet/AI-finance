@@ -43,7 +43,7 @@
     rows={rows}
     required={required}
     disabled={disabled}
-    class={`w-full rounded-xl border border-[var(--color-border-soft)] bg-[var(--color-surface-muted)] px-4 py-3 text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)] ${textareaClass}`.trim()}
+    class={`w-full min-h-11 rounded-xl border border-[var(--color-border-soft)] bg-[var(--color-surface-muted)] px-4 py-3 text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)] ${textareaClass}`.trim()}
     on:input={handleInput}
     on:change={handleChange}
   ></textarea>

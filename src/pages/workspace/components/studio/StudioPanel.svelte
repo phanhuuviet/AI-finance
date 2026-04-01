@@ -219,21 +219,21 @@
 </script>
 
 <div
-  class="h-full bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden"
+  class="h-full flex flex-col bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden"
 >
-  <div class="px-5 py-4 border-b border-gray-200 bg-white">
+  <div class="px-4 sm:px-5 py-4 border-b border-gray-200 bg-white">
     <div class="flex items-center justify-between">
       <h2 class="text-base font-semibold text-gray-900">{$t("studio.title")}</h2>
       <div class="text-xs text-gray-500">{$t("studio.perSession")}</div>
     </div>
   </div>
 
-  <div class="p-5">
+  <div class="p-4 sm:p-5 overflow-y-auto flex-1 min-h-0">
     <!-- Tools grid -->
-    <div class="grid grid-cols-2 lg:grid-cols-3 gap-3">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
       {#each tools as tool}
         <button
-          class={`group rounded-xl border px-4 py-3 text-left transition border-gray-200 hover:bg-gray-50 hover:border-blue-300 hover:bg-blue-50 hover:cursor-pointer`}
+          class={`group rounded-xl border px-4 py-3 min-h-11 text-left transition border-gray-200 hover:bg-gray-50 hover:border-blue-300 hover:bg-blue-50 hover:cursor-pointer`}
           on:click={() => openToolModal(tool.key)}
           type="button"
         >
@@ -258,7 +258,7 @@
           {$t("studio.createdInSession")}
         </div>
         <button
-          class="text-sm text-blue-600 hover:underline disabled:opacity-50"
+          class="text-sm text-blue-600 min-h-11 px-2 rounded-md hover:underline disabled:opacity-50"
           on:click={refreshOutputs}
           disabled={!sessionId || loadingOutputs}
           type="button"
@@ -301,7 +301,7 @@
         <div class="mt-3 space-y-2">
           {#each outputs as item (item.id)}
             <div
-              class="rounded-xl border border-gray-200 bg-white px-4 py-3 flex items-start justify-between gap-3"
+              class="rounded-xl border border-gray-200 bg-white px-3 sm:px-4 py-3 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3"
               transition:fly={{ y: 8, duration: 180, easing: cubicOut }}
             >
               <div class="min-w-0">
@@ -323,10 +323,10 @@
                 </div>
               </div>
 
-              <div class="shrink-0 flex items-center gap-2" data-studio-menu-root="true">
+              <div class="shrink-0 flex items-center gap-2 self-end sm:self-auto" data-studio-menu-root="true">
                 {#if item.result_url}
                   <button
-                    class="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm hover:bg-gray-50"
+                    class="rounded-lg border border-gray-200 bg-white px-3 py-2 min-h-11 text-sm hover:bg-gray-50"
                     on:click={() => window.open(String(item.result_url), "_blank", "noopener,noreferrer")}
                     type="button"
                   >
@@ -336,7 +336,7 @@
 
                 <div class="relative">
                   <button
-                    class="rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-sm hover:bg-gray-50"
+                    class="rounded-lg border border-gray-200 bg-white px-2.5 py-2 min-h-11 text-sm hover:bg-gray-50"
                     aria-haspopup="menu"
                     aria-expanded={openMenuForId === item.id}
                     on:click={() => (openMenuForId = openMenuForId === item.id ? null : item.id)}

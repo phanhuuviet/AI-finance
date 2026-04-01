@@ -14,6 +14,7 @@
   /** @typedef {import('../lib/models').ChatSession} ChatSession */
 
   let activeTab = "home"; // home | analytics | settings
+  let mobileNavOpen = false;
 
   /**
    * Route -> UI tab
@@ -30,6 +31,7 @@
    * @param {'home'|'analytics'|'settings'} tab
    */
   function goToTab(tab) {
+    mobileNavOpen = false;
     if (tab === "analytics") return navigate("/analytics");
     if (tab === "settings") return navigate("/settings");
 
@@ -75,6 +77,10 @@
 
   $: if (isNewChatModalOpen) fetchDocs();
 
+  $: if ($route.page) {
+    mobileNavOpen = false;
+  }
+
   // Keep UI tab synced with URL.
   $: activeTab = tabFromPage($route.page);
 
@@ -102,8 +108,19 @@
   }
 </script>
 
-<div class="flex h-screen bg-gray-50 overflow-hidden">
-  <aside class="w-64 bg-white border-r border-gray-200 flex flex-col">
+<div class="relative flex h-[100dvh] bg-gray-50 overflow-hidden">
+  {#if mobileNavOpen}
+    <button
+      type="button"
+      class="fixed inset-0 z-30 bg-black/50 lg:hidden"
+      aria-label={$t("common.close")}
+      on:click={() => (mobileNavOpen = false)}
+    ></button>
+  {/if}
+
+  <aside
+    class={`fixed inset-y-0 left-0 z-40 w-72 max-w-[85vw] bg-white border-r border-gray-200 flex flex-col transform transition-transform duration-200 lg:static lg:inset-auto lg:w-64 lg:max-w-none lg:translate-x-0 ${mobileNavOpen ? "translate-x-0" : "-translate-x-full"}`}
+  >
     <div class="p-4 border-b border-gray-200">
       <h1 class="text-xl font-bold text-blue-600 flex items-center gap-2">
         <svg
@@ -166,17 +183,29 @@
     </div>
   </aside>
 
-  <main class="flex-1 flex flex-col h-full overflow-hidden relative">
+  <main class="min-w-0 flex-1 flex flex-col h-full overflow-hidden relative">
     <header
-      class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between gap-4 z-10"
+      class="bg-white border-b border-gray-200 px-3 sm:px-4 lg:px-6 py-3 sm:py-4 flex items-center justify-between gap-3 z-10"
     >
-      <h2 class="text-xl font-semibold text-gray-900">{pageTitle($route.page)}</h2>
+      <div class="flex min-w-0 items-center gap-2 sm:gap-3">
+        <button
+          type="button"
+          class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-100 lg:hidden"
+          aria-label={$t("header.workspace")}
+          on:click={() => (mobileNavOpen = true)}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
+            <path fill-rule="evenodd" d="M3.75 5.25A.75.75 0 014.5 4.5h15a.75.75 0 010 1.5h-15a.75.75 0 01-.75-.75zm0 6A.75.75 0 014.5 10.5h15a.75.75 0 010 1.5h-15a.75.75 0 01-.75-.75zm0 6a.75.75 0 01.75-.75h15a.75.75 0 010 1.5h-15a.75.75 0 01-.75-.75z" clip-rule="evenodd" />
+          </svg>
+        </button>
+        <h2 class="truncate text-base sm:text-lg lg:text-xl font-semibold text-gray-900">{pageTitle($route.page)}</h2>
+      </div>
 
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 shrink-0">
         <div class="inline-flex items-center rounded-lg border border-gray-200 p-1" role="group" aria-label={$t("header.language")}>
           <button
             type="button"
-            class={`px-2 py-1 text-sm rounded-md ${$language === "vi" ? "bg-blue-100 text-blue-700" : "text-gray-600 hover:bg-gray-100"}`}
+            class={`px-2 sm:px-3 py-2 min-h-11 text-xs sm:text-sm rounded-md ${$language === "vi" ? "bg-blue-100 text-blue-700" : "text-gray-600 hover:bg-gray-100"}`}
             on:click={() => setLanguage("vi")}
             aria-pressed={$language === "vi"}
           >
@@ -184,7 +213,7 @@
           </button>
           <button
             type="button"
-            class={`px-2 py-1 text-sm rounded-md ${$language === "en" ? "bg-blue-100 text-blue-700" : "text-gray-600 hover:bg-gray-100"}`}
+            class={`px-2 sm:px-3 py-2 min-h-11 text-xs sm:text-sm rounded-md ${$language === "en" ? "bg-blue-100 text-blue-700" : "text-gray-600 hover:bg-gray-100"}`}
             on:click={() => setLanguage("en")}
             aria-pressed={$language === "en"}
           >
@@ -195,25 +224,26 @@
         {#if $route.page === "workspace"}
           <button
             on:click={() => (isNewChatModalOpen = true)}
-            class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+            class="px-3 sm:px-4 py-2 min-h-11 bg-blue-600 text-white text-xs sm:text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
           >
-            {$t("chat.newChatButton")}
+            <span class="hidden sm:inline">{$t("chat.newChatButton")}</span>
+            <span class="sm:hidden">+</span>
           </button>
         {/if}
       </div>
     </header>
 
     {#if $route.page === "workspace"}
-      <div class="flex-1 overflow-auto p-6">
+      <div class="flex-1 overflow-auto px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-6">
         <WorkspacePanel />
       </div>
 
       {#if isNewChatModalOpen}
         <div
-          class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          class="fixed inset-0 bg-black/50 flex items-center justify-center p-3 sm:p-4 z-50"
         >
           <div
-            class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden"
+            class="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90dvh] overflow-hidden"
           >
             <div class="p-6 border-b border-gray-100">
               <h3 class="text-xl font-semibold text-gray-900">
@@ -221,7 +251,7 @@
               </h3>
             </div>
 
-            <div class="p-6 space-y-4">
+            <div class="p-4 sm:p-6 space-y-4 overflow-y-auto max-h-[calc(90dvh-140px)]">
               <div>
                 <label
                   for="title"
@@ -274,18 +304,18 @@
             </div>
 
             <div
-              class="p-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3"
+              class="p-4 bg-gray-50 border-t border-gray-100 flex flex-col-reverse sm:flex-row sm:justify-end gap-3"
             >
               <button
                 on:click={() => (isNewChatModalOpen = false)}
-                class="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                class="w-full sm:w-auto px-4 py-2 min-h-11 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 {$t("common.cancel")}
               </button>
               <button
                 on:click={handleNewChat}
                 disabled={!newChatTitle.trim()}
-                class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+                class="w-full sm:w-auto px-4 py-2 min-h-11 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
               >
                 {$t("chat.createChat")}
               </button>
@@ -294,11 +324,11 @@
         </div>
       {/if}
     {:else if $route.page === "analytics"}
-      <div class="flex-1 overflow-auto p-6">
+      <div class="flex-1 overflow-auto px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-6">
         <TokenUsageChart />
       </div>
     {:else if $route.page === "settings"}
-      <div class="flex-1 overflow-auto p-6">
+      <div class="flex-1 overflow-auto px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-6">
         <Settings />
       </div>
     {/if}

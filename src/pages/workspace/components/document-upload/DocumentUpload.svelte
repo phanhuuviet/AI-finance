@@ -86,9 +86,9 @@
   }
 </script>
 
-<div class="max-w-4xl mx-auto space-y-8">
-  <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-    <h2 class="text-xl font-semibold mb-4 text-gray-800">{$t("documents.addDocuments")}</h2>
+<div class="w-full max-w-5xl mx-auto space-y-4 sm:space-y-6 lg:space-y-8">
+  <div class="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200">
+    <h2 class="text-lg sm:text-xl font-semibold mb-4 text-gray-800">{$t("documents.addDocuments")}</h2>
 
     {#if success}
       <div class="p-3 mb-4 text-sm text-green-700 bg-green-100 rounded-md">
@@ -96,8 +96,8 @@
       </div>
     {/if}
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div class="border border-gray-200 rounded-lg p-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+      <div class="border border-gray-200 rounded-lg p-3 sm:p-4">
         <h3 class="font-medium mb-3 text-gray-700">{$t("documents.uploadFile")}</h3>
         <p class="text-xs text-gray-500 mb-4">
           {$t("documents.supportedFormats")}
@@ -119,7 +119,7 @@
         </Button>
       </div>
 
-      <div class="border border-gray-200 rounded-lg p-4">
+      <div class="border border-gray-200 rounded-lg p-3 sm:p-4">
         <h3 class="font-medium mb-3 text-gray-700">{$t("documents.crawlWebsite")}</h3>
         <p class="text-xs text-gray-500 mb-4">
           {$t("documents.crawlHint")}
@@ -146,13 +146,13 @@
     </div>
   </div>
 
-  <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-xl font-semibold text-gray-800">{$t("documents.yourDocuments")}</h2>
+  <div class="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200">
+    <div class="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-4">
+      <h2 class="text-lg sm:text-xl font-semibold text-gray-800">{$t("documents.yourDocuments")}</h2>
       <Button
         variant="ghost"
         size="sm"
-        className="px-0"
+        className="px-0 min-h-11"
         on:click={fetchDocuments}
       >
         {$t("common.refresh")}
@@ -185,21 +185,21 @@
       <p class="text-gray-500 text-center py-4">{$t("documents.empty")}</p>
     {:else}
       <div class="overflow-x-auto" transition:fade={{ duration: 180 }}>
-        <table class="w-full text-sm text-left text-gray-500">
+        <table class="w-full min-w-[680px] text-sm text-left text-gray-500">
           <thead class="text-xs text-gray-700 uppercase bg-gray-50">
             <tr>
-              <th scope="col" class="px-6 py-3">{$t("documents.attach")}</th>
-              <th scope="col" class="px-6 py-3">{$t("documents.title")}</th>
-              <th scope="col" class="px-6 py-3">{$t("documents.source")}</th>
-              <th scope="col" class="px-6 py-3">{$t("common.status")}</th>
-              <th scope="col" class="px-6 py-3">{$t("documents.dateAdded")}</th>
-              <th scope="col" class="px-6 py-3 text-right">{$t("common.actions")}</th>
+              <th scope="col" class="px-3 sm:px-4 py-3">{$t("documents.attach")}</th>
+              <th scope="col" class="px-3 sm:px-4 py-3">{$t("documents.title")}</th>
+              <th scope="col" class="px-3 sm:px-4 py-3">{$t("documents.source")}</th>
+              <th scope="col" class="px-3 sm:px-4 py-3">{$t("common.status")}</th>
+              <th scope="col" class="px-3 sm:px-4 py-3">{$t("documents.dateAdded")}</th>
+              <th scope="col" class="px-3 sm:px-4 py-3 text-right">{$t("common.actions")}</th>
             </tr>
           </thead>
           <tbody>
             {#each documents as doc}
               <tr class="bg-white border-b hover:bg-gray-50">
-                <td class="px-6 py-4">
+                <td class="px-3 sm:px-4 py-4">
                   <input
                     type="checkbox"
                     disabled={!sessionId}
@@ -210,17 +210,17 @@
                   />
                 </td>
                 <td
-                  class="px-6 py-4 font-medium text-gray-900 truncate max-w-[200px]"
+                  class="px-3 sm:px-4 py-4 font-medium text-gray-900 truncate max-w-[140px] sm:max-w-[200px]"
                   title={doc.title}
                 >
                   {doc.title}
                 </td>
-                <td class="px-6 py-4">
+                <td class="px-3 sm:px-4 py-4">
                   <span class="px-2 py-1 rounded text-xs bg-gray-100 uppercase"
                     >{doc.source_type}</span
                   >
                 </td>
-                <td class="px-6 py-4">
+                <td class="px-3 sm:px-4 py-4">
                   {#if doc.status === "ready"}
                     <span class="text-green-600 flex items-center gap-1">
                       <span class="w-2 h-2 rounded-full bg-green-500"></span> {$t("documents.statusReady")}
@@ -240,10 +240,10 @@
                     </span>
                   {/if}
                 </td>
-                <td class="px-6 py-4"
+                <td class="px-3 sm:px-4 py-4"
                   >{new Date(doc.created_at).toLocaleDateString()}</td
                 >
-                <td class="px-6 py-4 text-right">
+                <td class="px-3 sm:px-4 py-4 text-right">
                   <Button
                     variant="danger"
                     size="sm"

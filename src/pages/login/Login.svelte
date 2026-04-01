@@ -42,9 +42,9 @@
   }
 </script>
 
-<div class="flex items-center justify-center min-h-screen bg-gray-100">
-  <div class="px-8 py-6 mt-4 text-left bg-white shadow-lg w-96 rounded-lg">
-    <h3 class="text-2xl font-bold text-center">{isLogin ? $t('auth.loginTitle') : $t('auth.registerTitle')}</h3>
+<div class="flex items-center justify-center min-h-screen bg-gray-100 px-3 sm:px-4">
+  <div class="w-full max-w-md px-4 sm:px-6 md:px-8 py-6 text-left bg-white shadow-lg rounded-lg">
+    <h3 class="text-xl sm:text-2xl font-bold text-center">{isLogin ? $t('auth.loginTitle') : $t('auth.registerTitle')}</h3>
     
     {#if error}
       <div class="p-4 mt-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
@@ -87,11 +87,11 @@
         />
       </div>
 
-      <div class="flex items-baseline justify-between mt-6">
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-baseline sm:justify-between mt-6">
         <Button
           type="submit"
           rounded="rounded-lg"
-          className="px-6"
+          className="px-6 w-full sm:w-auto"
           disabled={loading}
         >
           {loading ? $t('common.processing') : (isLogin ? $t('auth.login') : $t('auth.register'))}

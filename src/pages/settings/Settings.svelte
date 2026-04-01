@@ -59,8 +59,8 @@
   }
 </script>
 
-<div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-  <h2 class="text-xl font-semibold text-gray-800 mb-6">{$t('settings.accountSettings')}</h2>
+<div class="w-full max-w-3xl mx-auto bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200">
+  <h2 class="text-lg sm:text-xl font-semibold text-gray-800 mb-6">{$t('settings.accountSettings')}</h2>
 
   {#if message}
     <div class="p-3 mb-6 text-sm text-green-700 bg-green-100 rounded-md transition-opacity">
@@ -116,12 +116,12 @@
     </div>
 
     <!-- Save Button -->
-    <div class="pt-4 flex justify-end">
+    <div class="pt-4 flex justify-stretch sm:justify-end">
       <Button
         on:click={saveSettings}
         disabled={profileState.updating}
         rounded="rounded-lg"
-        className="px-6"
+        className="px-6 w-full sm:w-auto"
       >
         {profileState.updating ? $t('settings.saving') : $t('settings.saveChanges')}
       </Button>

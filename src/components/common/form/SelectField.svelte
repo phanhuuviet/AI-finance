@@ -41,7 +41,7 @@
     bind:value
     required={required}
     disabled={disabled}
-    class={`w-full px-3 py-2 border border-[var(--color-border-soft)] rounded-md bg-[var(--color-surface-muted)] text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)] ${selectClass}`.trim()}
+    class={`w-full px-3 py-2.5 min-h-11 border border-[var(--color-border-soft)] rounded-md bg-[var(--color-surface-muted)] text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)] ${selectClass}`.trim()}
     on:input={handleInput}
     on:change={handleChange}
   >

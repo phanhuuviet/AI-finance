@@ -36,7 +36,7 @@
   }
 </script>
 
-<main class="min-h-screen bg-gray-50 text-gray-900">
+<main class="min-h-screen w-full overflow-x-hidden bg-gray-50 text-gray-900">
   {#if loading}
     <div class="p-6 text-sm text-gray-600">{$t("common.loading")}</div>
   {:else}
