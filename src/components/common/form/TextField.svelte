@@ -28,7 +28,7 @@
 <div class={`space-y-1 ${containerClass}`.trim()}>
   {#if label && !hideLabel}
     <label
-      class={`block text-sm font-medium text-gray-700 ${labelClass}`.trim()}
+      class={`block text-sm font-medium text-[var(--color-text-secondary)] ${labelClass}`.trim()}
       for={id || undefined}
     >
       {label}
@@ -43,12 +43,12 @@
     placeholder={placeholder}
     required={required}
     disabled={disabled}
-    class={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 ${inputClass}`.trim()}
+    class={`w-full px-3 py-2 rounded-md border border-[var(--color-border-soft)] bg-[var(--color-surface-muted)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)] ${inputClass}`.trim()}
     on:input={handleInput}
     on:change={handleChange}
   />
 
   {#if helperText}
-    <p class="text-xs text-gray-500">{helperText}</p>
+    <p class="text-xs text-[var(--color-text-muted)]">{helperText}</p>
   {/if}
 </div>

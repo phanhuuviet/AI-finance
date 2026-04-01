@@ -13,10 +13,14 @@
   const forwardEvents = forwardEventsBuilder();
 
   const variantClasses = {
-    primary: "bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50",
-    secondary: "border border-gray-200 bg-white text-gray-900 hover:bg-gray-50 disabled:opacity-60",
-    ghost: "text-blue-600 hover:underline disabled:opacity-50",
-    danger: "text-red-600 hover:text-red-700 disabled:opacity-50"
+    primary:
+      "bg-[var(--color-accent)] text-[var(--color-accent-contrast)] hover:bg-[var(--color-accent-strong)]",
+    secondary:
+      "border border-[var(--color-border-soft)] bg-[var(--color-surface-muted)] text-[var(--color-text-primary)] hover:border-[var(--color-border-strong)] hover:bg-[var(--color-surface-elevated)]",
+    ghost:
+      "text-[var(--color-accent)] hover:bg-[var(--color-accent-muted)]",
+    danger:
+      "bg-[var(--color-danger)] text-[var(--color-accent-contrast)] hover:bg-[var(--color-danger-strong)] focus-visible:ring-[var(--color-danger)]"
   };
 
   const sizeClasses = {
@@ -26,11 +30,14 @@
   };
 
   const baseClasses =
-    "inline-flex items-center justify-center font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed";
+    "inline-flex items-center justify-center font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg-app)] disabled:cursor-not-allowed disabled:opacity-60";
 
   $: buttonClass = [
     baseClasses,
     rounded,
+    variant === "danger"
+      ? "focus-visible:ring-[var(--color-danger)]"
+      : "focus-visible:ring-[var(--color-accent)]",
     variantClasses[variant] ?? variantClasses.primary,
     sizeClasses[size] ?? sizeClasses.md,
     block ? "w-full" : "",

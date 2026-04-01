@@ -28,7 +28,7 @@
 <div class={`space-y-1 ${containerClass}`.trim()}>
   {#if label && !hideLabel}
     <label
-      class={`block text-sm font-medium text-gray-700 ${labelClass}`.trim()}
+      class={`block text-sm font-medium text-[var(--color-text-secondary)] ${labelClass}`.trim()}
       for={id || undefined}
     >
       {label}
@@ -43,12 +43,12 @@
     rows={rows}
     required={required}
     disabled={disabled}
-    class={`w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${textareaClass}`.trim()}
+    class={`w-full rounded-xl border border-[var(--color-border-soft)] bg-[var(--color-surface-muted)] px-4 py-3 text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)] ${textareaClass}`.trim()}
     on:input={handleInput}
     on:change={handleChange}
   ></textarea>
 
   {#if helperText}
-    <p class="text-xs text-gray-500">{helperText}</p>
+    <p class="text-xs text-[var(--color-text-muted)]">{helperText}</p>
   {/if}
 </div>
