@@ -78,13 +78,13 @@
       <div class="h-full flex items-center justify-center text-gray-400">
         Select a chat from history or start a new one
       </div>
-    {:else if messageState.showLoading}
+    {:else if messageState.loading}
       <div class="space-y-4" aria-live="polite">
-        <LoadingBlock rows={2} rowHeight="h-10" className="max-w-[75%]" />
+        <LoadingBlock rows={2} rowHeight="h-10" className="max-w-[75%]" active={messageState.showLoading} />
         <div class="flex justify-end">
-          <LoadingBlock rows={1} rowHeight="h-10" className="w-[60%]" />
+          <LoadingBlock rows={1} rowHeight="h-10" className="w-[60%]" active={messageState.showLoading} />
         </div>
-        <LoadingBlock rows={2} rowHeight="h-10" className="max-w-[70%]" />
+        <LoadingBlock rows={2} rowHeight="h-10" className="max-w-[70%]" active={messageState.showLoading} />
       </div>
     {:else if messageState.error}
       <ErrorFallback

@@ -56,6 +56,11 @@ function createDashboardStore() {
     }));
   });
 
+  let documentsRequestId = 0;
+  let tokenUsageRequestId = 0;
+  /** @type {Record<string, number>} */
+  const studioRequestIds = {};
+
   /** @param {string} sessionId */
   function ensureStudioState(sessionId) {
     update((state) => {
@@ -90,11 +95,13 @@ function createDashboardStore() {
     subscribe,
 
     async fetchDocuments() {
+      const requestId = ++documentsRequestId;
       documentsGate.start();
       update((state) => ({
         ...state,
         documents: {
           ...state.documents,
+          data: null,
           loading: true,
           error: null,
           showLoading: false
@@ -103,6 +110,7 @@ function createDashboardStore() {
 
       try {
         const data = /** @type {DocumentItem[]} */ (await dashboardService.getDocuments());
+        if (requestId !== documentsRequestId) return [];
         update((state) => ({
           ...state,
           documents: {
@@ -113,6 +121,7 @@ function createDashboardStore() {
         }));
         return data;
       } catch (error) {
+        if (requestId !== documentsRequestId) throw error;
         update((state) => ({
           ...state,
           documents: {
@@ -122,6 +131,7 @@ function createDashboardStore() {
         }));
         throw error;
       } finally {
+        if (requestId !== documentsRequestId) return;
         documentsGate.stop();
         update((state) => ({
           ...state,
@@ -150,11 +160,13 @@ function createDashboardStore() {
     },
 
     async fetchTokenUsage(days) {
+      const requestId = ++tokenUsageRequestId;
       tokenUsageGate.start();
       update((state) => ({
         ...state,
         tokenUsage: {
           ...state.tokenUsage,
+          data: null,
           loading: true,
           error: null,
           showLoading: false
@@ -163,6 +175,7 @@ function createDashboardStore() {
 
       try {
         const data = /** @type {TokenUsageAnalytics} */ (await dashboardService.getTokenUsage(days));
+        if (requestId !== tokenUsageRequestId) return null;
         update((state) => ({
           ...state,
           tokenUsage: {
@@ -173,6 +186,7 @@ function createDashboardStore() {
         }));
         return data;
       } catch (error) {
+        if (requestId !== tokenUsageRequestId) throw error;
         update((state) => ({
           ...state,
           tokenUsage: {
@@ -182,6 +196,7 @@ function createDashboardStore() {
         }));
         throw error;
       } finally {
+        if (requestId !== tokenUsageRequestId) return;
         tokenUsageGate.stop();
         update((state) => ({
           ...state,
@@ -196,6 +211,8 @@ function createDashboardStore() {
 
     async fetchStudioOutputs(sessionId) {
       ensureStudioState(sessionId);
+      const requestId = (studioRequestIds[sessionId] || 0) + 1;
+      studioRequestIds[sessionId] = requestId;
       const gate = createStudioGate(sessionId);
       gate.start();
       update((state) => ({
@@ -204,6 +221,7 @@ function createDashboardStore() {
           ...state.studioBySession,
           [sessionId]: {
             ...(state.studioBySession[sessionId] || createAsyncState()),
+            data: null,
             loading: true,
             error: null,
             showLoading: false
@@ -213,6 +231,7 @@ function createDashboardStore() {
 
       try {
         const data = /** @type {StudioOutput[]} */ (await dashboardService.getStudioOutputs(sessionId));
+        if (requestId !== studioRequestIds[sessionId]) return [];
         update((state) => ({
           ...state,
           studioBySession: {
@@ -226,6 +245,7 @@ function createDashboardStore() {
         }));
         return data;
       } catch (error) {
+        if (requestId !== studioRequestIds[sessionId]) throw error;
         update((state) => ({
           ...state,
           studioBySession: {
@@ -238,6 +258,7 @@ function createDashboardStore() {
         }));
         throw error;
       } finally {
+        if (requestId !== studioRequestIds[sessionId]) return;
         gate.stop();
         update((state) => ({
           ...state,

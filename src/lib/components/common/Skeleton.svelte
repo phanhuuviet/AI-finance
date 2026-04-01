@@ -1,13 +1,16 @@
 <script>
   export let className = "";
   export let rounded = "rounded-md";
+  export let active = true;
 </script>
 
 <div
   class={`relative overflow-hidden bg-gray-200 ${rounded} ${className}`}
   aria-hidden="true"
 >
-  <div class="absolute inset-0 skeleton-shimmer"></div>
+  {#if active}
+    <div class="absolute inset-0 skeleton-shimmer"></div>
+  {/if}
 </div>
 
 <style>

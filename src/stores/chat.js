@@ -47,6 +47,10 @@ function createChatStore() {
     }));
   });
 
+  let sessionsRequestId = 0;
+  /** @type {Record<string, number>} */
+  const messageRequestIds = {};
+
   /** @param {string} sessionId */
   function createMessageGate(sessionId) {
     return createLoadingGate(() => {
@@ -68,11 +72,14 @@ function createChatStore() {
     set,
     update,
     fetchSessions: async () => {
+      const requestId = ++sessionsRequestId;
       sessionsGate.start();
       update((state) => ({
         ...state,
+        sessions: [],
         sessionsState: {
           ...state.sessionsState,
+          data: null,
           loading: true,
           showLoading: false,
           error: null
@@ -81,6 +88,7 @@ function createChatStore() {
       try {
         /** @type {ChatSession[]} */
         const data = await chatService.getSessions();
+        if (requestId !== sessionsRequestId) return;
         update(state => ({
           ...state,
           sessions: data,
@@ -91,6 +99,7 @@ function createChatStore() {
           }
         }));
       } catch (error) {
+        if (requestId !== sessionsRequestId) return;
         update((state) => ({
           ...state,
           sessionsState: {
@@ -99,6 +108,7 @@ function createChatStore() {
           }
         }));
       } finally {
+        if (requestId !== sessionsRequestId) return;
         sessionsGate.stop();
         update((state) => ({
           ...state,
@@ -139,10 +149,16 @@ function createChatStore() {
      * @returns {Promise<void>}
      */
     loadMessages: async (sessionId) => {
+      const requestId = (messageRequestIds[sessionId] || 0) + 1;
+      messageRequestIds[sessionId] = requestId;
       const messagesGate = createMessageGate(sessionId);
       messagesGate.start();
       update((state) => ({
         ...state,
+        messages: {
+          ...state.messages,
+          [sessionId]: []
+        },
         messagesState: {
           ...state.messagesState,
           [sessionId]: {
@@ -150,7 +166,7 @@ function createChatStore() {
             loading: true,
             showLoading: false,
             error: null,
-            data: state.messages[sessionId] || null
+            data: null
           }
         }
       }));
@@ -158,6 +174,7 @@ function createChatStore() {
       try {
         /** @type {ChatSessionDetail} */
         const data = await chatService.getSessionDetail(sessionId);
+        if (requestId !== messageRequestIds[sessionId]) return;
         update(state => {
           const newMessages = { ...state.messages };
           newMessages[sessionId] = data.messages || [];
@@ -176,6 +193,7 @@ function createChatStore() {
           };
         });
       } catch (error) {
+        if (requestId !== messageRequestIds[sessionId]) return;
         update((state) => ({
           ...state,
           messagesState: {
@@ -187,6 +205,7 @@ function createChatStore() {
           }
         }));
       } finally {
+        if (requestId !== messageRequestIds[sessionId]) return;
         messagesGate.stop();
         update((state) => ({
           ...state,

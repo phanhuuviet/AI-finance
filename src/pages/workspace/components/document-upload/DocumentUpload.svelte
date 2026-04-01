@@ -166,11 +166,11 @@
       </div>
     {/if}
 
-    {#if documentsState.showLoading}
+    {#if documentsState.loading}
       <div class="overflow-x-auto" aria-live="polite">
         <div class="space-y-3 py-2">
-          <LoadingBlock rows={1} rowHeight="h-8" />
-          <LoadingBlock rows={6} rowHeight="h-12" />
+          <LoadingBlock rows={1} rowHeight="h-8" active={documentsState.showLoading} />
+          <LoadingBlock rows={6} rowHeight="h-12" active={documentsState.showLoading} />
         </div>
       </div>
     {:else if documentsState.error}

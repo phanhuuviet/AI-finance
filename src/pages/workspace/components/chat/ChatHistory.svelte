@@ -43,10 +43,10 @@
   </div>
 
   <div class="flex-1 overflow-y-auto">
-    {#if sessionsState.showLoading}
+    {#if sessionsState.loading}
       <div class="p-4 space-y-4">
-        <LoadingBlock rows={1} rowHeight="h-10" className="mb-2" />
-        <LoadingBlock rows={6} rowHeight="h-14" />
+        <LoadingBlock rows={1} rowHeight="h-10" className="mb-2" active={sessionsState.showLoading} />
+        <LoadingBlock rows={6} rowHeight="h-14" active={sessionsState.showLoading} />
       </div>
     {:else if sessionsState.error}
       <div class="p-4">

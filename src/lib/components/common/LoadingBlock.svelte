@@ -6,6 +6,7 @@
   export let gap = 'gap-3';
   export let className = '';
   export let rounded = 'rounded-md';
+  export let active = true;
 
   $: normalizedRows = Math.max(1, Number(rows) || 1);
 </script>
@@ -15,6 +16,7 @@
     <Skeleton
       className={`${rowHeight} ${index === normalizedRows - 1 ? 'w-2/3' : 'w-full'}`}
       {rounded}
+      {active}
     />
   {/each}
 </div>

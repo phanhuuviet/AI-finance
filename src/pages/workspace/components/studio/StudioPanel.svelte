@@ -279,12 +279,12 @@
             on:retry={refreshOutputs}
           />
         </div>
-      {:else if loadingOutputs}
+      {:else if studioState.loading}
         <div
           class="mt-3 p-4 rounded-xl bg-gray-50 border border-gray-200 text-sm text-gray-600"
           transition:fade={{ duration: 140 }}
         >
-          <LoadingBlock rows={4} rowHeight="h-10" />
+          <LoadingBlock rows={4} rowHeight="h-10" active={studioState.showLoading} />
         </div>
       {:else if outputs.length === 0}
         <div
