@@ -1,5 +1,9 @@
 import { ApiError, toApiError } from '../../utils/error';
 import {
+  resolveMockFallback,
+  USE_MOCK_FALLBACK
+} from '../mock/mock.registry';
+import {
   applyRequestInterceptors,
   type HttpRequestConfig,
   type HttpRequestContext
@@ -53,7 +57,9 @@ export async function http<T>(
   config: HttpRequestConfig = {}
 ): Promise<T> {
   const requestContext = await applyRequestInterceptors({ endpoint, config });
-  const url = `${API_URL}${withQuery(requestContext.endpoint, requestContext.config.query)}`;
+  const resolvedEndpoint = withQuery(requestContext.endpoint, requestContext.config.query);
+  const url = `${API_URL}${resolvedEndpoint}`;
+  const method = (requestContext.config.method || 'GET').toUpperCase();
 
   try {
     const response = await fetch(url, {
@@ -82,6 +88,19 @@ export async function http<T>(
     return intercepted.data;
   } catch (error) {
     const normalized = toApiError(error);
+
+    if (USE_MOCK_FALLBACK) {
+      const mocked = await resolveMockFallback<T>(
+        method,
+        resolvedEndpoint,
+        requestContext.config,
+        normalized
+      );
+      if (mocked !== undefined) {
+        return mocked;
+      }
+    }
+
     const interceptedError = await applyErrorInterceptors(normalized);
     throw interceptedError;
   }

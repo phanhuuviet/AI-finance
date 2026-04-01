@@ -16,27 +16,6 @@
   let success = "";
   /** @type {DocumentItem[]} */
   let documents = [
-    {
-      _id: "1",
-      title: "File 1",
-      source_type: "Video",
-      status: "ready",
-      created_at: "11pm",
-    },
-    {
-      _id: "2",
-      title: "File 1",
-      source_type: "Video",
-      status: "ready",
-      created_at: "11pm",
-    },
-    {
-      _id: "3",
-      title: "File 1",
-      source_type: "Video",
-      status: "ready",
-      created_at: "11pm",
-    },
   ];
 
   /** @type {string | null} */
