@@ -8,6 +8,8 @@
   import { currentSessionSelectedDocIds } from "../../../../stores/attachments.js";
   import LoadingBlock from "$lib/components/common/LoadingBlock.svelte";
   import ErrorFallback from "$lib/components/common/ErrorFallback.svelte";
+  import TextareaField from "$lib/components/common/TextareaField.svelte";
+  import Button from "$lib/components/common/Button.svelte";
   import { t } from "../../../../lib/i18n";
 
   /** @typedef {import('../../../../lib/models').ChatMessage} ChatMessage */
@@ -123,22 +125,25 @@
 
   <div class="p-3 sm:p-4 border-t border-gray-200 bg-white rounded-b-lg">
     <div class="relative flex items-center">
-      <textarea
+      <TextareaField
+        bare
+        unstyled
         bind:value={messageInput}
-        on:keydown={handleKeydown}
+        onkeydown={handleKeydown}
         disabled={!sessionId || !isConnected}
         placeholder={!sessionId
           ? $t("chat.selectChatFirst")
           : $t("chat.typeMessage")}
-        class="w-full pl-3 sm:pl-4 pr-24 py-2.5 min-h-11 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none h-12"
-        rows="1"
-      ></textarea>
+        textareaClass="w-full pl-3 sm:pl-4 pr-24 py-2.5 min-h-11 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none h-12"
+        rows={1}
+      ></TextareaField>
 
       <!-- docs indicator (icon + badge) -->
       <div class="absolute right-12 flex items-center">
-        <button
+        <Button
+          unstyled
           type="button"
-          class="relative p-2 min-h-11 min-w-11 text-gray-500 hover:text-gray-700"
+          className="relative p-2 min-h-11 min-w-11 text-gray-500 hover:text-gray-700"
           aria-label={$t("chat.selectedDocuments")}
           title={$t("chat.selectedDocuments")}
           disabled
@@ -160,13 +165,14 @@
               >{selectedCount}</span
             >
           {/if}
-        </button>
+        </Button>
       </div>
 
-      <button
+      <Button
+        unstyled
         on:click={sendMessage}
         disabled={!messageInput.trim() || !sessionId || !isConnected}
-        class="absolute right-1.5 sm:right-2 p-2 min-h-11 min-w-11 inline-flex items-center justify-center text-blue-600 hover:text-blue-800 disabled:text-gray-400 disabled:cursor-not-allowed"
+        className="absolute right-1.5 sm:right-2 p-2 min-h-11 min-w-11 inline-flex items-center justify-center text-blue-600 hover:text-blue-800 disabled:text-gray-400 disabled:cursor-not-allowed"
         aria-label={$t("chat.sendMessage")}
         title={$t("chat.send")}
       >
@@ -180,7 +186,7 @@
             d="M3.478 2.404a.75.75 0 00-.926.941l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.404z"
           />
         </svg>
-      </button>
+      </Button>
     </div>
   </div>
 </div>

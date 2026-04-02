@@ -103,10 +103,12 @@
           {$t("documents.supportedFormats")}
         </p>
 
-        <input
+        <TextField
+          bare
+          unstyled
           type="file"
           bind:files={file}
-          class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 mb-4"
+          inputClass="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 mb-4"
         />
 
         <Button
@@ -200,13 +202,15 @@
             {#each documents as doc}
               <tr class="bg-white border-b hover:bg-gray-50">
                 <td class="px-3 sm:px-4 py-4">
-                  <input
+                  <TextField
+                    bare
+                    unstyled
                     type="checkbox"
-                    disabled={!sessionId}
                     checked={selectedSet.has(doc._id)}
+                    disabled={!sessionId}
                     on:change={(e) => toggleAttach(doc._id, e)}
                     aria-label={$t("documents.attachToChat", { title: doc.title })}
-                    class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50"
+                    inputClass="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50"
                   />
                 </td>
                 <td

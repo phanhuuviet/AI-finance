@@ -5,6 +5,7 @@
   import Chart from 'chart.js/auto';
   import LoadingBlock from '$lib/components/common/LoadingBlock.svelte';
   import ErrorFallback from '$lib/components/common/ErrorFallback.svelte';
+  import SelectField from '$lib/components/common/SelectField.svelte';
   import { t } from '../../lib/i18n';
 
   /** @typedef {import('../../lib/models').TokenUsageAnalytics} TokenUsageAnalytics */
@@ -12,7 +13,7 @@
 
   /** @type {TokenUsageAnalytics | null} */
   let analyticsData = null;
-  let days = 30;
+  let days = "30";
 
   /** @type {HTMLCanvasElement | null} */
   let canvasEl = null;
@@ -137,7 +138,7 @@
   async function fetchAnalytics() {
     // Ensure we don't keep a stale chart while the canvas may be unmounted.
     destroyChart();
-    await dashboardStore.fetchTokenUsage(days);
+    await dashboardStore.fetchTokenUsage(Number(days));
   }
 
 </script>
@@ -145,15 +146,17 @@
 <div class="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200 w-full max-w-5xl mx-auto">
   <div class="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-6">
     <h2 class="text-lg sm:text-xl font-semibold text-gray-800">{$t('analytics.title')}</h2>
-    <select 
-      bind:value={days} 
+    <SelectField
+      bare
+      unstyled
+      bind:value={days}
       on:change={fetchAnalytics}
-      class="border border-gray-300 rounded-md text-sm px-3 py-2 min-h-11 focus:ring-blue-500 focus:border-blue-500"
+      selectClass="border border-gray-300 rounded-md text-sm px-3 py-2 min-h-11 focus:ring-blue-500 focus:border-blue-500"
     >
-      <option value={7}>{$t('analytics.last7Days')}</option>
-      <option value={30}>{$t('analytics.last30Days')}</option>
-      <option value={90}>{$t('analytics.last90Days')}</option>
-    </select>
+      <option value="7">{$t('analytics.last7Days')}</option>
+      <option value="30">{$t('analytics.last30Days')}</option>
+      <option value="90">{$t('analytics.last90Days')}</option>
+    </SelectField>
   </div>
 
   {#if tokenUsageState.loading}

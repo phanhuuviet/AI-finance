@@ -1,5 +1,6 @@
 <script>
   import { createEventDispatcher } from "svelte";
+  import Button from "$lib/components/common/Button.svelte";
   import { t } from "../../../../lib/i18n";
 
   export let sessionId = null;
@@ -74,13 +75,14 @@
   {:else if layoutMode === "tablet"}
     <div class="min-w-0 flex-1 flex flex-col gap-4">
       <div class="flex items-center gap-2">
-        <button
+        <Button
+          unstyled
           type="button"
-          class="inline-flex min-h-11 items-center justify-center rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+          className="inline-flex min-h-11 items-center justify-center rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
           on:click={toggleTabletList}
         >
           {tabletListOpen ? "Hide chats" : "Show chats"}
-        </button>
+        </Button>
       </div>
 
       <slot name="detail-nav" {layoutMode} />
@@ -91,12 +93,13 @@
     </div>
 
     {#if tabletListOpen}
-      <button
+      <Button
+        unstyled
         type="button"
-        class="absolute inset-0 z-20 bg-black/50"
+        className="absolute inset-0 z-20 bg-black/50"
         aria-label={$t("common.close")}
         on:click={toggleTabletList}
-      ></button>
+      ></Button>
 
       <div class="absolute inset-y-0 left-0 z-30 w-[340px] max-w-[75vw] p-2">
         <div class="h-full">
@@ -112,13 +115,14 @@
     {:else}
       <div class="min-w-0 flex-1 flex flex-col gap-3">
         <div class="flex items-center gap-2">
-          <button
+          <Button
+            unstyled
             type="button"
-            class="inline-flex min-h-11 items-center justify-center rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+            className="inline-flex min-h-11 items-center justify-center rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
             on:click={backToListView}
           >
             Back
-          </button>
+          </Button>
         </div>
 
         <slot name="detail-nav" {layoutMode} />

@@ -7,6 +7,8 @@
   import { navigate } from "../../../../stores/router.js";
   import LoadingBlock from "$lib/components/common/LoadingBlock.svelte";
   import ErrorFallback from "$lib/components/common/ErrorFallback.svelte";
+  import TextField from "$lib/components/common/TextField.svelte";
+  import Button from "$lib/components/common/Button.svelte";
   import { t } from "../../../../lib/i18n";
 
   /** @typedef {import('../../../../lib/models').ChatSession} ChatSession */
@@ -39,11 +41,13 @@
 >
   <div class="p-3 sm:p-4 border-b border-gray-200">
     <h2 class="text-base sm:text-lg font-semibold text-gray-800 mb-3">{$t("chat.history")}</h2>
-    <input
+    <TextField
+      bare
+      unstyled
       type="text"
       bind:value={searchTerm}
       placeholder={$t("chat.searchPlaceholder")}
-      class="w-full px-3 py-2.5 min-h-11 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+      inputClass="w-full px-3 py-2.5 min-h-11 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
     />
   </div>
 
@@ -75,8 +79,9 @@
         <ul class="divide-y divide-gray-100">
           {#each filteredSessions as session}
             <li>
-              <button
-                class={`w-full text-left block p-3 sm:p-4 min-h-11 hover:bg-blue-50 cursor-pointer transition-colors ${selectedSessionId === session._id ? "bg-blue-50 border-l-4 border-blue-600" : "border-l-4 border-transparent"}`}
+              <Button
+                unstyled
+                className={`w-full text-left block p-3 sm:p-4 min-h-11 hover:bg-blue-50 cursor-pointer transition-colors ${selectedSessionId === session._id ? "bg-blue-50 border-l-4 border-blue-600" : "border-l-4 border-transparent"}`}
                 on:click={() => selectSession(session._id)}
                 type="button"
               >
@@ -86,7 +91,7 @@
                 <div class="text-xs text-gray-500 mt-1">
                   {new Date(session.updated_at).toLocaleDateString()}
                 </div>
-              </button>
+              </Button>
             </li>
           {/each}
         </ul>

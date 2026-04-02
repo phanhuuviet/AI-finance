@@ -10,6 +10,8 @@
   export let className = "";
   export let rounded = "rounded-lg";
   export let block = false;
+  // Added to preserve legacy button visuals when replacing raw buttons.
+  export let unstyled = false;
 
   const forwardEvents = forwardEventsBuilder();
 
@@ -34,13 +36,15 @@
     "inline-flex items-center justify-center font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg-app)] disabled:cursor-not-allowed disabled:opacity-60";
 
   $: buttonClass = [
-    baseClasses,
-    rounded,
-    variant === "danger"
-      ? "focus-visible:ring-[var(--color-danger)]"
-      : "focus-visible:ring-[var(--color-accent)]",
-    variantClasses[variant] ?? variantClasses.primary,
-    sizeClasses[size] ?? sizeClasses.md,
+    unstyled ? "" : baseClasses,
+    unstyled ? "" : rounded,
+    unstyled
+      ? ""
+      : variant === "danger"
+        ? "focus-visible:ring-[var(--color-danger)]"
+        : "focus-visible:ring-[var(--color-accent)]",
+    unstyled ? "" : variantClasses[variant] ?? variantClasses.primary,
+    unstyled ? "" : sizeClasses[size] ?? sizeClasses.md,
     block ? "w-full" : "",
     className
   ]

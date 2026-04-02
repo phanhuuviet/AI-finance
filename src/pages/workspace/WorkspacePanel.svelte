@@ -4,6 +4,7 @@
   import ChatInterface from "./components/chat/ChatInterfaceSectioned.svelte";
   import ChatHistory from "./components/chat/ChatHistory.svelte";
   import ResponsiveWorkspaceLayout from "./components/layout/ResponsiveWorkspaceLayout.svelte";
+  import Button from "$lib/components/common/Button.svelte";
 
   import { fade } from "svelte/transition";
   import { t } from "../../lib/i18n";
@@ -46,27 +47,30 @@
         <div
           class="inline-flex max-w-full overflow-x-auto rounded-xl border border-gray-200 bg-gray-50 p-1"
         >
-          <button
-            class={`px-3 py-2 min-h-11 rounded-lg text-sm whitespace-nowrap ${section === "documents" ? "bg-white shadow-sm border border-gray-200 text-gray-900" : "text-gray-600 hover:text-gray-900"}`}
+          <Button
+            unstyled
+            className={`px-3 py-2 min-h-11 rounded-lg text-sm whitespace-nowrap ${section === "documents" ? "bg-white shadow-sm border border-gray-200 text-gray-900" : "text-gray-600 hover:text-gray-900"}`}
             on:click={() => setSection("documents")}
             type="button"
           >
             {$t("workspace.documents")}
-          </button>
-          <button
-            class={`px-3 py-2 min-h-11 rounded-lg text-sm whitespace-nowrap ${section === "chat" ? "bg-white shadow-sm border border-gray-200 text-gray-900" : "text-gray-600 hover:text-gray-900"}`}
+          </Button>
+          <Button
+            unstyled
+            className={`px-3 py-2 min-h-11 rounded-lg text-sm whitespace-nowrap ${section === "chat" ? "bg-white shadow-sm border border-gray-200 text-gray-900" : "text-gray-600 hover:text-gray-900"}`}
             on:click={() => setSection("chat")}
             type="button"
           >
             {$t("workspace.chat")}
-          </button>
-          <button
-            class={`px-3 py-2 min-h-11 rounded-lg text-sm whitespace-nowrap ${section === "studio" ? "bg-white shadow-sm border border-gray-200 text-gray-900" : "text-gray-600 hover:text-gray-900"}`}
+          </Button>
+          <Button
+            unstyled
+            className={`px-3 py-2 min-h-11 rounded-lg text-sm whitespace-nowrap ${section === "studio" ? "bg-white shadow-sm border border-gray-200 text-gray-900" : "text-gray-600 hover:text-gray-900"}`}
             on:click={() => setSection("studio")}
             type="button"
           >
             {$t("workspace.studio")}
-          </button>
+          </Button>
         </div>
 
         <div class="text-xs text-gray-500 break-all">{$t("common.session")}: {sessionId}</div>

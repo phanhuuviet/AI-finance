@@ -11,6 +11,7 @@
   import StudioModalQuiz from "./modal/StudioModalQuiz.svelte";
   import StudioModalData from "./modal/StudioModalData.svelte";
   import StudioToolIcon from "../../../../components/icons/StudioToolIcon.svelte";
+  import Button from "$lib/components/common/Button.svelte";
   import LoadingBlock from "$lib/components/common/LoadingBlock.svelte";
   import ErrorFallback from "$lib/components/common/ErrorFallback.svelte";
   import { t } from "../../../../lib/i18n";
@@ -232,8 +233,9 @@
     <!-- Tools grid -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
       {#each tools as tool}
-        <button
-          class={`group rounded-xl border px-4 py-3 min-h-11 text-left transition border-gray-200 hover:bg-gray-50 hover:border-blue-300 hover:bg-blue-50 hover:cursor-pointer`}
+        <Button
+          unstyled
+          className={`group rounded-xl border px-4 py-3 min-h-11 text-left transition border-gray-200 hover:bg-gray-50 hover:border-blue-300 hover:bg-blue-50 hover:cursor-pointer`}
           on:click={() => openToolModal(tool.key)}
           type="button"
         >
@@ -247,7 +249,7 @@
               <div class="mt-1 text-xs text-gray-500">{$t(tool.subtitleKey)}</div>
             </div>
           </div>
-        </button>
+        </Button>
       {/each}
     </div>
 
@@ -257,14 +259,15 @@
         <div class="text-sm font-semibold text-gray-900">
           {$t("studio.createdInSession")}
         </div>
-        <button
-          class="text-sm text-blue-600 min-h-11 px-2 rounded-md hover:underline disabled:opacity-50"
+        <Button
+          unstyled
+          className="text-sm text-blue-600 min-h-11 px-2 rounded-md hover:underline disabled:opacity-50"
           on:click={refreshOutputs}
           disabled={!sessionId || loadingOutputs}
           type="button"
         >
           {$t("common.refresh")}
-        </button>
+        </Button>
       </div>
 
       {#if !sessionId}
@@ -325,18 +328,20 @@
 
               <div class="shrink-0 flex items-center gap-2 self-end sm:self-auto" data-studio-menu-root="true">
                 {#if item.result_url}
-                  <button
-                    class="rounded-lg border border-gray-200 bg-white px-3 py-2 min-h-11 text-sm hover:bg-gray-50"
+                  <Button
+                    unstyled
+                    className="rounded-lg border border-gray-200 bg-white px-3 py-2 min-h-11 text-sm hover:bg-gray-50"
                     on:click={() => window.open(String(item.result_url), "_blank", "noopener,noreferrer")}
                     type="button"
                   >
                     {$t("common.open")}
-                  </button>
+                  </Button>
                 {/if}
 
                 <div class="relative">
-                  <button
-                    class="rounded-lg border border-gray-200 bg-white px-2.5 py-2 min-h-11 text-sm hover:bg-gray-50"
+                  <Button
+                    unstyled
+                    className="rounded-lg border border-gray-200 bg-white px-2.5 py-2 min-h-11 text-sm hover:bg-gray-50"
                     aria-haspopup="menu"
                     aria-expanded={openMenuForId === item.id}
                     on:click={() => (openMenuForId = openMenuForId === item.id ? null : item.id)}
@@ -344,7 +349,7 @@
                     title={$t("studio.menu")}
                   >
                     ⋮
-                  </button>
+                  </Button>
 
                   {#if openMenuForId === item.id}
                     <div
@@ -352,8 +357,9 @@
                       role="menu"
                       transition:scale={{ start: 0.96, duration: 140, easing: cubicOut }}
                     >
-                      <button
-                        class="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+                      <Button
+                        unstyled
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
                         on:click={() => {
                           openMenuForId = null;
                           renameOutput(item);
@@ -362,9 +368,10 @@
                         role="menuitem"
                       >
                         {$t("common.rename")}
-                      </button>
-                      <button
-                        class="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+                      </Button>
+                      <Button
+                        unstyled
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
                         on:click={() => {
                           openMenuForId = null;
                           downloadOutput(item);
@@ -373,9 +380,10 @@
                         role="menuitem"
                       >
                         {$t("common.download")}
-                      </button>
-                      <button
-                        class="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+                      </Button>
+                      <Button
+                        unstyled
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
                         on:click={() => {
                           openMenuForId = null;
                           shareOutput(item);
@@ -384,9 +392,10 @@
                         role="menuitem"
                       >
                         {$t("common.share")}
-                      </button>
-                      <button
-                        class="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+                      </Button>
+                      <Button
+                        unstyled
+                        className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50"
                         on:click={() => {
                           openMenuForId = null;
                           deleteOutput(item);
@@ -395,7 +404,7 @@
                         role="menuitem"
                       >
                         {$t("common.delete")}
-                      </button>
+                      </Button>
                     </div>
                   {/if}
                 </div>

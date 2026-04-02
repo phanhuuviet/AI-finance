@@ -5,6 +5,9 @@
   export let label = "";
   export let type = "text";
   export let value = "";
+  export let checked = false;
+  export let group = undefined;
+  export let files = undefined;
   export let placeholder = "";
   export let required = false;
   export let disabled = false;
@@ -13,42 +16,186 @@
   export let labelClass = "";
   export let inputClass = "";
   export let hideLabel = false;
+  // Added to allow replacing inline native inputs without introducing wrapper layout changes.
+  export let bare = false;
+  // Added to preserve original classes when replacing already-styled native inputs.
+  export let unstyled = false;
 
   const dispatch = createEventDispatcher();
 
   function handleInput(event) {
+    const target = /** @type {HTMLInputElement} */ (event.currentTarget);
+    if (type === "file") {
+      files = target.files;
+    } else if (type === "checkbox" && group === undefined) {
+      checked = target.checked;
+    } else {
+      value = target.value;
+    }
     dispatch("input", event);
   }
 
   function handleChange(event) {
     dispatch("change", event);
   }
+
+  $: resolvedInputClass = [
+    unstyled
+      ? ""
+      : "w-full px-3 py-2.5 min-h-11 rounded-md border border-[var(--color-border-soft)] bg-[var(--color-surface-muted)] text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)]",
+    inputClass
+  ]
+    .filter(Boolean)
+    .join(" ");
 </script>
 
-<div class={`space-y-1 ${containerClass}`.trim()}>
-  {#if label && !hideLabel}
-    <label
-      class={`block text-sm font-medium text-[var(--color-text-secondary)] ${labelClass}`.trim()}
-      for={id || undefined}
-    >
-      {label}
-    </label>
+{#if bare}
+  {#if type === "radio"}
+    <input
+      {...$$restProps}
+      id={id || undefined}
+      type="radio"
+      bind:group
+      value={value}
+      required={required}
+      disabled={disabled}
+      class={resolvedInputClass}
+      on:input={handleInput}
+      on:change={handleChange}
+    />
+  {:else if type === "checkbox"}
+    {#if group !== undefined}
+      <input
+        {...$$restProps}
+        id={id || undefined}
+        type="checkbox"
+        bind:group
+        value={value}
+        required={required}
+        disabled={disabled}
+        class={resolvedInputClass}
+        on:input={handleInput}
+        on:change={handleChange}
+      />
+    {:else}
+      <input
+        {...$$restProps}
+        id={id || undefined}
+        type="checkbox"
+        bind:checked
+        required={required}
+        disabled={disabled}
+        class={resolvedInputClass}
+        on:input={handleInput}
+        on:change={handleChange}
+      />
+    {/if}
+  {:else if type === "file"}
+    <input
+      {...$$restProps}
+      id={id || undefined}
+      type="file"
+      bind:files
+      required={required}
+      disabled={disabled}
+      class={resolvedInputClass}
+      on:input={handleInput}
+      on:change={handleChange}
+    />
+  {:else}
+    <input
+      {...$$restProps}
+      id={id || undefined}
+      type={type}
+      value={value}
+      placeholder={placeholder}
+      required={required}
+      disabled={disabled}
+      class={resolvedInputClass}
+      on:input={handleInput}
+      on:change={handleChange}
+    />
   {/if}
+{:else}
+  <div class={`space-y-1 ${containerClass}`.trim()}>
+    {#if label && !hideLabel}
+      <label
+        class={`block text-sm font-medium text-[var(--color-text-secondary)] ${labelClass}`.trim()}
+        for={id || undefined}
+      >
+        {label}
+      </label>
+    {/if}
 
-  <input
-    {...$$restProps}
-    id={id || undefined}
-    type={type}
-    bind:value
-    placeholder={placeholder}
-    required={required}
-    disabled={disabled}
-    class={`w-full px-3 py-2.5 min-h-11 rounded-md border border-[var(--color-border-soft)] bg-[var(--color-surface-muted)] text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)] ${inputClass}`.trim()}
-    on:input={handleInput}
-    on:change={handleChange}
-  />
+    {#if type === "radio"}
+      <input
+        {...$$restProps}
+        id={id || undefined}
+        type="radio"
+        bind:group
+        value={value}
+        required={required}
+        disabled={disabled}
+        class={resolvedInputClass}
+        on:input={handleInput}
+        on:change={handleChange}
+      />
+    {:else if type === "checkbox"}
+      {#if group !== undefined}
+        <input
+          {...$$restProps}
+          id={id || undefined}
+          type="checkbox"
+          bind:group
+          value={value}
+          required={required}
+          disabled={disabled}
+          class={resolvedInputClass}
+          on:input={handleInput}
+          on:change={handleChange}
+        />
+      {:else}
+        <input
+          {...$$restProps}
+          id={id || undefined}
+          type="checkbox"
+          bind:checked
+          required={required}
+          disabled={disabled}
+          class={resolvedInputClass}
+          on:input={handleInput}
+          on:change={handleChange}
+        />
+      {/if}
+    {:else if type === "file"}
+      <input
+        {...$$restProps}
+        id={id || undefined}
+        type="file"
+        bind:files
+        required={required}
+        disabled={disabled}
+        class={resolvedInputClass}
+        on:input={handleInput}
+        on:change={handleChange}
+      />
+    {:else}
+      <input
+        {...$$restProps}
+        id={id || undefined}
+        type={type}
+        value={value}
+        placeholder={placeholder}
+        required={required}
+        disabled={disabled}
+        class={resolvedInputClass}
+        on:input={handleInput}
+        on:change={handleChange}
+      />
+    {/if}
 
-  {#if helperText}
-    <p class="text-xs text-[var(--color-text-muted)]">{helperText}</p>
-  {/if}
-</div>
+    {#if helperText}
+      <p class="text-xs text-[var(--color-text-muted)]">{helperText}</p>
+    {/if}
+  </div>
+{/if}
