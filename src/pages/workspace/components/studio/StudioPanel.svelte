@@ -11,8 +11,8 @@
   import StudioModalQuiz from "./modal/StudioModalQuiz.svelte";
   import StudioModalData from "./modal/StudioModalData.svelte";
   import StudioToolIcon from "../../../../components/icons/StudioToolIcon.svelte";
-  import LoadingBlock from "../../../../lib/components/common/LoadingBlock.svelte";
-  import ErrorFallback from "../../../../lib/components/common/ErrorFallback.svelte";
+  import LoadingBlock from "$lib/components/common/LoadingBlock.svelte";
+  import ErrorFallback from "$lib/components/common/ErrorFallback.svelte";
   import { t } from "../../../../lib/i18n";
 
   /** @typedef {import('../../../../lib/models').StudioOutput} StudioOutput */

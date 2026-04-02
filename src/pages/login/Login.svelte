@@ -1,8 +1,8 @@
 <script>
   import { login as loginStore, register as registerStore } from '../../stores/auth.js';
   import { navigate } from '../../stores/router.js';
-  import Button from '../../components/common/Button.svelte';
-  import TextField from '../../components/common/form/TextField.svelte';
+  import Button from '$lib/components/common/Button.svelte';
+  import TextField from '$lib/components/common/TextField.svelte';
   import { t } from '../../lib/i18n';
   
   let isLogin = true;

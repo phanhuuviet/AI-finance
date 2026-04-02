@@ -2,8 +2,8 @@
   import { createEventDispatcher } from "svelte";
   import { cubicOut } from "svelte/easing";
   import { fade, scale } from "svelte/transition";
-  import { portal } from "../../utils/portal.js";
-  import { t } from "../../lib/i18n";
+  import { portal } from "../../../utils/portal.js";
+  import { t } from "../../i18n";
 
   /** Control modal visibility */
   export let isOpen = false;

@@ -1,9 +1,9 @@
 <script>
   import { createEventDispatcher } from "svelte";
-  import ModalDialog from "../../../../../components/common/ModalDialog.svelte";
-  import Button from "../../../../../components/common/Button.svelte";
-  import SelectField from "../../../../../components/common/form/SelectField.svelte";
-  import TextareaField from "../../../../../components/common/form/TextareaField.svelte";
+  import ModalDialog from "$lib/components/common/ModalDialog.svelte";
+  import Button from "$lib/components/common/Button.svelte";
+  import SelectField from "$lib/components/common/SelectField.svelte";
+  import TextareaField from "$lib/components/common/TextareaField.svelte";
   import { t } from "../../../../../lib/i18n";
 
   const dispatch = createEventDispatcher();

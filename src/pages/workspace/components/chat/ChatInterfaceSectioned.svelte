@@ -6,8 +6,8 @@
 
   import { sendWebSocketMessage } from "../../../../lib/services/websocket.service";
   import { currentSessionSelectedDocIds } from "../../../../stores/attachments.js";
-  import LoadingBlock from "../../../../lib/components/common/LoadingBlock.svelte";
-  import ErrorFallback from "../../../../lib/components/common/ErrorFallback.svelte";
+  import LoadingBlock from "$lib/components/common/LoadingBlock.svelte";
+  import ErrorFallback from "$lib/components/common/ErrorFallback.svelte";
   import { t } from "../../../../lib/i18n";
 
   /** @typedef {import('../../../../lib/models').ChatMessage} ChatMessage */

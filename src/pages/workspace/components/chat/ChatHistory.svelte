@@ -5,8 +5,8 @@
   import { chatStore } from "../../../../stores/chat.js";
   import { workspaceStore } from "../../../../stores/workspace.js";
   import { navigate } from "../../../../stores/router.js";
-  import LoadingBlock from "../../../../lib/components/common/LoadingBlock.svelte";
-  import ErrorFallback from "../../../../lib/components/common/ErrorFallback.svelte";
+  import LoadingBlock from "$lib/components/common/LoadingBlock.svelte";
+  import ErrorFallback from "$lib/components/common/ErrorFallback.svelte";
   import { t } from "../../../../lib/i18n";
 
   /** @typedef {import('../../../../lib/models').ChatSession} ChatSession */

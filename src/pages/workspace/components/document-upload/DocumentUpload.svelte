@@ -4,10 +4,10 @@
   import { dashboardStore } from "../../../../stores/dashboard.js";
   import { workspaceStore } from "../../../../stores/workspace.js";
   import { attachmentsStore } from "../../../../stores/attachments.js";
-  import Button from "../../../../components/common/Button.svelte";
-  import TextField from "../../../../components/common/form/TextField.svelte";
-  import LoadingBlock from "../../../../lib/components/common/LoadingBlock.svelte";
-  import ErrorFallback from "../../../../lib/components/common/ErrorFallback.svelte";
+  import Button from "$lib/components/common/Button.svelte";
+  import TextField from "$lib/components/common/TextField.svelte";
+  import LoadingBlock from "$lib/components/common/LoadingBlock.svelte";
+  import ErrorFallback from "$lib/components/common/ErrorFallback.svelte";
   import { t } from "../../../../lib/i18n";
 
   /** @typedef {import('../../../../lib/models').DocumentItem} DocumentItem */

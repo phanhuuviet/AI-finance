@@ -1,11 +1,11 @@
 <script>
   import { fade } from 'svelte/transition';
   import { user, authState, updateProfile, fetchUser } from '../../stores/auth.js';
-  import Button from '../../components/common/Button.svelte';
-  import TextField from '../../components/common/form/TextField.svelte';
-  import SelectField from '../../components/common/form/SelectField.svelte';
-  import LoadingBlock from '../../lib/components/common/LoadingBlock.svelte';
-  import ErrorFallback from '../../lib/components/common/ErrorFallback.svelte';
+  import Button from '$lib/components/common/Button.svelte';
+  import TextField from '$lib/components/common/TextField.svelte';
+  import SelectField from '$lib/components/common/SelectField.svelte';
+  import LoadingBlock from '$lib/components/common/LoadingBlock.svelte';
+  import ErrorFallback from '$lib/components/common/ErrorFallback.svelte';
   import { t } from '../../lib/i18n';
 
   /** @typedef {import('../../lib/models').User} User */

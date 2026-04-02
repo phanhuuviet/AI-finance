@@ -1,6 +1,6 @@
 <script>
-  import { forwardEventsBuilder } from "../../utils/forwardEvents.js";
-  import { t } from "../../lib/i18n";
+  import { forwardEventsBuilder } from "../../../utils/forwardEvents.js";
+  import { t } from "../../i18n";
 
   export let type = "button";
   export let variant = "primary";

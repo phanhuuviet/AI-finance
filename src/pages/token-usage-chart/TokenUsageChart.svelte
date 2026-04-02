@@ -3,8 +3,8 @@
   import { fade } from 'svelte/transition';
   import { dashboardStore } from '../../stores/dashboard.js';
   import Chart from 'chart.js/auto';
-  import LoadingBlock from '../../lib/components/common/LoadingBlock.svelte';
-  import ErrorFallback from '../../lib/components/common/ErrorFallback.svelte';
+  import LoadingBlock from '$lib/components/common/LoadingBlock.svelte';
+  import ErrorFallback from '$lib/components/common/ErrorFallback.svelte';
   import { t } from '../../lib/i18n';
 
   /** @typedef {import('../../lib/models').TokenUsageAnalytics} TokenUsageAnalytics */
