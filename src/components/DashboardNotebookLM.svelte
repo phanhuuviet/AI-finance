@@ -245,8 +245,10 @@
     </header>
 
     {#if $route.page === "workspace"}
-      <div class="flex-1 overflow-auto px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-6">
-        <WorkspacePanel />
+      <div class="flex-1 min-h-0 overflow-hidden px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-6">
+        <div class="h-full min-h-0 overflow-hidden">
+          <WorkspacePanel />
+        </div>
       </div>
 
       {#if isNewChatModalOpen}

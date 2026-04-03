@@ -61,14 +61,14 @@
 
 <svelte:window bind:innerWidth={viewportWidth} />
 
-<div class="relative flex h-full min-h-0 gap-4">
+<div class="relative flex h-full min-h-0 overflow-hidden gap-4">
   {#if layoutMode === "desktop"}
-    <div class="h-full w-[320px] shrink-0 xl:w-[360px]">
+    <div class="h-full min-h-0 w-[320px] shrink-0 overflow-hidden xl:w-[360px]">
       <slot name="list" {openDetailView} {layoutMode} />
     </div>
-    <div class="min-w-0 flex-1 flex flex-col gap-4">
+    <div class="h-full min-h-0 min-w-0 flex-1 flex flex-col gap-4 overflow-hidden">
       <slot name="detail-nav" {layoutMode} />
-      <div class="min-h-0 flex-1">
+      <div class="min-h-0 flex-1 overflow-y-auto">
         <slot name="detail" {layoutMode} />
       </div>
     </div>
