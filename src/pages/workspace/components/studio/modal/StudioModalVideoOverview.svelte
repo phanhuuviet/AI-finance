@@ -5,6 +5,7 @@
   import SelectField from "$lib/components/common/SelectField.svelte";
   import TextareaField from "$lib/components/common/TextareaField.svelte";
   import TextField from "$lib/components/common/TextField.svelte";
+  import RangeSliderField from "$lib/components/common/RangeSliderField.svelte";
   import { t } from "../../../../../lib/i18n";
 
   const dispatch = createEventDispatcher();
@@ -33,10 +34,19 @@
   /** @type {string} */
   export let videoFocus = "";
 
+  let videoDuration = 120;
+  let formattedVideoDuration = "2m 0s";
+
   $: languageOptions = [
     { value: "vi", label: $t("studio.languageVietnamese") },
     { value: "en", label: $t("studio.languageEnglish") }
   ];
+
+  // Keep the live label readable while dragging the native range input.
+  $: formattedVideoDuration =
+    videoDuration < 60
+      ? `${videoDuration}s`
+      : `${Math.floor(videoDuration / 60)}m ${videoDuration % 60}s`;
 
   function close() {
     dispatch("close");
@@ -148,6 +158,18 @@
     bind:value={videoFocus}
     rows={6}
     textareaClass="min-h-[140px]"
+  />
+
+  <RangeSliderField
+    id="video_duration"
+    label="Video Duration"
+    bind:value={videoDuration}
+    min={40}
+    max={480}
+    step={10}
+    displayValue={formattedVideoDuration}
+    minLabel="40s"
+    maxLabel="8m"
   />
 
   <svelte:fragment slot="footer">

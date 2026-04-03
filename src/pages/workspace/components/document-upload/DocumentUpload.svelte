@@ -6,6 +6,7 @@
   import { attachmentsStore } from "../../../../stores/attachments.js";
   import Button from "$lib/components/common/Button.svelte";
   import TextField from "$lib/components/common/TextField.svelte";
+  import TextareaField from "$lib/components/common/TextareaField.svelte";
   import LoadingBlock from "$lib/components/common/LoadingBlock.svelte";
   import ErrorFallback from "$lib/components/common/ErrorFallback.svelte";
   import { t } from "../../../../lib/i18n";
@@ -15,6 +16,12 @@
   /** @type {FileList | null} */
   let file = null;
   let url = "";
+  let activeInputMethod = "upload";
+  let pastedText = `Artificial intelligence (AI) is transforming industries worldwide.
+From healthcare diagnostics to financial forecasting, AI systems are
+enabling faster, more accurate decision-making. This document explores
+key trends, challenges, and opportunities in enterprise AI adoption
+through 2025 and beyond.`;
   let success = "";
 
   /** @type {string | null} */
@@ -66,6 +73,14 @@
     }
   }
 
+  function handleAddText() {
+    if (!pastedText.trim()) return;
+
+    // Mock action only: this lets QA verify the pasted content payload quickly.
+    console.log("Pasted text content:", pastedText);
+    success = "Text added successfully.";
+  }
+
   /**
    * @param {string} docId
    * @param {Event} e
@@ -96,7 +111,46 @@
       </div>
     {/if}
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+    <div class="mb-4 flex flex-wrap gap-2">
+      <Button
+        unstyled
+        type="button"
+        className={`rounded-md border px-3 py-2 text-sm font-medium ${
+          activeInputMethod === "upload"
+            ? "border-blue-300 bg-blue-50 text-blue-700"
+            : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+        }`}
+        on:click={() => (activeInputMethod = "upload")}
+      >
+        {$t("documents.uploadFile")}
+      </Button>
+      <Button
+        unstyled
+        type="button"
+        className={`rounded-md border px-3 py-2 text-sm font-medium ${
+          activeInputMethod === "crawl"
+            ? "border-blue-300 bg-blue-50 text-blue-700"
+            : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+        }`}
+        on:click={() => (activeInputMethod = "crawl")}
+      >
+        {$t("documents.crawlWebsite")}
+      </Button>
+      <Button
+        unstyled
+        type="button"
+        className={`rounded-md border px-3 py-2 text-sm font-medium ${
+          activeInputMethod === "paste"
+            ? "border-blue-300 bg-blue-50 text-blue-700"
+            : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+        }`}
+        on:click={() => (activeInputMethod = "paste")}
+      >
+        Paste Text
+      </Button>
+    </div>
+
+    {#if activeInputMethod === "upload"}
       <div class="border border-gray-200 rounded-lg p-3 sm:p-4">
         <h3 class="font-medium mb-3 text-gray-700">{$t("documents.uploadFile")}</h3>
         <p class="text-xs text-gray-500 mb-4">
@@ -120,7 +174,7 @@
           {documentsState.loading && file ? $t("documents.uploading") : $t("documents.uploadFile")}
         </Button>
       </div>
-
+    {:else if activeInputMethod === "crawl"}
       <div class="border border-gray-200 rounded-lg p-3 sm:p-4">
         <h3 class="font-medium mb-3 text-gray-700">{$t("documents.crawlWebsite")}</h3>
         <p class="text-xs text-gray-500 mb-4">
@@ -145,7 +199,33 @@
           {documentsState.loading && url ? $t("documents.crawling") : $t("documents.extractContent")}
         </Button>
       </div>
-    </div>
+    {:else}
+      <div class="border border-gray-200 rounded-lg p-3 sm:p-4">
+        <h3 class="font-medium mb-3 text-gray-700">Paste Text</h3>
+        <p class="text-xs text-gray-500 mb-4">
+          Paste or type raw content directly into the workspace.
+        </p>
+
+        <TextareaField
+          id="pasted_text_document"
+          label=" "
+          hideLabel={true}
+          bind:value={pastedText}
+          rows={8}
+          placeholder="Paste or type your content here..."
+          textareaClass="mb-4 min-h-[160px] resize-y"
+        />
+
+        <Button
+          block
+          on:click={handleAddText}
+          disabled={!pastedText.trim()}
+          rounded="rounded-md"
+        >
+          Add Text
+        </Button>
+      </div>
+    {/if}
   </div>
 
   <div class="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200">
