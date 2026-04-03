@@ -110,7 +110,7 @@
   }
 </script>
 
-<div class="relative flex h-[100dvh] bg-gray-50 overflow-hidden">
+<div class="relative flex h-[100dvh] bg-[var(--color-bg-app)] overflow-hidden">
   {#if mobileNavOpen}
     <Button
       unstyled
@@ -122,10 +122,10 @@
   {/if}
 
   <aside
-    class={`fixed inset-y-0 left-0 z-40 w-72 max-w-[85vw] bg-white border-r border-gray-200 flex flex-col transform transition-transform duration-200 lg:static lg:inset-auto lg:w-64 lg:max-w-none lg:translate-x-0 ${mobileNavOpen ? "translate-x-0" : "-translate-x-full"}`}
+    class={`fixed inset-y-0 left-0 z-40 w-72 max-w-[85vw] bg-[var(--color-bg-sidebar)] border-r border-[var(--color-border-default)] flex flex-col transform transition-transform duration-200 lg:static lg:inset-auto lg:w-64 lg:max-w-none lg:translate-x-0 ${mobileNavOpen ? "translate-x-0" : "-translate-x-full"}`}
   >
-    <div class="p-4 border-b border-gray-200">
-      <h1 class="text-xl font-bold text-blue-600 flex items-center gap-2">
+    <div class="p-4 border-b border-[var(--color-border-default)]">
+      <h1 class="text-xl font-bold text-[var(--color-accent-text)] flex items-center gap-2">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
@@ -145,45 +145,45 @@
     <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
       <Button
         unstyled
-        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${activeTab === "home" ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-gray-100"}`}
+        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors border-l-[3px] ${activeTab === "home" ? "bg-[var(--color-bg-active)] text-[var(--color-accent-text)] font-medium border-l-[var(--color-accent)]" : "text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)] hover:text-[var(--color-text-primary)] border-l-transparent"}`}
         on:click={() => goToTab("home")}
       >
         {$t("header.workspace")}
       </Button>
       <Button
         unstyled
-        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${activeTab === "analytics" ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-gray-100"}`}
+        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors border-l-[3px] ${activeTab === "analytics" ? "bg-[var(--color-bg-active)] text-[var(--color-accent-text)] font-medium border-l-[var(--color-accent)]" : "text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)] hover:text-[var(--color-text-primary)] border-l-transparent"}`}
         on:click={() => goToTab("analytics")}
       >
         {$t("header.analytics")}
       </Button>
       <Button
         unstyled
-        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${activeTab === "settings" ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-gray-100"}`}
+        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors border-l-[3px] ${activeTab === "settings" ? "bg-[var(--color-bg-active)] text-[var(--color-accent-text)] font-medium border-l-[var(--color-accent)]" : "text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)] hover:text-[var(--color-text-primary)] border-l-transparent"}`}
         on:click={() => goToTab("settings")}
       >
         {$t("header.settings")}
       </Button>
     </nav>
 
-    <div class="p-4 border-t border-gray-200">
+    <div class="p-4 border-t border-[var(--color-border-subtle)]">
       <div class="flex items-center gap-3 mb-4">
         <div
-          class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold"
+          class="w-10 h-10 rounded-full bg-[var(--color-accent-light)] flex items-center justify-center text-[var(--color-accent-text)] font-bold"
         >
           {($user?.username?.[0] || "?").toUpperCase()}
         </div>
         <div class="overflow-hidden">
-          <p class="text-sm font-medium text-gray-900 truncate">
+          <p class="text-sm font-medium text-[var(--color-text-primary)] truncate">
             {$user?.username || $t("header.guest")}
           </p>
-          <p class="text-xs text-gray-500 truncate">{$user?.email}</p>
+          <p class="text-xs text-[var(--color-text-muted)] truncate">{$user?.email}</p>
         </div>
       </div>
       <Button
         unstyled
         on:click={logout}
-        className="w-full px-4 py-2 text-sm text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
+        className="w-full px-4 py-2 text-sm text-[var(--color-danger)] border border-[var(--color-danger)] rounded-lg bg-transparent hover:bg-[var(--color-danger-light)] transition-colors"
       >
         {$t("header.signOut")}
       </Button>
@@ -192,13 +192,13 @@
 
   <main class="min-w-0 flex-1 flex flex-col h-full overflow-hidden relative">
     <header
-      class="bg-white border-b border-gray-200 px-3 sm:px-4 lg:px-6 py-3 sm:py-4 flex items-center justify-between gap-3 z-10"
+      class="bg-[var(--color-bg-surface)] border-b border-[var(--color-border-default)] px-3 sm:px-4 lg:px-6 py-3 sm:py-4 flex items-center justify-between gap-3 z-10"
     >
       <div class="flex min-w-0 items-center gap-2 sm:gap-3">
         <Button
           unstyled
           type="button"
-          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-100 lg:hidden"
+          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-[var(--color-border-default)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)] lg:hidden"
           aria-label={$t("header.workspace")}
           on:click={() => (mobileNavOpen = true)}
         >
@@ -206,15 +206,15 @@
             <path fill-rule="evenodd" d="M3.75 5.25A.75.75 0 014.5 4.5h15a.75.75 0 010 1.5h-15a.75.75 0 01-.75-.75zm0 6A.75.75 0 014.5 10.5h15a.75.75 0 010 1.5h-15a.75.75 0 01-.75-.75zm0 6a.75.75 0 01.75-.75h15a.75.75 0 010 1.5h-15a.75.75 0 01-.75-.75z" clip-rule="evenodd" />
           </svg>
         </Button>
-        <h2 class="truncate text-base sm:text-lg lg:text-xl font-semibold text-gray-900">{pageTitle($route.page)}</h2>
+        <h2 class="truncate text-base sm:text-lg lg:text-xl font-semibold text-[var(--color-text-primary)]">{pageTitle($route.page)}</h2>
       </div>
 
       <div class="flex items-center gap-2 shrink-0">
-        <div class="inline-flex items-center rounded-lg border border-gray-200 p-1" role="group" aria-label={$t("header.language")}>
+        <div class="inline-flex items-center rounded-lg border border-[var(--color-border-default)] p-1" role="group" aria-label={$t("header.language")}>
           <Button
             unstyled
             type="button"
-            className={`px-2 sm:px-3 py-2 min-h-11 text-xs sm:text-sm rounded-md ${$language === "vi" ? "bg-blue-100 text-blue-700" : "text-gray-600 hover:bg-gray-100"}`}
+            className={`px-2 sm:px-3 py-2 min-h-11 text-xs sm:text-sm rounded-md ${$language === "vi" ? "bg-[var(--color-accent-light)] text-[var(--color-accent-text)] font-medium" : "bg-[var(--color-bg-hover)] text-[var(--color-text-secondary)]"}`}
             on:click={() => setLanguage("vi")}
             aria-pressed={$language === "vi"}
           >
@@ -223,7 +223,7 @@
           <Button
             unstyled
             type="button"
-            className={`px-2 sm:px-3 py-2 min-h-11 text-xs sm:text-sm rounded-md ${$language === "en" ? "bg-blue-100 text-blue-700" : "text-gray-600 hover:bg-gray-100"}`}
+            className={`px-2 sm:px-3 py-2 min-h-11 text-xs sm:text-sm rounded-md ${$language === "en" ? "bg-[var(--color-accent-light)] text-[var(--color-accent-text)] font-medium" : "bg-[var(--color-bg-hover)] text-[var(--color-text-secondary)]"}`}
             on:click={() => setLanguage("en")}
             aria-pressed={$language === "en"}
           >
@@ -235,7 +235,7 @@
           <Button
             unstyled
             on:click={() => (isNewChatModalOpen = true)}
-            className="px-3 sm:px-4 py-2 min-h-11 bg-blue-600 text-white text-xs sm:text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+            className="px-3 sm:px-4 py-2 min-h-11 bg-[var(--color-accent)] text-white text-xs sm:text-sm font-medium rounded-lg hover:bg-[var(--color-accent-hover)] transition-colors"
           >
             <span class="hidden sm:inline">{$t("chat.newChatButton")}</span>
             <span class="sm:hidden">+</span>
@@ -256,10 +256,10 @@
           class="fixed inset-0 bg-black/50 flex items-center justify-center p-3 sm:p-4 z-50"
         >
           <div
-            class="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90dvh] overflow-hidden"
+            class="bg-[var(--color-bg-elevated)] rounded-xl w-full max-w-md max-h-[90dvh] overflow-hidden border border-[var(--color-border-default)]"
           >
-            <div class="p-6 border-b border-gray-100">
-              <h3 class="text-xl font-semibold text-gray-900">
+            <div class="p-6 border-b border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)]">
+              <h3 class="text-xl font-semibold text-[var(--color-text-primary)]">
                 {$t("chat.startNew")}
               </h3>
             </div>
@@ -268,7 +268,7 @@
               <div>
                 <label
                   for="title"
-                  class="block text-sm font-medium text-gray-700 mb-1"
+                  class="block text-sm font-medium text-[var(--color-text-secondary)] mb-1"
                   >{$t("chat.chatTitle")}</label
                 >
                 <TextField
@@ -278,25 +278,25 @@
                   type="text"
                   bind:value={newChatTitle}
                   placeholder={$t("chat.chatTitlePlaceholder")}
-                  inputClass="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  inputClass="w-full px-4 py-2 border border-[var(--color-border-default)] rounded-lg bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-border-accent)] focus:[box-shadow:0_0_0_3px_rgba(91,79,207,0.12)]"
                 />
               </div>
 
               <div>
-                <div class="block text-sm font-medium text-gray-700 mb-1">
+                <div class="block text-sm font-medium text-[var(--color-text-secondary)] mb-1">
                   {$t("chat.linkDocumentsOptional")}
                 </div>
                 {#if availableDocs.length === 0}
-                  <p class="text-sm text-gray-500 italic">
+                  <p class="text-sm text-[var(--color-text-muted)] italic">
                     {$t("chat.noDocumentsAvailable")}
                   </p>
                 {:else}
                   <div
-                    class="max-h-40 overflow-y-auto border border-gray-200 rounded-md p-2"
+                    class="max-h-40 overflow-y-auto border border-[var(--color-border-default)] rounded-md p-2 bg-[var(--color-bg-surface)]"
                   >
                     {#each availableDocs as doc}
                       <label
-                        class="flex items-center space-x-2 p-1 hover:bg-gray-50 rounded"
+                        class="flex items-center space-x-2 p-1 hover:bg-[var(--color-bg-hover)] rounded"
                       >
                         <TextField
                           bare
@@ -304,13 +304,13 @@
                           type="checkbox"
                           bind:group={selectedDocs}
                           value={doc._id}
-                          inputClass="rounded text-blue-600"
+                          inputClass="rounded border-[var(--color-border-default)] text-[var(--color-accent)]"
                         />
                         <span class="text-sm truncate" title={doc.title}
                           >{doc.title}</span
                         >
                         <span
-                          class="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 ml-auto"
+                          class="text-xs px-2 py-0.5 rounded-full bg-[var(--color-status-ready-bg)] text-[var(--color-status-ready)] border border-[var(--color-status-ready-border)] ml-auto"
                           >{doc.status}</span
                         >
                       </label>
@@ -321,12 +321,12 @@
             </div>
 
             <div
-              class="p-4 bg-gray-50 border-t border-gray-100 flex flex-col-reverse sm:flex-row sm:justify-end gap-3"
+              class="p-4 bg-[var(--color-bg-app)] border-t border-[var(--color-border-subtle)] flex flex-col-reverse sm:flex-row sm:justify-end gap-3"
             >
               <Button
                 unstyled
                 on:click={() => (isNewChatModalOpen = false)}
-                className="w-full sm:w-auto px-4 py-2 min-h-11 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                className="w-full sm:w-auto px-4 py-2 min-h-11 text-sm font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)] rounded-lg transition-colors border border-[var(--color-border-default)]"
               >
                 {$t("common.cancel")}
               </Button>
@@ -334,7 +334,7 @@
                 unstyled
                 on:click={handleNewChat}
                 disabled={!newChatTitle.trim()}
-                className="w-full sm:w-auto px-4 py-2 min-h-11 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+                className="w-full sm:w-auto px-4 py-2 min-h-11 text-sm font-medium text-white bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {$t("chat.createChat")}
               </Button>

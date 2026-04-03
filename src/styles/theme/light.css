@@ -45,13 +45,11 @@ textarea::placeholder {
 .surface-panel {
   background-color: var(--color-surface);
   border: 1px solid var(--color-border-soft);
-  box-shadow: var(--shadow-soft);
 }
 
 .surface-card {
   background-color: var(--color-surface-elevated);
   border: 1px solid var(--color-border-muted);
-  box-shadow: var(--shadow-medium);
 }
 
 .surface-muted {
@@ -83,11 +81,11 @@ textarea::placeholder {
 }
 
 .shadow-card {
-  box-shadow: var(--shadow-soft);
+  box-shadow: none;
 }
 
 .shadow-elevated {
-  box-shadow: var(--shadow-medium);
+  box-shadow: none;
 }
 
 /* Background overrides */
@@ -96,25 +94,25 @@ textarea::placeholder {
 }
 
 .bg-gray-100 {
-  background-color: var(--color-bg-muted) !important;
+  background-color: var(--color-bg-hover) !important;
 }
 
 .bg-gray-200 {
-  background-color: var(--color-surface-muted) !important;
+  background-color: var(--color-bg-sidebar) !important;
 }
 
 .bg-white {
-  background-color: var(--color-surface) !important;
+  background-color: var(--color-bg-surface) !important;
 }
 
 .bg-blue-50,
 .bg-indigo-50 {
-  background-color: var(--color-accent-muted) !important;
+  background-color: var(--color-accent-light) !important;
 }
 
 .bg-blue-100,
 .bg-indigo-100 {
-  background-color: var(--color-accent-muted-strong) !important;
+  background-color: var(--color-bg-active) !important;
 }
 
 .bg-blue-500,
@@ -125,7 +123,7 @@ textarea::placeholder {
 .bg-blue-700,
 .bg-blue-800,
 .hover\:bg-blue-700:hover {
-  background-color: var(--color-accent-strong) !important;
+  background-color: var(--color-accent-hover) !important;
 }
 
 .bg-green-50,
@@ -161,7 +159,7 @@ textarea::placeholder {
 }
 
 .hover\:bg-gray-100:hover {
-  background-color: var(--color-surface) !important;
+  background-color: var(--color-bg-hover) !important;
 }
 
 .hover\:bg-gray-200:hover {
@@ -211,7 +209,7 @@ textarea::placeholder {
 .text-blue-700,
 .text-blue-800,
 .text-blue-900 {
-  color: var(--color-accent) !important;
+  color: var(--color-accent-text) !important;
 }
 
 .text-white {
@@ -276,22 +274,27 @@ textarea::placeholder {
 
 .border-blue-100,
 .border-indigo-100 {
-  border-color: var(--color-accent-muted-strong) !important;
+  border-color: var(--color-border-accent) !important;
 }
 
 .border-blue-300,
 .border-blue-500,
 .border-blue-600 {
-  border-color: var(--color-accent) !important;
+  border-color: var(--color-border-accent) !important;
 }
 
 .border-green-100 {
-  border-color: var(--color-success-muted) !important;
+  border-color: var(--color-status-ready-border) !important;
 }
 
 .border-red-100,
 .border-red-200 {
   border-color: var(--color-danger-border, var(--color-danger-muted)) !important;
+}
+
+.border-yellow-200,
+.border-amber-200 {
+  border-color: var(--color-status-processing-border) !important;
 }
 
 .divide-gray-100 > :not([hidden]) ~ :not([hidden]),
@@ -302,7 +305,7 @@ textarea::placeholder {
 /* Hover border variants */
 .hover\:border-blue-300:hover,
 .hover\:border-blue-600:hover {
-  border-color: var(--color-accent) !important;
+  border-color: var(--color-border-accent) !important;
 }
 
 .hover\:border-gray-200:hover {
@@ -343,13 +346,13 @@ textarea::placeholder {
 /* Shadows */
 .shadow-sm,
 .shadow {
-  box-shadow: var(--shadow-soft) !important;
+  box-shadow: none !important;
 }
 
 .shadow-lg,
 .shadow-xl,
 .shadow-2xl {
-  box-shadow: var(--shadow-medium) !important;
+  box-shadow: none !important;
 }
 
 /* Checkbox / radio accent */

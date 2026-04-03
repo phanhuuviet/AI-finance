@@ -11,10 +11,10 @@
   export let containerClass = "";
 </script>
 
-<div class={`rounded-xl border border-gray-200 bg-gray-50 p-4 ${containerClass}`.trim()}>
+<div class={`rounded-xl border border-[var(--color-border-default)] bg-[var(--color-bg-app)] p-4 ${containerClass}`.trim()}>
   <div class="flex items-center justify-between gap-2">
-    <div class="text-sm font-medium text-gray-900">{label}</div>
-    <div class="text-sm font-semibold text-blue-700">{displayValue}</div>
+    <div class="text-sm font-medium text-[var(--color-text-primary)]">{label}</div>
+    <div class="text-sm font-semibold text-[var(--color-accent-text)]">{displayValue}</div>
   </div>
 
   <div class="mt-3">
@@ -28,7 +28,7 @@
       class="range-slider"
     />
 
-    <div class="mt-2 flex items-center justify-between text-xs text-gray-500">
+    <div class="mt-2 flex items-center justify-between text-xs text-[var(--color-text-muted)]">
       <span>{minLabel}</span>
       <span>{maxLabel}</span>
     </div>
@@ -40,7 +40,7 @@
     width: 100%;
     height: 6px;
     border-radius: 999px;
-    background: var(--color-border-soft, #d1d5db);
+    background: var(--color-border-default);
     outline: none;
     appearance: none;
   }
@@ -50,9 +50,8 @@
     width: 18px;
     height: 18px;
     border-radius: 999px;
-    background: var(--color-accent, #2563eb);
-    border: 2px solid #fff;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    background: var(--color-accent);
+    border: 2px solid var(--color-bg-elevated);
     cursor: pointer;
   }
 
@@ -60,15 +59,14 @@
     width: 18px;
     height: 18px;
     border-radius: 999px;
-    background: var(--color-accent, #2563eb);
-    border: 2px solid #fff;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    background: var(--color-accent);
+    border: 2px solid var(--color-bg-elevated);
     cursor: pointer;
   }
 
   .range-slider::-moz-range-track {
     height: 6px;
     border-radius: 999px;
-    background: var(--color-border-soft, #d1d5db);
+    background: var(--color-border-default);
   }
 </style>

@@ -102,23 +102,23 @@ through 2025 and beyond.`;
 </script>
 
 <div class="w-full max-w-5xl mx-auto space-y-4 sm:space-y-6 lg:space-y-8">
-  <div class="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200">
-    <h2 class="text-lg sm:text-xl font-semibold mb-4 text-gray-800">{$t("documents.addDocuments")}</h2>
+  <div class="bg-[var(--color-bg-surface)] p-4 sm:p-6 rounded-xl border border-[var(--color-border-default)]">
+    <h2 class="text-lg sm:text-xl font-semibold mb-4 text-[var(--color-text-primary)]">{$t("documents.addDocuments")}</h2>
 
     {#if success}
-      <div class="p-3 mb-4 text-sm text-green-700 bg-green-100 rounded-md">
+      <div class="p-3 mb-4 text-sm text-[var(--color-status-ready)] bg-[var(--color-status-ready-bg)] border border-[var(--color-status-ready-border)] rounded-md">
         {success}
       </div>
     {/if}
 
-    <div class="mb-4 flex flex-wrap gap-2">
+    <div class="mb-4 flex flex-wrap gap-2 rounded-lg bg-[var(--color-bg-app)] p-1">
       <Button
         unstyled
         type="button"
         className={`rounded-md border px-3 py-2 text-sm font-medium ${
           activeInputMethod === "upload"
-            ? "border-blue-300 bg-blue-50 text-blue-700"
-            : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+            ? "bg-[var(--color-bg-elevated)] text-[var(--color-accent-text)] border-[var(--color-border-accent)]"
+            : "bg-transparent text-[var(--color-text-secondary)] border-transparent hover:text-[var(--color-text-primary)]"
         }`}
         on:click={() => (activeInputMethod = "upload")}
       >
@@ -129,8 +129,8 @@ through 2025 and beyond.`;
         type="button"
         className={`rounded-md border px-3 py-2 text-sm font-medium ${
           activeInputMethod === "crawl"
-            ? "border-blue-300 bg-blue-50 text-blue-700"
-            : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+            ? "bg-[var(--color-bg-elevated)] text-[var(--color-accent-text)] border-[var(--color-border-accent)]"
+            : "bg-transparent text-[var(--color-text-secondary)] border-transparent hover:text-[var(--color-text-primary)]"
         }`}
         on:click={() => (activeInputMethod = "crawl")}
       >
@@ -141,8 +141,8 @@ through 2025 and beyond.`;
         type="button"
         className={`rounded-md border px-3 py-2 text-sm font-medium ${
           activeInputMethod === "paste"
-            ? "border-blue-300 bg-blue-50 text-blue-700"
-            : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+            ? "bg-[var(--color-bg-elevated)] text-[var(--color-accent-text)] border-[var(--color-border-accent)]"
+            : "bg-transparent text-[var(--color-text-secondary)] border-transparent hover:text-[var(--color-text-primary)]"
         }`}
         on:click={() => (activeInputMethod = "paste")}
       >
@@ -151,9 +151,9 @@ through 2025 and beyond.`;
     </div>
 
     {#if activeInputMethod === "upload"}
-      <div class="border border-gray-200 rounded-lg p-3 sm:p-4">
-        <h3 class="font-medium mb-3 text-gray-700">{$t("documents.uploadFile")}</h3>
-        <p class="text-xs text-gray-500 mb-4">
+      <div class="border border-[var(--color-border-default)] rounded-xl p-3 sm:p-4 bg-[var(--color-bg-surface)]">
+        <h3 class="font-medium mb-3 text-[var(--color-text-primary)]">{$t("documents.uploadFile")}</h3>
+        <p class="text-xs text-[var(--color-text-secondary)] mb-4">
           {$t("documents.supportedFormats")}
         </p>
 
@@ -162,7 +162,7 @@ through 2025 and beyond.`;
           unstyled
           type="file"
           bind:files={file}
-          inputClass="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 mb-4"
+          inputClass="block w-full text-sm text-[var(--color-text-secondary)] file:mr-4 file:py-2 file:px-4 file:rounded-md file:border file:border-[var(--color-border-accent)] file:text-sm file:font-semibold file:bg-[var(--color-accent-light)] file:text-[var(--color-accent-text)] hover:file:bg-[var(--color-bg-active)] mb-4"
         />
 
         <Button
@@ -175,9 +175,9 @@ through 2025 and beyond.`;
         </Button>
       </div>
     {:else if activeInputMethod === "crawl"}
-      <div class="border border-gray-200 rounded-lg p-3 sm:p-4">
-        <h3 class="font-medium mb-3 text-gray-700">{$t("documents.crawlWebsite")}</h3>
-        <p class="text-xs text-gray-500 mb-4">
+      <div class="border border-[var(--color-border-default)] rounded-xl p-3 sm:p-4 bg-[var(--color-bg-surface)]">
+        <h3 class="font-medium mb-3 text-[var(--color-text-primary)]">{$t("documents.crawlWebsite")}</h3>
+        <p class="text-xs text-[var(--color-text-secondary)] mb-4">
           {$t("documents.crawlHint")}
         </p>
 
@@ -200,9 +200,9 @@ through 2025 and beyond.`;
         </Button>
       </div>
     {:else}
-      <div class="border border-gray-200 rounded-lg p-3 sm:p-4">
-        <h3 class="font-medium mb-3 text-gray-700">Paste Text</h3>
-        <p class="text-xs text-gray-500 mb-4">
+      <div class="border border-[var(--color-border-default)] rounded-xl p-3 sm:p-4 bg-[var(--color-bg-surface)]">
+        <h3 class="font-medium mb-3 text-[var(--color-text-primary)]">Paste Text</h3>
+        <p class="text-xs text-[var(--color-text-secondary)] mb-4">
           Paste or type raw content directly into the workspace.
         </p>
 
@@ -228,13 +228,13 @@ through 2025 and beyond.`;
     {/if}
   </div>
 
-  <div class="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200">
+  <div class="bg-[var(--color-bg-surface)] p-4 sm:p-6 rounded-xl border border-[var(--color-border-default)]">
     <div class="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-4">
-      <h2 class="text-lg sm:text-xl font-semibold text-gray-800">{$t("documents.yourDocuments")}</h2>
+      <h2 class="text-lg sm:text-xl font-semibold text-[var(--color-text-primary)]">{$t("documents.yourDocuments")}</h2>
       <Button
         variant="ghost"
         size="sm"
-        className="px-0 min-h-11"
+        className="px-0 min-h-11 text-[var(--color-accent-text)] hover:text-[var(--color-accent)]"
         on:click={fetchDocuments}
       >
         {$t("common.refresh")}
@@ -243,7 +243,7 @@ through 2025 and beyond.`;
 
     {#if !sessionId}
       <div
-        class="p-4 rounded-md bg-gray-50 border border-gray-200 text-sm text-gray-600"
+        class="p-4 rounded-md bg-[var(--color-bg-app)] border border-[var(--color-border-default)] text-sm text-[var(--color-text-secondary)]"
       >
         {$t("documents.selectSessionHint")}
       </div>
@@ -264,11 +264,11 @@ through 2025 and beyond.`;
         on:retry={fetchDocuments}
       />
     {:else if documents.length === 0}
-      <p class="text-gray-500 text-center py-4">{$t("documents.empty")}</p>
+      <p class="text-[var(--color-text-muted)] text-center py-4">{$t("documents.empty")}</p>
     {:else}
       <div class="overflow-x-auto" transition:fade={{ duration: 180 }}>
-        <table class="w-full min-w-[680px] text-sm text-left text-gray-500">
-          <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+        <table class="w-full min-w-[680px] text-sm text-left text-[var(--color-text-secondary)]">
+          <thead class="text-xs uppercase bg-[var(--color-bg-app)] text-[var(--color-text-muted)] border-b border-[var(--color-border-default)] tracking-[0.06em]">
             <tr>
               <th scope="col" class="px-3 sm:px-4 py-3">{$t("documents.attach")}</th>
               <th scope="col" class="px-3 sm:px-4 py-3">{$t("documents.title")}</th>
@@ -280,7 +280,7 @@ through 2025 and beyond.`;
           </thead>
           <tbody>
             {#each documents as doc}
-              <tr class="bg-white border-b hover:bg-gray-50">
+              <tr class="bg-transparent border-b border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-hover)]">
                 <td class="px-3 sm:px-4 py-4">
                   <TextField
                     bare
@@ -290,37 +290,37 @@ through 2025 and beyond.`;
                     disabled={!sessionId}
                     on:change={(e) => toggleAttach(doc._id, e)}
                     aria-label={$t("documents.attachToChat", { title: doc.title })}
-                    inputClass="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50"
+                    inputClass="h-4 w-4 rounded border-[var(--color-border-default)] text-[var(--color-accent)] focus:[box-shadow:0_0_0_3px_rgba(91,79,207,0.12)] disabled:opacity-50 accent-[var(--color-accent)]"
                   />
                 </td>
                 <td
-                  class="px-3 sm:px-4 py-4 font-medium text-gray-900 truncate max-w-[140px] sm:max-w-[200px]"
+                  class="px-3 sm:px-4 py-4 font-medium text-[var(--color-text-primary)] truncate max-w-[140px] sm:max-w-[200px]"
                   title={doc.title}
                 >
                   {doc.title}
                 </td>
                 <td class="px-3 sm:px-4 py-4">
-                  <span class="px-2 py-1 rounded text-xs bg-gray-100 uppercase"
+                  <span class="px-2 py-1 rounded-md text-[11px] font-medium uppercase tracking-[0.04em] bg-[var(--color-bg-hover)] text-[var(--color-text-secondary)] border border-[var(--color-border-default)]"
                     >{doc.source_type}</span
                   >
                 </td>
                 <td class="px-3 sm:px-4 py-4">
                   {#if doc.status === "ready"}
-                    <span class="text-green-600 flex items-center gap-1">
-                      <span class="w-2 h-2 rounded-full bg-green-500"></span> {$t("documents.statusReady")}
+                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-md border border-[var(--color-status-ready-border)] bg-[var(--color-status-ready-bg)] text-[var(--color-status-ready)] text-xs font-medium">
+                      <span class="w-2 h-2 rounded-full bg-[var(--color-status-ready)]"></span> {$t("documents.statusReady")}
                     </span>
                   {:else if doc.status === "processing"}
-                    <span class="text-yellow-600 flex items-center gap-1">
+                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-md border border-[var(--color-status-processing-border)] bg-[var(--color-status-processing-bg)] text-[var(--color-status-processing)] text-xs font-medium">
                       <span
-                        class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"
+                        class="w-2 h-2 rounded-full bg-[var(--color-status-processing)]"
                       ></span> {$t("documents.statusProcessing")}
                     </span>
                   {:else}
                     <span
-                      class="text-red-600 flex items-center gap-1"
+                      class="inline-flex items-center gap-1.5 px-2 py-1 rounded-md border border-[var(--color-danger-light)] bg-[var(--color-status-error-bg)] text-[var(--color-status-error)] text-xs font-medium"
                       title={String(doc.error_message ?? "")}
                     >
-                      <span class="w-2 h-2 rounded-full bg-red-500"></span> {$t("documents.statusFailed")}
+                      <span class="w-2 h-2 rounded-full bg-[var(--color-status-error)]"></span> {$t("documents.statusFailed")}
                     </span>
                   {/if}
                 </td>
@@ -331,7 +331,7 @@ through 2025 and beyond.`;
                   <Button
                     variant="danger"
                     size="sm"
-                    className="px-0 py-0 hover:underline"
+                    className="px-3 py-1.5 rounded-md"
                     on:click={() => deleteDocument(doc._id)}
                   >
                     {$t("common.delete")}

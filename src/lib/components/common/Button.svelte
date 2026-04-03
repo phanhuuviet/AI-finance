@@ -17,13 +17,13 @@
 
   const variantClasses = {
     primary:
-      "bg-[var(--color-accent)] text-[var(--color-accent-contrast)] hover:bg-[var(--color-accent-strong)]",
+      "bg-[var(--color-accent)] text-[var(--color-bg-elevated)] hover:bg-[var(--color-accent-hover)] border-0",
     secondary:
-      "border border-[var(--color-border-soft)] bg-[var(--color-surface-muted)] text-[var(--color-text-primary)] hover:border-[var(--color-border-strong)] hover:bg-[var(--color-surface-elevated)]",
+      "border border-[var(--color-border-default)] bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-hover)]",
     ghost:
-      "text-[var(--color-accent)] hover:bg-[var(--color-accent-muted)]",
+      "text-[var(--color-accent-text)] hover:bg-[var(--color-accent-light)]",
     danger:
-      "bg-[var(--color-danger)] text-[var(--color-accent-contrast)] hover:bg-[var(--color-danger-strong)] focus-visible:ring-[var(--color-danger)]"
+      "border border-[var(--color-danger-light)] bg-transparent text-[var(--color-danger)] hover:bg-[var(--color-danger-light)] hover:border-[var(--color-danger)] focus-visible:ring-[var(--color-danger)]"
   };
 
   const sizeClasses = {

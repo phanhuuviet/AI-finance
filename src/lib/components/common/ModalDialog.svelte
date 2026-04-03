@@ -16,13 +16,13 @@
   /** Additional classes for the dialog panel */
   export let panelClass = "";
   /** Additional classes for the body container */
-  export let bodyClass = "p-5 space-y-4 bg-[var(--color-surface-elevated)]";
+  export let bodyClass = "p-5 space-y-4 bg-[var(--color-bg-surface)]";
   /** Additional classes for the footer container */
   export let footerClass =
-    "px-4 sm:px-5 py-4 border-t border-[var(--color-border-soft)] bg-[var(--color-surface)] flex flex-col-reverse sm:flex-row sm:justify-end gap-2";
+    "px-4 sm:px-5 py-4 border-t border-[var(--color-border-default)] bg-[var(--color-bg-app)] flex flex-col-reverse sm:flex-row sm:justify-end gap-2";
   /** Allows overriding the default panel styling */
   export let contentClass =
-    "w-full max-w-2xl rounded-2xl bg-[var(--color-surface-elevated)] border border-[var(--color-border-strong)] shadow-elevated overflow-hidden max-h-[90dvh]";
+    "w-full max-w-2xl rounded-2xl bg-[var(--color-bg-elevated)] border border-[var(--color-border-default)] overflow-hidden max-h-[90dvh]";
   /** Controls whether the footer wrapper is rendered */
   export let showFooter = true;
   /** Accessible label for the close actions */
@@ -59,15 +59,15 @@
       class={`relative z-10 ${contentClass} ${panelClass}`}
       transition:scale={{ start: 0.94, duration: 220, easing: cubicOut }}
     >
-      <div class="px-5 py-4 border-b border-[var(--color-border-soft)] bg-[var(--color-surface)] flex items-start justify-between gap-4">
+      <div class="px-5 py-4 border-b border-[var(--color-border-default)] bg-[var(--color-bg-surface)] flex items-start justify-between gap-4">
         <div>
           <div class="text-sm font-semibold text-[var(--color-text-primary)]">{title}</div>
           {#if description}
-            <div class="text-xs text-[var(--color-text-muted)] mt-1">{description}</div>
+            <div class="text-xs text-[var(--color-text-secondary)] mt-1">{description}</div>
           {/if}
         </div>
         <button
-          class="rounded-lg px-3 py-1.5 text-sm border border-[var(--color-border-soft)] bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-highlight)]"
+          class="rounded-lg px-3 py-1.5 text-sm border border-[var(--color-border-default)] bg-[var(--color-bg-app)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)]"
           type="button"
           title={$t("common.close")}
           aria-label={resolvedCloseButtonAriaLabel}

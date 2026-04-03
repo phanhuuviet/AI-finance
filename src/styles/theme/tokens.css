@@ -1,51 +1,85 @@
 :root {
   color-scheme: light;
 
-  --color-bg-app: #f8fafc;
-  --color-bg-muted: #f1f5f9;
-  --color-surface: #ffffff;
-  --color-surface-muted: #f8fafc;
-  --color-surface-elevated: #ffffff;
-  --color-surface-highlight: #eef2ff;
+  /* Backgrounds - warm layered surfaces */
+  --color-bg-app: #f5f3ef;
+  --color-bg-surface: #fdfcfa;
+  --color-bg-sidebar: #efede8;
+  --color-bg-elevated: #ffffff;
+  --color-bg-hover: #e8e5df;
+  --color-bg-active: #e3dff7;
 
-  --color-border-muted: rgba(15, 23, 42, 0.04);
-  --color-border-soft: #e2e8f0;
-  --color-border-strong: #cbd5f5;
-  --color-border-accent: rgba(37, 99, 235, 0.6);
+  /* Primary accent - purple/indigo */
+  --color-accent: #5b4fcf;
+  --color-accent-light: #ede9fb;
+  --color-accent-hover: #4a3fbf;
+  --color-accent-text: #3d2fa8;
 
-  --color-text-primary: #0f172a;
-  --color-text-secondary: #475569;
-  --color-text-tertiary: #64748b;
-  --color-text-muted: #94a3b8;
-  --color-text-disabled: rgba(148, 163, 184, 0.7);
+  /* Text hierarchy */
+  --color-text-primary: #1c1917;
+  --color-text-secondary: #6b6560;
+  --color-text-muted: #a8a29e;
+  --color-text-accent: #5b4fcf;
 
-  --color-accent: #2563eb;
-  --color-accent-strong: #1d4ed8;
-  --color-accent-contrast: #ffffff;
-  --color-accent-muted: rgba(37, 99, 235, 0.12);
-  --color-accent-muted-strong: rgba(37, 99, 235, 0.2);
+  /* Borders */
+  --color-border-default: #e2ded8;
+  --color-border-subtle: #edebe6;
+  --color-border-accent: #c4baf0;
 
-  --color-overlay: rgba(15, 23, 42, 0.32);
-  --overlay-blur: 12px;
+  /* Status colors */
+  --color-status-ready: #16a34a;
+  --color-status-ready-bg: #f0fdf4;
+  --color-status-ready-border: #bbf7d0;
+  --color-status-processing: #ca8a04;
+  --color-status-processing-bg: #fffbeb;
+  --color-status-processing-border: #fde68a;
+  --color-status-error: #dc2626;
+  --color-status-error-bg: #fef2f2;
 
-  --color-success: #16a34a;
-  --color-success-strong: #15803d;
-  --color-success-muted: rgba(22, 163, 74, 0.16);
-
-  --color-warning: #f59e0b;
-  --color-warning-muted: rgba(245, 158, 11, 0.18);
-
+  /* Danger */
   --color-danger: #dc2626;
-  --color-danger-strong: #b91c1c;
-  --color-danger-muted: rgba(220, 38, 38, 0.18);
-  --color-danger-border: rgba(220, 38, 38, 0.4);
+  --color-danger-light: #fee2e2;
+  --color-danger-text: #991b1b;
 
-  --color-info: #6366f1;
-  --color-info-muted: rgba(99, 102, 241, 0.2);
+  /* Compatibility aliases for existing utility mapping */
+  --color-bg-muted: var(--color-bg-hover);
+  --color-surface: var(--color-bg-surface);
+  --color-surface-muted: var(--color-bg-app);
+  --color-surface-elevated: var(--color-bg-elevated);
+  --color-surface-highlight: var(--color-accent-light);
 
-  --shadow-soft: 0 8px 18px rgba(15, 23, 42, 0.08);
-  --shadow-medium: 0 18px 35px rgba(15, 23, 42, 0.12);
-  --shadow-strong: 0 28px 55px rgba(15, 23, 42, 0.16);
+  --color-border-muted: var(--color-border-subtle);
+  --color-border-soft: var(--color-border-default);
+  --color-border-strong: var(--color-border-accent);
+
+  --color-text-tertiary: var(--color-text-secondary);
+  --color-text-disabled: var(--color-text-muted);
+
+  --color-accent-strong: var(--color-accent-hover);
+  --color-accent-contrast: var(--color-bg-elevated);
+  --color-accent-muted: var(--color-accent-light);
+  --color-accent-muted-strong: var(--color-bg-active);
+
+  --color-overlay: rgba(28, 25, 23, 0.42);
+  --overlay-blur: 0;
+
+  --color-success: var(--color-status-ready);
+  --color-success-strong: var(--color-status-ready);
+  --color-success-muted: var(--color-status-ready-bg);
+
+  --color-warning: var(--color-status-processing);
+  --color-warning-muted: var(--color-status-processing-bg);
+
+  --color-danger-strong: var(--color-danger-text);
+  --color-danger-muted: var(--color-danger-light);
+  --color-danger-border: var(--color-danger-light);
+
+  --color-info: var(--color-accent-text);
+  --color-info-muted: var(--color-accent-light);
+
+  --shadow-soft: none;
+  --shadow-medium: none;
+  --shadow-strong: none;
 
   --radius-sm: 0.5rem;
   --radius-md: 0.75rem;

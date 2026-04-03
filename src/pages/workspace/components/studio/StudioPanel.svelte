@@ -220,12 +220,12 @@
 </script>
 
 <div
-  class="h-full flex flex-col bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden"
+  class="h-full flex flex-col bg-[var(--color-bg-surface)] rounded-xl border border-[var(--color-border-default)] overflow-hidden"
 >
-  <div class="px-4 sm:px-5 py-4 border-b border-gray-200 bg-white">
+  <div class="px-4 sm:px-5 py-4 border-b border-[var(--color-border-default)] bg-[var(--color-bg-surface)]">
     <div class="flex items-center justify-between">
-      <h2 class="text-base font-semibold text-gray-900">{$t("studio.title")}</h2>
-      <div class="text-xs text-gray-500">{$t("studio.perSession")}</div>
+      <h2 class="text-base font-semibold text-[var(--color-text-primary)]">{$t("studio.title")}</h2>
+      <div class="text-xs text-[var(--color-text-muted)]">{$t("studio.perSession")}</div>
     </div>
   </div>
 
@@ -235,18 +235,18 @@
       {#each tools as tool}
         <Button
           unstyled
-          className={`group rounded-xl border px-4 py-3 min-h-11 text-left transition border-gray-200 hover:bg-gray-50 hover:border-blue-300 hover:bg-blue-50 hover:cursor-pointer`}
+          className={`group rounded-xl border px-4 py-3 min-h-11 text-left transition border-[var(--color-border-default)] bg-[var(--color-bg-surface)] hover:bg-[var(--color-bg-hover)] hover:border-[var(--color-border-accent)] hover:cursor-pointer`}
           on:click={() => openToolModal(tool.key)}
           type="button"
         >
           <div class="flex items-start gap-3">
-            <div class="mt-0.5 shrink-0 text-gray-500">
+            <div class="mt-0.5 shrink-0 text-[var(--color-text-muted)]">
               <StudioToolIcon name={tool.key} className="h-5 w-5" />
             </div>
 
             <div class="min-w-0">
-              <div class="text-sm font-medium text-gray-900">{$t(tool.titleKey)}</div>
-              <div class="mt-1 text-xs text-gray-500">{$t(tool.subtitleKey)}</div>
+              <div class="text-sm font-medium text-[var(--color-text-primary)]">{$t(tool.titleKey)}</div>
+              <div class="mt-1 text-xs text-[var(--color-text-secondary)]">{$t(tool.subtitleKey)}</div>
             </div>
           </div>
         </Button>
@@ -256,12 +256,12 @@
     <!-- Outputs list -->
     <div class="mt-6">
       <div class="flex items-center justify-between">
-        <div class="text-sm font-semibold text-gray-900">
+        <div class="text-sm font-semibold text-[var(--color-text-primary)]">
           {$t("studio.createdInSession")}
         </div>
         <Button
           unstyled
-          className="text-sm text-blue-600 min-h-11 px-2 rounded-md hover:underline disabled:opacity-50"
+          className="text-sm text-[var(--color-accent-text)] min-h-11 px-2 rounded-md hover:text-[var(--color-accent)] disabled:opacity-50"
           on:click={refreshOutputs}
           disabled={!sessionId || loadingOutputs}
           type="button"
@@ -272,7 +272,7 @@
 
       {#if !sessionId}
         <div
-          class="mt-3 p-4 rounded-xl bg-gray-50 border border-gray-200 text-sm text-gray-600"
+          class="mt-3 p-4 rounded-xl bg-[var(--color-bg-app)] border border-[var(--color-border-default)] text-sm text-[var(--color-text-secondary)]"
           transition:fade={{ duration: 140 }}
         >
           {$t("studio.selectSessionHint")}
@@ -288,14 +288,14 @@
         </div>
       {:else if studioState.loading}
         <div
-          class="mt-3 p-4 rounded-xl bg-gray-50 border border-gray-200 text-sm text-gray-600"
+          class="mt-3 p-4 rounded-xl bg-[var(--color-bg-app)] border border-[var(--color-border-default)] text-sm text-[var(--color-text-secondary)]"
           transition:fade={{ duration: 140 }}
         >
           <LoadingBlock rows={4} rowHeight="h-10" active={studioState.showLoading} />
         </div>
       {:else if outputs.length === 0}
         <div
-          class="mt-3 p-6 rounded-2xl border border-gray-200 bg-gray-50 text-sm text-gray-600"
+          class="mt-3 p-6 rounded-2xl border border-[var(--color-border-default)] bg-[var(--color-bg-app)] text-sm text-[var(--color-text-secondary)]"
           transition:fade={{ duration: 140 }}
         >
           {$t("studio.empty")}
@@ -304,24 +304,24 @@
         <div class="mt-3 space-y-2">
           {#each outputs as item (item.id)}
             <div
-              class="rounded-xl border border-gray-200 bg-white px-3 sm:px-4 py-3 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3"
+              class="rounded-xl border border-[var(--color-border-default)] bg-[var(--color-bg-surface)] px-3 sm:px-4 py-3 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3"
               transition:fly={{ y: 8, duration: 180, easing: cubicOut }}
             >
               <div class="min-w-0">
-                <div class="text-sm font-medium text-gray-900 truncate">
+                <div class="text-sm font-medium text-[var(--color-text-primary)] truncate">
                   {item.title || $t(toolTitleKey(item.type))}
                 </div>
-                <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500">
+                <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--color-text-muted)]">
                   <span class="capitalize">{String(item.type).replaceAll("_", " ")}</span>
                   <span>•</span>
                   <span>{formatDate(item.created_at)}</span>
                   <span>•</span>
                   {#if item.status === "ready"}
-                    <span class="text-green-700">{$t("studio.statusReady")}</span>
+                    <span class="text-[var(--color-status-ready)]">{$t("studio.statusReady")}</span>
                   {:else if item.status === "processing"}
-                    <span class="text-yellow-700">{$t("studio.statusProcessing")}</span>
+                    <span class="text-[var(--color-status-processing)]">{$t("studio.statusProcessing")}</span>
                   {:else}
-                    <span class="text-red-700">{String(item.status)}</span>
+                    <span class="text-[var(--color-status-error)]">{String(item.status)}</span>
                   {/if}
                 </div>
               </div>
@@ -330,7 +330,7 @@
                 {#if item.result_url}
                   <Button
                     unstyled
-                    className="rounded-lg border border-gray-200 bg-white px-3 py-2 min-h-11 text-sm hover:bg-gray-50"
+                    className="rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-surface)] px-3 py-2 min-h-11 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)]"
                     on:click={() => window.open(String(item.result_url), "_blank", "noopener,noreferrer")}
                     type="button"
                   >
@@ -341,7 +341,7 @@
                 <div class="relative">
                   <Button
                     unstyled
-                    className="rounded-lg border border-gray-200 bg-white px-2.5 py-2 min-h-11 text-sm hover:bg-gray-50"
+                    className="rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-surface)] px-2.5 py-2 min-h-11 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)]"
                     aria-haspopup="menu"
                     aria-expanded={openMenuForId === item.id}
                     on:click={() => (openMenuForId = openMenuForId === item.id ? null : item.id)}
@@ -353,13 +353,13 @@
 
                   {#if openMenuForId === item.id}
                     <div
-                      class="absolute right-0 mt-2 w-44 rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden z-10 origin-top-right"
+                      class="absolute right-0 mt-2 w-44 rounded-xl border border-[var(--color-border-default)] bg-[var(--color-bg-elevated)] overflow-hidden z-10 origin-top-right"
                       role="menu"
                       transition:scale={{ start: 0.96, duration: 140, easing: cubicOut }}
                     >
                       <Button
                         unstyled
-                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+                        className="w-full text-left px-3 py-2 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)]"
                         on:click={() => {
                           openMenuForId = null;
                           renameOutput(item);
@@ -371,7 +371,7 @@
                       </Button>
                       <Button
                         unstyled
-                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+                        className="w-full text-left px-3 py-2 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)]"
                         on:click={() => {
                           openMenuForId = null;
                           downloadOutput(item);
@@ -383,7 +383,7 @@
                       </Button>
                       <Button
                         unstyled
-                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+                        className="w-full text-left px-3 py-2 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)]"
                         on:click={() => {
                           openMenuForId = null;
                           shareOutput(item);
@@ -395,7 +395,7 @@
                       </Button>
                       <Button
                         unstyled
-                        className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+                        className="w-full text-left px-3 py-2 text-sm text-[var(--color-danger)] hover:bg-[var(--color-danger-light)]"
                         on:click={() => {
                           openMenuForId = null;
                           deleteOutput(item);

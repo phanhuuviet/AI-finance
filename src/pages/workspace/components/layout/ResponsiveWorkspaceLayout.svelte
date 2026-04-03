@@ -78,7 +78,7 @@
         <Button
           unstyled
           type="button"
-          className="inline-flex min-h-11 items-center justify-center rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+          className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-surface)] px-3 py-2 text-sm font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)]"
           on:click={toggleTabletList}
         >
           {tabletListOpen ? "Hide chats" : "Show chats"}
@@ -118,7 +118,7 @@
           <Button
             unstyled
             type="button"
-            className="inline-flex min-h-11 items-center justify-center rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+            className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-surface)] px-3 py-2 text-sm font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)]"
             on:click={backToListView}
           >
             Back
