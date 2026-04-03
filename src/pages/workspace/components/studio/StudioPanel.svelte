@@ -22,24 +22,44 @@
   let sessionId = null;
   $: sessionId = $workspaceStore.currentSessionId;
 
-  const tools = /** @type {{ key: string; titleKey: string; subtitleKey: string }[]} */ (
-    [
-      {
-        key: "audio_overview",
-        titleKey: "studio.tool.audio.title",
-        subtitleKey: "studio.tool.audio.subtitle"
-      },
-      {
-        key: "video_overview",
-        titleKey: "studio.tool.video.title",
-        subtitleKey: "studio.tool.video.subtitle"
-      },
-      { key: "mindmap", titleKey: "studio.tool.mindmap.title", subtitleKey: "studio.tool.mindmap.subtitle" },
-      { key: "report", titleKey: "studio.tool.report.title", subtitleKey: "studio.tool.report.subtitle" },
-      { key: "quiz", titleKey: "studio.tool.quiz.title", subtitleKey: "studio.tool.quiz.subtitle" },
-      { key: "data", titleKey: "studio.tool.data.title", subtitleKey: "studio.tool.data.subtitle" }
-    ]
-  );
+  const tools = /** @type {{ key: string; titleKey: string; subtitleKey: string; color: string }[]} */ ([
+    {
+      key: "audio_overview",
+      titleKey: "studio.tool.audio.title",
+      subtitleKey: "studio.tool.audio.subtitle",
+      color: "#4F8CFF" // blue
+    },
+    {
+      key: "video_overview",
+      titleKey: "studio.tool.video.title",
+      subtitleKey: "studio.tool.video.subtitle",
+      color: "#FFB347" // orange
+    },
+    {
+      key: "mindmap",
+      titleKey: "studio.tool.mindmap.title",
+      subtitleKey: "studio.tool.mindmap.subtitle",
+      color: "#6DD47E" // green
+    },
+    {
+      key: "report",
+      titleKey: "studio.tool.report.title",
+      subtitleKey: "studio.tool.report.subtitle",
+      color: "#A259FF" // purple
+    },
+    {
+      key: "quiz",
+      titleKey: "studio.tool.quiz.title",
+      subtitleKey: "studio.tool.quiz.subtitle",
+      color: "#FF6B81" // red
+    },
+    {
+      key: "data",
+      titleKey: "studio.tool.data.title",
+      subtitleKey: "studio.tool.data.subtitle",
+      color: "#00CFCF" // teal
+    }
+  ]);
 
   /** @type {string} */
   let activeTool = "audio_overview";
@@ -235,12 +255,13 @@
       {#each tools as tool}
         <Button
           unstyled
-          className={`group rounded-xl border px-4 py-3 min-h-11 text-left transition border-[var(--color-border-default)] bg-[var(--color-bg-surface)] hover:bg-[var(--color-bg-hover)] hover:border-[var(--color-border-accent)] hover:cursor-pointer`}
+          className={`group rounded-xl border px-4 py-3 min-h-11 text-left transition bg-[var(--color-bg-surface)] hover:bg-[var(--color-bg-hover)] hover:border-[var(--color-border-accent)] hover:cursor-pointer`}
+          style={`border-left: 6px solid ${tool.color}; border-color: var(--color-border-default);`}
           on:click={() => openToolModal(tool.key)}
           type="button"
         >
           <div class="flex items-start gap-3">
-            <div class="mt-0.5 shrink-0 text-[var(--color-text-muted)]">
+            <div class="mt-0.5 shrink-0" style={`color: ${tool.color}`}> 
               <StudioToolIcon name={tool.key} className="h-5 w-5" />
             </div>
 
