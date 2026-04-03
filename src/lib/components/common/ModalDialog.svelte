@@ -29,6 +29,8 @@
   export let closeButtonAriaLabel = "";
   /** Selector or element the dialog should portal into */
   export let portalTarget = "body";
+  /** Optional gradient accent strip shown at top of modal content */
+  export let accentGradient = "";
 
   const dispatch = createEventDispatcher();
 
@@ -49,7 +51,7 @@
     transition:fade={{ duration: 180, easing: cubicOut }}
   >
     <button
-      class="absolute inset-0 bg-black/40"
+      class="absolute inset-0 bg-[var(--color-overlay)]"
       aria-label={resolvedCloseButtonAriaLabel}
       type="button"
       on:click={handleClose}
@@ -59,6 +61,10 @@
       class={`relative z-10 ${contentClass} ${panelClass}`}
       transition:scale={{ start: 0.94, duration: 220, easing: cubicOut }}
     >
+      {#if accentGradient}
+        <div class="h-1" style={`background: ${accentGradient};`}></div>
+      {/if}
+
       <div class="px-5 py-4 border-b border-[var(--color-border-default)] bg-[var(--color-bg-surface)] flex items-start justify-between gap-4">
         <div>
           <div class="text-sm font-semibold text-[var(--color-text-primary)]">{title}</div>

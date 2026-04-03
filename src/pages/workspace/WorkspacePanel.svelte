@@ -46,11 +46,11 @@
       {#if sessionId}
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div
-            class="inline-flex max-w-full overflow-x-auto rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-app)] p-1"
+            class="inline-flex max-w-full overflow-x-auto rounded-[var(--radius-md)] border border-[var(--border-purple)] bg-[var(--purple-50)] p-1"
           >
             <Button
               unstyled
-              className={`px-3 py-2 min-h-11 rounded-md text-sm whitespace-nowrap ${section === "documents" ? "bg-[var(--color-bg-elevated)] border border-[var(--color-border-accent)] text-[var(--color-accent-text)] font-medium" : "bg-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"}`}
+              className={`px-3 py-2 min-h-11 rounded-[var(--radius-sm)] text-sm whitespace-nowrap transition-all duration-200 ${section === "documents" ? "[background:var(--gradient-accent)] text-[var(--text-on-dark)] font-semibold shadow-[0_1px_6px_rgba(99,102,241,0.3)]" : "bg-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"}`}
               on:click={() => setSection("documents")}
               type="button"
             >
@@ -58,7 +58,7 @@
             </Button>
             <Button
               unstyled
-              className={`px-3 py-2 min-h-11 rounded-md text-sm whitespace-nowrap ${section === "chat" ? "bg-[var(--color-bg-elevated)] border border-[var(--color-border-accent)] text-[var(--color-accent-text)] font-medium" : "bg-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"}`}
+              className={`px-3 py-2 min-h-11 rounded-[var(--radius-sm)] text-sm whitespace-nowrap transition-all duration-200 ${section === "chat" ? "[background:var(--gradient-accent)] text-[var(--text-on-dark)] font-semibold shadow-[0_1px_6px_rgba(99,102,241,0.3)]" : "bg-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"}`}
               on:click={() => setSection("chat")}
               type="button"
             >
@@ -66,7 +66,7 @@
             </Button>
             <Button
               unstyled
-              className={`px-3 py-2 min-h-11 rounded-md text-sm whitespace-nowrap ${section === "studio" ? "bg-[var(--color-bg-elevated)] border border-[var(--color-border-accent)] text-[var(--color-accent-text)] font-medium" : "bg-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"}`}
+              className={`px-3 py-2 min-h-11 rounded-[var(--radius-sm)] text-sm whitespace-nowrap transition-all duration-200 ${section === "studio" ? "[background:var(--gradient-accent)] text-[var(--text-on-dark)] font-semibold shadow-[0_1px_6px_rgba(99,102,241,0.3)]" : "bg-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"}`}
               on:click={() => setSection("studio")}
               type="button"
             >
@@ -74,7 +74,7 @@
             </Button>
           </div>
 
-          <div class="text-xs text-[var(--color-text-muted)] break-all">{$t("common.session")}: {sessionId}</div>
+          <div class="text-xs text-[var(--text-muted)] break-all">{$t("common.session")}: {sessionId}</div>
         </div>
       {/if}
     </svelte:fragment>

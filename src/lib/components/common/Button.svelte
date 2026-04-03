@@ -17,13 +17,13 @@
 
   const variantClasses = {
     primary:
-      "bg-[var(--color-accent)] text-[var(--color-bg-elevated)] hover:bg-[var(--color-accent-hover)] border-0",
+      "[background:var(--gradient-accent)] text-[var(--text-on-dark)] border-0 shadow-[0_2px_8px_rgba(99,102,241,0.3)] hover:opacity-90",
     secondary:
-      "border border-[var(--color-border-default)] bg-[var(--color-bg-surface)] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-hover)]",
+      "border border-[var(--border-default)] bg-[var(--bg-card)] text-[var(--text-primary)] hover:bg-[var(--bg-card-hover)]",
     ghost:
-      "text-[var(--color-accent-text)] hover:bg-[var(--color-accent-light)]",
+      "text-[var(--indigo-500)] hover:bg-[var(--indigo-50)]",
     danger:
-      "border border-[var(--color-danger-light)] bg-transparent text-[var(--color-danger)] hover:bg-[var(--color-danger-light)] hover:border-[var(--color-danger)] focus-visible:ring-[var(--color-danger)]"
+      "border border-[var(--border-rose)] bg-[var(--rose-50)] text-[var(--rose-600)] hover:bg-[var(--rose-100)] hover:border-[var(--rose-400)] hover:text-[var(--rose-800)] focus-visible:ring-[var(--rose-500)]"
   };
 
   const sizeClasses = {
@@ -33,7 +33,7 @@
   };
 
   const baseClasses =
-    "inline-flex items-center justify-center font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg-app)] disabled:cursor-not-allowed disabled:opacity-60";
+    "inline-flex items-center justify-center font-medium transition-[opacity,box-shadow,background-color,color,border-color] duration-150 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-app)] disabled:cursor-not-allowed disabled:opacity-60";
 
   $: buttonClass = [
     unstyled ? "" : baseClasses,

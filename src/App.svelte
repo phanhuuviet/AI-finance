@@ -36,9 +36,9 @@
   }
 </script>
 
-<main class="min-h-screen w-full overflow-x-hidden bg-[var(--color-bg-app)] text-[var(--color-text-primary)]">
+<main class="min-h-screen w-full overflow-x-hidden bg-[var(--bg-app)] text-[var(--text-primary)]">
   {#if loading}
-    <div class="p-6 text-sm text-[var(--color-text-secondary)]">{$t("common.loading")}</div>
+    <div class="p-6 text-sm text-[var(--text-secondary)]">{$t("common.loading")}</div>
   {:else}
     {#if $route.page === "login"}
       <Login />

@@ -41,6 +41,7 @@
   isOpen={isOpen}
   title={title}
   description={$t("studio.modalDescription")}
+  accentGradient="var(--gradient-success)"
   on:close={close}
 >
   <SelectField

@@ -31,7 +31,7 @@
   $: resolvedSelectClass = [
     unstyled
       ? ""
-      : "w-full px-3 py-2.5 min-h-11 border border-[var(--color-border-default)] rounded-lg bg-[var(--color-bg-elevated)] text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-border-accent)] focus:[box-shadow:0_0_0_3px_rgba(91,79,207,0.12)]",
+      : "w-full px-3 py-2.5 min-h-11 border border-[var(--border-default)] rounded-[var(--radius-md)] bg-[var(--bg-input)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--indigo-400)] focus:[box-shadow:0_0_0_3px_rgba(99,102,241,0.15)]",
     selectClass
   ]
     .filter(Boolean)
