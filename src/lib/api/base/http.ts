@@ -1,4 +1,4 @@
-import { ApiError, toApiError } from '../../utils/error';
+import type { ApiResponse, PaginationMeta } from '../../models';
 import {
   resolveMockFallback,
   USE_MOCK_FALLBACK
@@ -14,6 +14,30 @@ import {
 } from './response';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
+export class ApiError extends Error {
+  constructor(
+    public statusCode: number,
+    public override message: string,
+    public data?: unknown
+  ) {
+    super(message);
+    this.name = 'ApiError';
+  }
+
+  static fromUnknown(error: unknown): ApiError {
+    if (error instanceof ApiError) return error;
+    if (error instanceof Error) {
+      return new ApiError(500, error.message || 'INTERNAL_SERVER_ERROR', error);
+    }
+    return new ApiError(500, 'INTERNAL_SERVER_ERROR', error);
+  }
+}
+
+export interface HttpResult<T> {
+  data: T;
+  pagination?: PaginationMeta;
+}
 
 function withQuery(
   endpoint: string,
@@ -52,10 +76,28 @@ async function parseResponse(response: Response): Promise<unknown> {
   return response.text();
 }
 
+function isApiResponse<T>(payload: unknown): payload is ApiResponse<T> {
+  if (!payload || typeof payload !== 'object') return false;
+  const candidate = payload as Partial<ApiResponse<T>>;
+  return typeof candidate.statusCode === 'number' && typeof candidate.message === 'string';
+}
+
+function toEnvelope<T>(payload: unknown, response: Response): ApiResponse<T> {
+  if (isApiResponse<T>(payload)) {
+    return payload;
+  }
+
+  return {
+    statusCode: response.status,
+    message: response.ok ? 'SUCCESS' : 'REQUEST_FAILED',
+    data: payload as T
+  };
+}
+
 export async function http<T>(
   endpoint: string,
   config: HttpRequestConfig = {}
-): Promise<T> {
+): Promise<HttpResult<T>> {
   const requestContext = await applyRequestInterceptors({ endpoint, config });
   const resolvedEndpoint = withQuery(requestContext.endpoint, requestContext.config.query);
   const url = `${API_URL}${resolvedEndpoint}`;
@@ -69,25 +111,29 @@ export async function http<T>(
       signal: requestContext.config.signal
     });
 
-    const data = await parseResponse(response);
+    const rawPayload = await parseResponse(response);
+    const envelope = toEnvelope<T>(rawPayload, response);
 
-    if (!response.ok) {
-      const detail =
-        typeof data === 'object' && data !== null && 'detail' in data
-          ? (data as Record<string, unknown>).detail
-          : undefined;
-      throw new ApiError(String(detail || 'API request failed'), response.status, data);
+    if (!response.ok || envelope.statusCode >= 400) {
+      throw new ApiError(
+        envelope.statusCode || response.status,
+        envelope.message || 'REQUEST_FAILED',
+        envelope.data
+      );
     }
 
-    const intercepted = await applyResponseInterceptors<T>({
+    const intercepted = await applyResponseInterceptors<HttpResult<T>>({
       endpoint: requestContext.endpoint,
       response,
-      data: data as T
+      data: {
+        data: envelope.data as T,
+        pagination: envelope.pagination
+      }
     });
 
     return intercepted.data;
   } catch (error) {
-    const normalized = toApiError(error);
+    const normalized = ApiError.fromUnknown(error);
 
     if (USE_MOCK_FALLBACK) {
       const mocked = await resolveMockFallback<T>(
@@ -97,7 +143,7 @@ export async function http<T>(
         normalized
       );
       if (mocked !== undefined) {
-        return mocked;
+        return { data: mocked };
       }
     }
 

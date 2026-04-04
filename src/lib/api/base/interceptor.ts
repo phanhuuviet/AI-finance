@@ -1,4 +1,4 @@
-import { ApiError } from '../../utils/error';
+import { ApiError } from './http';
 import { addRequestInterceptor } from './request';
 import { addErrorInterceptor, addResponseInterceptor } from './response';
 
@@ -27,10 +27,10 @@ export function initializeApiInterceptors(): void {
 
   // Centralize auth failure behavior.
   addErrorInterceptor((error) => {
-    if (error.status === 401) {
+    if (error.statusCode === 401) {
       localStorage.removeItem('token');
     }
-    return error instanceof ApiError ? error : new ApiError(error.message, error.status, error.details);
+    return error instanceof ApiError ? error : ApiError.fromUnknown(error);
   });
 
   initialized = true;

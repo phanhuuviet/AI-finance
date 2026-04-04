@@ -1,6 +1,7 @@
 import type {
   DocumentItem,
   Id,
+  PaginationMeta,
   StudioOutput,
   StudioOutputListResponse,
   TokenUsageAnalytics
@@ -8,44 +9,50 @@ import type {
 import { http } from '../base/http';
 
 export const dashboardApi = {
-  getDocuments(): Promise<DocumentItem[]> {
-    return http<DocumentItem[]>('/documents/');
+  async getDocuments(): Promise<{ data: DocumentItem[]; pagination?: PaginationMeta }> {
+    const { data, pagination } = await http<DocumentItem[]>('/documents/');
+    return { data, pagination };
   },
 
-  uploadDocument(formData: FormData): Promise<unknown> {
-    return http<unknown>('/documents/upload', {
+  async uploadDocument(formData: FormData): Promise<unknown> {
+    const { data } = await http<unknown>('/documents/upload', {
       method: 'POST',
       body: formData
     });
+    return data;
   },
 
-  crawlWebsite(formData: FormData): Promise<unknown> {
-    return http<unknown>('/documents/crawl', {
+  async crawlWebsite(formData: FormData): Promise<unknown> {
+    const { data } = await http<unknown>('/documents/crawl', {
       method: 'POST',
       body: formData
     });
+    return data;
   },
 
-  deleteDocument(id: Id): Promise<{ ok?: boolean }> {
-    return http<{ ok?: boolean }>(`/documents/${encodeURIComponent(String(id))}`, {
+  async deleteDocument(id: Id): Promise<{ ok?: boolean }> {
+    const { data } = await http<{ ok?: boolean }>(`/documents/${encodeURIComponent(String(id))}`, {
       method: 'DELETE'
     });
+    return data;
   },
 
-  getTokenUsage(days: number): Promise<TokenUsageAnalytics> {
-    return http<TokenUsageAnalytics>('/analytics/tokens', {
+  async getTokenUsage(days: number): Promise<TokenUsageAnalytics> {
+    const { data } = await http<TokenUsageAnalytics>('/analytics/tokens', {
       query: { days }
     });
+    return data;
   },
 
-  getStudioOutputs(sessionId: Id): Promise<StudioOutputListResponse> {
-    return http<StudioOutputListResponse>('/studio/outputs', {
+  async getStudioOutputs(sessionId: Id): Promise<{ data: StudioOutputListResponse; pagination?: PaginationMeta }> {
+    const { data, pagination } = await http<StudioOutputListResponse>('/studio/outputs', {
       query: { session_id: sessionId }
     });
+    return { data, pagination };
   },
 
-  createStudioOutput(sessionId: Id, type: string, payload: unknown): Promise<StudioOutput> {
-    return http<StudioOutput>('/studio/outputs', {
+  async createStudioOutput(sessionId: Id, type: string, payload: unknown): Promise<StudioOutput> {
+    const { data } = await http<StudioOutput>('/studio/outputs', {
       method: 'POST',
       body: {
         session_id: sessionId,
@@ -53,28 +60,33 @@ export const dashboardApi = {
         payload
       }
     });
+    return data;
   },
 
-  renameStudioOutput(outputId: Id, title: string): Promise<{ ok?: boolean }> {
-    return http<{ ok?: boolean }>(`/studio/outputs/${encodeURIComponent(String(outputId))}`, {
+  async renameStudioOutput(outputId: Id, title: string): Promise<{ ok?: boolean }> {
+    const { data } = await http<{ ok?: boolean }>(`/studio/outputs/${encodeURIComponent(String(outputId))}`, {
       method: 'PATCH',
       body: { title }
     });
+    return data;
   },
 
-  deleteStudioOutput(outputId: Id): Promise<{ ok?: boolean }> {
-    return http<{ ok?: boolean }>(`/studio/outputs/${encodeURIComponent(String(outputId))}`, {
+  async deleteStudioOutput(outputId: Id): Promise<{ ok?: boolean }> {
+    const { data } = await http<{ ok?: boolean }>(`/studio/outputs/${encodeURIComponent(String(outputId))}`, {
       method: 'DELETE'
     });
+    return data;
   },
 
-  shareStudioOutput(outputId: Id): Promise<{ share_url?: string; url?: string }> {
-    return http<{ share_url?: string; url?: string }>(`/studio/outputs/${encodeURIComponent(String(outputId))}/share`, {
+  async shareStudioOutput(outputId: Id): Promise<{ share_url?: string; url?: string }> {
+    const { data } = await http<{ share_url?: string; url?: string }>(`/studio/outputs/${encodeURIComponent(String(outputId))}/share`, {
       method: 'POST'
     });
+    return data;
   },
 
-  downloadStudioOutput(outputId: Id): Promise<{ download_url?: string }> {
-    return http<{ download_url?: string }>(`/studio/outputs/${encodeURIComponent(String(outputId))}/download`);
+  async downloadStudioOutput(outputId: Id): Promise<{ download_url?: string }> {
+    const { data } = await http<{ download_url?: string }>(`/studio/outputs/${encodeURIComponent(String(outputId))}/download`);
+    return data;
   }
 };

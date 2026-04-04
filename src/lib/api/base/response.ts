@@ -1,4 +1,4 @@
-import type { ApiError } from '../../utils/error';
+import type { ApiError } from './http';
 
 export interface HttpResponseContext<T = unknown> {
   endpoint: string;

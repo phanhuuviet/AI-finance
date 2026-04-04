@@ -1,4 +1,4 @@
-import type { ApiError } from '../../utils/error';
+import type { ApiError } from '../base/http';
 import type { HttpRequestConfig } from '../base/request';
 import { authMockEntries } from './auth.mock';
 import { chatMockEntries } from './chat.mock';

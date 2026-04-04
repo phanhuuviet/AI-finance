@@ -1,4 +1,5 @@
 import { authApi, userApi } from '../api';
+import { ApiError } from '../api/base/http';
 import type {
   AuthLoginRequest,
   AuthRegisterRequest,
@@ -37,27 +38,43 @@ export const authService = {
   },
 
   async login(payload: AuthLoginRequest): Promise<User> {
-    const auth = await authApi.login(payload);
-    persistSession(auth.access_token, readStoredUser() || ({ username: payload.username } as User));
-    const me = await authApi.me();
-    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(me));
-    return me;
+    try {
+      const auth = await authApi.login(payload);
+      persistSession(auth.access_token, readStoredUser() || ({ username: payload.username } as User));
+      const me = await authApi.me();
+      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(me));
+      return me;
+    } catch (error) {
+      throw ApiError.fromUnknown(error);
+    }
   },
 
   async register(payload: AuthRegisterRequest): Promise<User> {
-    return authApi.register(payload);
+    try {
+      return await authApi.register(payload);
+    } catch (error) {
+      throw ApiError.fromUnknown(error);
+    }
   },
 
   async fetchUser(): Promise<User> {
-    const me = await userApi.getProfile();
-    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(me));
-    return me;
+    try {
+      const me = await userApi.getProfile();
+      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(me));
+      return me;
+    } catch (error) {
+      throw ApiError.fromUnknown(error);
+    }
   },
 
   async updateUser(payload: Partial<User>): Promise<User> {
-    const updated = await userApi.updateProfile(payload);
-    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(updated));
-    return updated;
+    try {
+      const updated = await userApi.updateProfile(payload);
+      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(updated));
+      return updated;
+    } catch (error) {
+      throw ApiError.fromUnknown(error);
+    }
   },
 
   logout(): void {

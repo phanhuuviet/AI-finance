@@ -5,10 +5,12 @@ import { createLoadingGate } from '../lib/utils/loading.js';
 /** @typedef {import('../lib/models').ChatSession} ChatSession */
 /** @typedef {import('../lib/models').ChatSessionDetail} ChatSessionDetail */
 /** @typedef {import('../lib/models').ChatMessage} ChatMessage */
+/** @typedef {import('../lib/models').PaginationMeta} PaginationMeta */
 
 /**
  * @typedef {{
  *  sessions: ChatSession[];
+ *  sessionsPagination: PaginationMeta | null;
  *  currentSessionId: string | null;
  *  messages: Record<string, ChatMessage[]>;
  *  sessionsState: { data: ChatSession[] | null; loading: boolean; showLoading: boolean; error: string | null };
@@ -30,6 +32,7 @@ function createChatStore() {
     /** @type {ChatState} */
     ({
       sessions: [],
+      sessionsPagination: null,
       currentSessionId: null,
       messages: {},
       sessionsState: createAsyncState(),
@@ -77,6 +80,7 @@ function createChatStore() {
       update((state) => ({
         ...state,
         sessions: [],
+        sessionsPagination: null,
         sessionsState: {
           ...state.sessionsState,
           data: null,
@@ -86,12 +90,14 @@ function createChatStore() {
         }
       }));
       try {
+        const result = await chatService.getSessions();
         /** @type {ChatSession[]} */
-        const data = await chatService.getSessions();
+        const data = Array.isArray(result?.data) ? result.data : [];
         if (requestId !== sessionsRequestId) return;
         update(state => ({
           ...state,
           sessions: data,
+          sessionsPagination: result?.pagination || null,
           sessionsState: {
             ...state.sessionsState,
             data,

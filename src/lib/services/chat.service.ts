@@ -1,16 +1,29 @@
 import { chatApi } from '../api';
-import type { ChatSession, ChatSessionDetail, Id } from '../models';
+import { ApiError } from '../api/base/http';
+import type { ChatSession, ChatSessionDetail, Id, PaginationMeta } from '../models';
 
 export const chatService = {
-  getSessions(): Promise<ChatSession[]> {
-    return chatApi.getSessions();
+  async getSessions(): Promise<{ data: ChatSession[]; pagination?: PaginationMeta }> {
+    try {
+      return await chatApi.getSessions();
+    } catch (error) {
+      throw ApiError.fromUnknown(error);
+    }
   },
 
-  createSession(title: string, documentIds: Id[] = []): Promise<ChatSession> {
-    return chatApi.createSession(title, documentIds);
+  async createSession(title: string, documentIds: Id[] = []): Promise<ChatSession> {
+    try {
+      return await chatApi.createSession(title, documentIds);
+    } catch (error) {
+      throw ApiError.fromUnknown(error);
+    }
   },
 
-  getSessionDetail(sessionId: Id): Promise<ChatSessionDetail> {
-    return chatApi.getSessionDetail(sessionId);
+  async getSessionDetail(sessionId: Id): Promise<ChatSessionDetail> {
+    try {
+      return await chatApi.getSessionDetail(sessionId);
+    } catch (error) {
+      throw ApiError.fromUnknown(error);
+    }
   }
 };

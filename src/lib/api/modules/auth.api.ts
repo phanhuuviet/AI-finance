@@ -7,28 +7,32 @@ import type {
 import { http } from '../base/http';
 
 export const authApi = {
-  login(payload: AuthLoginRequest): Promise<AuthLoginResponse> {
-    return http<AuthLoginResponse>('/auth/login', {
+  async login(payload: AuthLoginRequest): Promise<AuthLoginResponse> {
+    const { data } = await http<AuthLoginResponse>('/auth/login', {
       method: 'POST',
       body: payload
     });
+    return data;
   },
 
-  register(payload: AuthRegisterRequest): Promise<User> {
-    return http<User>('/auth/register', {
+  async register(payload: AuthRegisterRequest): Promise<User> {
+    const { data } = await http<User>('/auth/register', {
       method: 'POST',
       body: payload
     });
+    return data;
   },
 
-  me(): Promise<User> {
-    return http<User>('/auth/me');
+  async me(): Promise<User> {
+    const { data } = await http<User>('/auth/me');
+    return data;
   },
 
-  updateMe(payload: Partial<User>): Promise<User> {
-    return http<User>('/auth/me', {
+  async updateMe(payload: Partial<User>): Promise<User> {
+    const { data } = await http<User>('/auth/me', {
       method: 'PUT',
       body: payload
     });
+    return data;
   }
 };

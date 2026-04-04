@@ -5,6 +5,7 @@ import { createLoadingGate } from '../lib/utils/loading.js';
 /** @typedef {import('../lib/models').DocumentItem} DocumentItem */
 /** @typedef {import('../lib/models').TokenUsageAnalytics} TokenUsageAnalytics */
 /** @typedef {import('../lib/models').StudioOutput} StudioOutput */
+/** @typedef {import('../lib/models').PaginationMeta} PaginationMeta */
 
 /**
  * @template T
@@ -32,8 +33,10 @@ function toMessage(error) {
 function createDashboardStore() {
   const { subscribe, update } = writable({
     documents: createAsyncState(),
+    documentsPagination: /** @type {PaginationMeta | null} */ (null),
     tokenUsage: createAsyncState(),
-    studioBySession: /** @type {Record<string, ReturnType<typeof createAsyncState>>} */ ({})
+    studioBySession: /** @type {Record<string, ReturnType<typeof createAsyncState>>} */ ({}),
+    studioPaginationBySession: /** @type {Record<string, PaginationMeta | null>} */ ({})
   });
 
   const documentsGate = createLoadingGate(() => {
@@ -70,6 +73,10 @@ function createDashboardStore() {
         studioBySession: {
           ...state.studioBySession,
           [sessionId]: createAsyncState()
+        },
+        studioPaginationBySession: {
+          ...state.studioPaginationBySession,
+          [sessionId]: state.studioPaginationBySession[sessionId] || null
         }
       };
     });
@@ -99,6 +106,7 @@ function createDashboardStore() {
       documentsGate.start();
       update((state) => ({
         ...state,
+        documentsPagination: null,
         documents: {
           ...state.documents,
           data: null,
@@ -109,10 +117,12 @@ function createDashboardStore() {
       }));
 
       try {
-        const data = /** @type {DocumentItem[]} */ (await dashboardService.getDocuments());
+        const result = await dashboardService.getDocuments();
+        const data = /** @type {DocumentItem[]} */ (Array.isArray(result?.data) ? result.data : []);
         if (requestId !== documentsRequestId) return [];
         update((state) => ({
           ...state,
+          documentsPagination: result?.pagination || null,
           documents: {
             ...state.documents,
             data,
@@ -230,10 +240,15 @@ function createDashboardStore() {
       }));
 
       try {
-        const data = /** @type {StudioOutput[]} */ (await dashboardService.getStudioOutputs(sessionId));
+        const result = await dashboardService.getStudioOutputs(sessionId);
+        const data = /** @type {StudioOutput[]} */ (Array.isArray(result?.data) ? result.data : []);
         if (requestId !== studioRequestIds[sessionId]) return [];
         update((state) => ({
           ...state,
+          studioPaginationBySession: {
+            ...state.studioPaginationBySession,
+            [sessionId]: result?.pagination || null
+          },
           studioBySession: {
             ...state.studioBySession,
             [sessionId]: {
