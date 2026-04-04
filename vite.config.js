@@ -8,6 +8,7 @@ export default defineConfig({
   resolve: {
     alias: {
       $lib: fileURLToPath(new URL('./src/lib', import.meta.url)),
+      '$app/navigation': fileURLToPath(new URL('./src/app/navigation.ts', import.meta.url)),
     },
   },
   plugins: [

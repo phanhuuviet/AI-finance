@@ -172,11 +172,11 @@
         <div
           class="w-10 h-10 rounded-full [background:var(--gradient-accent)] flex items-center justify-center text-[var(--text-on-dark)] font-bold"
         >
-          {($user?.username?.[0] || "?").toUpperCase()}
+          {($user?.full_name?.[0] || "?").toUpperCase()}
         </div>
         <div class="overflow-hidden">
           <p class="text-sm font-medium text-[var(--text-on-dark)] truncate">
-            {$user?.username || $t("header.guest")}
+            {$user?.full_name || $t("header.guest")}
           </p>
           <p class="text-xs text-[var(--text-on-dark-2)] truncate">{$user?.email}</p>
         </div>

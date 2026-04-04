@@ -1,6 +1,6 @@
 <script>
-  import { login as loginStore, register as registerStore } from '../../stores/auth.js';
-  import { navigate } from '../../stores/router.js';
+  import { authService } from '$lib/services/auth.service';
+  import { authError, authLoading } from '$lib/stores/auth.store';
   import Button from '$lib/components/common/Button.svelte';
   import TextField from '$lib/components/common/TextField.svelte';
   import { t } from '../../lib/i18n';
@@ -9,24 +9,23 @@
   let username = '';
   let email = '';
   let password = '';
-  let error = '';
-  let loading = false;
 
   async function handleSubmit() {
-    error = '';
-    loading = true;
     try {
       if (isLogin) {
-        await loginStore(username, password);
+        await authService.login({
+          email: username,
+          password
+        });
       } else {
-        await registerStore(username, email, password);
+        await authService.register({
+          email,
+          full_name: username,
+          password
+        });
       }
-
-      navigate('/workspace');
-    } catch (err) {
-      error = err.message;
-    } finally {
-      loading = false;
+    } catch {
+      // Error state comes from authError store.
     }
   }
 
@@ -59,9 +58,9 @@
       <div class="w-full max-w-md bg-[var(--color-bg-card)] rounded-2xl shadow-md px-6 py-10 flex flex-col gap-6">
         <h3 class="text-2xl font-bold text-center text-[var(--color-text-primary)] mb-2 tracking-tight">{isLogin ? $t('auth.loginTitle') : $t('auth.registerTitle')}</h3>
 
-        {#if error}
+        {#if $authError}
           <div class="p-4 mb-2 text-base text-[var(--color-danger)] bg-[var(--color-danger-muted)] rounded-md border border-[var(--color-danger-border)] text-left">
-            {error}
+            {$authError}
           </div>
         {/if}
 
@@ -99,9 +98,9 @@
               type="submit"
               rounded="rounded-lg"
               className="w-full py-3 text-base font-semibold bg-[var(--color-accent)] text-[var(--color-accent-contrast)] rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] focus:ring-opacity-50 transition disabled:opacity-70 disabled:cursor-not-allowed"
-              disabled={loading}
+              disabled={$authLoading}
             >
-              {loading ? $t('common.processing') : (isLogin ? $t('auth.login') : $t('auth.register'))}
+              {$authLoading ? $t('common.processing') : (isLogin ? $t('auth.login') : $t('auth.register'))}
             </Button>
             <a
               class="text-base text-[var(--color-accent)] text-center underline cursor-pointer mt-1 hover:text-[var(--color-accent-hover)] transition"

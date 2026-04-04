@@ -1,38 +1,39 @@
-import type {
-  AuthLoginRequest,
-  AuthLoginResponse,
-  AuthRegisterRequest,
-  User
-} from '../../models';
 import { http } from '../base/http';
+import type {
+  LoginRequest,
+  LoginResponse,
+  RegisterRequest,
+  RegisterResponse,
+  RefreshResponse,
+  LogoutRequest,
+  LogoutResponse,
+  User
+} from '$lib/models/auth.model';
 
 export const authApi = {
-  async login(payload: AuthLoginRequest): Promise<AuthLoginResponse> {
-    const { data } = await http<AuthLoginResponse>('/auth/login', {
+  register: (body: RegisterRequest) =>
+    http<RegisterResponse>('/auth/register', {
       method: 'POST',
-      body: payload
-    });
-    return data;
-  },
+      body: JSON.stringify(body)
+    }),
 
-  async register(payload: AuthRegisterRequest): Promise<User> {
-    const { data } = await http<User>('/auth/register', {
+  login: (body: LoginRequest) =>
+    http<LoginResponse>('/auth/login', {
       method: 'POST',
-      body: payload
-    });
-    return data;
-  },
+      body: JSON.stringify(body)
+    }),
 
-  async me(): Promise<User> {
-    const { data } = await http<User>('/auth/me');
-    return data;
-  },
+  refresh: (body: { refresh_token: string }) =>
+    http<RefreshResponse>('/auth/refresh', {
+      method: 'POST',
+      body: JSON.stringify(body)
+    }),
 
-  async updateMe(payload: Partial<User>): Promise<User> {
-    const { data } = await http<User>('/auth/me', {
-      method: 'PUT',
-      body: payload
-    });
-    return data;
-  }
+  me: () => http<{ user: User }>('/auth/me'),
+
+  logout: (body: LogoutRequest) =>
+    http<LogoutResponse>('/auth/logout', {
+      method: 'POST',
+      body: JSON.stringify(body)
+    })
 };

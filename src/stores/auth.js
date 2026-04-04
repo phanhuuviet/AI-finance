@@ -1,22 +1,16 @@
-import { writable } from 'svelte/store';
+import { derived, get, writable } from 'svelte/store';
 import { authService } from '../lib/services/auth.service';
 import { createLoadingGate } from '../lib/utils/loading.js';
+import { authStore } from '../lib/stores/auth.store';
+import { userApi } from '../lib/api/modules/user.api';
 
-/** @typedef {import('../lib/models').User} User */
+/** @typedef {import('../lib/models/auth.model').User} User */
 
-const TOKEN_STORAGE_KEY = 'token';
-const storage = typeof window !== 'undefined' && window.localStorage ? window.localStorage : undefined;
-
-const persistedUser = authService.getStoredUser();
-
-/** @type {import('svelte/store').Writable<User | null>} */
-export const user = writable(/** @type {User | null} */ (persistedUser));
-
-/** @type {import('svelte/store').Writable<string | null>} */
-export const token = writable(/** @type {string | null} */ (storage?.getItem(TOKEN_STORAGE_KEY) || null));
-
+/** @type {import('svelte/store').Readable<User | null>} */
+export const user = derived(authStore, ($s) => /** @type {User | null} */ ($s.user));
+console.log('user data', get(user));
 const initialAsync = {
-  data: persistedUser,
+  data: null,
   loading: false,
   showLoading: false,
   updating: false,
@@ -38,9 +32,8 @@ export const login = async (username, password) => {
   authLoadingGate.start();
   authState.update((state) => ({ ...state, loading: true, showLoading: false, error: null }));
   try {
-    const me = await authService.login({ username, password });
-    token.set(authService.getStoredToken());
-    user.set(me);
+    await authService.login({ email: username, password });
+    const me = get(authStore).user;
     authState.update((state) => ({ ...state, data: me, error: null }));
   } catch (error) {
     authState.update((state) => ({ ...state, error: error?.message || 'Login failed.' }));
@@ -61,7 +54,7 @@ export const register = async (username, email, password) => {
   authLoadingGate.start();
   authState.update((state) => ({ ...state, loading: true, showLoading: false, error: null }));
   try {
-    await authService.register({ username, email, password });
+    await authService.register({ email, full_name: username, password });
   } catch (error) {
     authState.update((state) => ({ ...state, error: error?.message || 'Register failed.' }));
     throw error;
@@ -78,8 +71,8 @@ export const fetchUser = async () => {
   authLoadingGate.start();
   authState.update((state) => ({ ...state, loading: true, showLoading: false, error: null }));
   try {
-    const me = await authService.fetchUser();
-    user.set(me);
+    await authService.fetchCurrentUser();
+    const me = get(authStore).user;
     authState.update((state) => ({ ...state, data: me, error: null }));
     return me;
   } catch (error) {
@@ -92,16 +85,17 @@ export const fetchUser = async () => {
 };
 
 /**
- * @param {Partial<User>} payload
- * @returns {Promise<User>}
+ * @param {Record<string, unknown>} payload
+ * @returns {Promise<User | null>}
  */
 export const updateProfile = async (payload) => {
   authState.update((state) => ({ ...state, updating: true, error: null }));
   try {
-    const updated = await authService.updateUser(payload);
-    user.set(updated);
-    authState.update((state) => ({ ...state, data: updated, error: null }));
-    return updated;
+    await userApi.updateProfile(payload);
+    await authService.fetchCurrentUser();
+    const me = get(authStore).user;
+    authState.update((state) => ({ ...state, data: me, error: null }));
+    return me;
   } catch (error) {
     authState.update((state) => ({ ...state, error: error?.message || 'Failed to update profile.' }));
     throw error;
@@ -110,9 +104,7 @@ export const updateProfile = async (payload) => {
   }
 };
 
-export const logout = () => {
-  authService.logout();
-  token.set(null);
-  user.set(null);
+export const logout = async () => {
+  await authService.logout();
   authState.set({ ...initialAsync, data: null });
 };

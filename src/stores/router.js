@@ -1,6 +1,7 @@
 import { get, writable } from 'svelte/store';
 import { ROUTE_DEFINITIONS, DEFAULT_PROTECTED_ROUTE, LOGIN_ROUTE, ROOT_REDIRECT_PATH } from '../routes/definitions.js';
-import { token } from './auth.js';
+import { authStore } from '../lib/stores/auth.store';
+import { tokenStorage } from '../lib/utils/token';
 
 /**
  * @typedef {'workspace' | 'analytics' | 'settings' | 'login'} Page
@@ -30,11 +31,11 @@ function normalizePath(path) {
 
 /**
  * @param {string} pathname
- * @param {string | null} [tokenValue]
+ * @param {boolean} [hasSession]
  */
-function parseRoute(pathname, tokenValue) {
+function parseRoute(pathname, hasSession) {
   const normalized = normalizePath(pathname);
-  const snapshot = tokenValue ?? get(token);
+  const snapshot = hasSession ?? tokenStorage.hasValidSession();
 
   if (normalized === '/' || normalized === '') {
     return coerceRoute(DEFAULT_PROTECTED_ROUTE, null, snapshot);
@@ -53,10 +54,10 @@ function parseRoute(pathname, tokenValue) {
 /**
  * @param {{ requiresAuth: boolean; build: (match: RegExpMatchArray | null) => Route }} definition
  * @param {RegExpMatchArray | null} match
- * @param {string | null} tokenValue
+ * @param {boolean} hasSession
  */
-function coerceRoute(definition, match, tokenValue) {
-  if (definition.requiresAuth && !tokenValue) {
+function coerceRoute(definition, match, hasSession) {
+  if (definition.requiresAuth && !hasSession) {
     return LOGIN_ROUTE.build(null);
   }
 
@@ -132,10 +133,10 @@ export function navigate(to, opts = {}) {
   syncFromLocation();
 }
 
-token.subscribe((value) => {
+authStore.subscribe(() => {
   if (typeof window === 'undefined') return;
   const current = normalizePath(window.location.pathname);
-  const parsed = parseRoute(current, value);
+  const parsed = parseRoute(current, tokenStorage.hasValidSession());
 
   if (parsed.pathname !== current) {
     navigate(parsed.pathname, { replace: true });

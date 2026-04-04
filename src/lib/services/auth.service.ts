@@ -1,83 +1,64 @@
-import { authApi, userApi } from '../api';
-import { ApiError } from '../api/base/http';
-import type {
-  AuthLoginRequest,
-  AuthRegisterRequest,
-  User
-} from '../models';
-
-const TOKEN_STORAGE_KEY = 'token';
-const USER_STORAGE_KEY = 'user';
-
-function persistSession(accessToken: string, userData: User): void {
-  localStorage.setItem(TOKEN_STORAGE_KEY, accessToken);
-  localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userData));
-}
-
-function clearSession(): void {
-  localStorage.removeItem(TOKEN_STORAGE_KEY);
-  localStorage.removeItem(USER_STORAGE_KEY);
-}
-
-function readStoredUser(): User | null {
-  try {
-    const raw = localStorage.getItem(USER_STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as User) : null;
-  } catch {
-    return null;
-  }
-}
+import { goto } from '$app/navigation';
+import { authApi } from '$lib/api/modules/auth.api';
+import { ApiError } from '$lib/api/base/http';
+import { authStore } from '$lib/stores/auth.store';
+import { tokenStorage } from '$lib/utils/token';
+import type { LoginRequest, RegisterRequest } from '$lib/models/auth.model';
 
 export const authService = {
-  getStoredUser(): User | null {
-    return readStoredUser();
-  },
-
-  getStoredToken(): string | null {
-    return localStorage.getItem(TOKEN_STORAGE_KEY);
-  },
-
-  async login(payload: AuthLoginRequest): Promise<User> {
+  async login(body: LoginRequest): Promise<void> {
+    authStore.update((s) => ({ ...s, isLoading: true, error: null }));
     try {
-      const auth = await authApi.login(payload);
-      persistSession(auth.access_token, readStoredUser() || ({ username: payload.username } as User));
-      const me = await authApi.me();
-      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(me));
-      return me;
-    } catch (error) {
-      throw ApiError.fromUnknown(error);
+      const { data } = await authApi.login(body);
+      tokenStorage.setTokens(data.access_token, data.refresh_token);
+      authStore.update((s) => ({ ...s, user: data.user, isLoading: false }));
+      goto('/workspace');
+    } catch (err) {
+      const message = err instanceof ApiError ? err.message : 'LOGIN_FAILED';
+      authStore.update((s) => ({ ...s, error: message, isLoading: false }));
+      throw err;
     }
   },
 
-  async register(payload: AuthRegisterRequest): Promise<User> {
+  async register(body: RegisterRequest): Promise<void> {
+    authStore.update((s) => ({ ...s, isLoading: true, error: null }));
     try {
-      return await authApi.register(payload);
-    } catch (error) {
-      throw ApiError.fromUnknown(error);
+      await authApi.register(body);
+      authStore.update((s) => ({ ...s, isLoading: false }));
+      goto('/login');
+    } catch (err) {
+      const message = err instanceof ApiError ? err.message : 'REGISTER_FAILED';
+      authStore.update((s) => ({ ...s, error: message, isLoading: false }));
+      throw err;
     }
   },
 
-  async fetchUser(): Promise<User> {
+  async logout(): Promise<void> {
+    const refreshToken = tokenStorage.getRefresh();
     try {
-      const me = await userApi.getProfile();
-      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(me));
-      return me;
-    } catch (error) {
-      throw ApiError.fromUnknown(error);
+      if (refreshToken) {
+        await authApi.logout({ refresh_token: refreshToken });
+      }
+    } finally {
+      tokenStorage.clearTokens();
+      authStore.set({ user: null, isLoading: false, error: null });
+      goto('/login');
     }
   },
 
-  async updateUser(payload: Partial<User>): Promise<User> {
+  async fetchCurrentUser(): Promise<void> {
+    if (!tokenStorage.hasValidSession()) return;
+    authStore.update((s) => ({ ...s, isLoading: true }));
     try {
-      const updated = await userApi.updateProfile(payload);
-      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(updated));
-      return updated;
-    } catch (error) {
-      throw ApiError.fromUnknown(error);
+      const { data } = await authApi.me();
+      authStore.update((s) => ({ ...s, user: data.user, isLoading: false }));
+    } catch (err) {
+      tokenStorage.clearTokens();
+      authStore.set({ user: null, isLoading: false, error: null });
     }
   },
 
-  logout(): void {
-    clearSession();
+  async rehydrate(): Promise<void> {
+    await authService.fetchCurrentUser();
   }
 };

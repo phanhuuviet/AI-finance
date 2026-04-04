@@ -1,9 +1,8 @@
 import type { ApiError } from '../base/http';
 import type { HttpRequestConfig } from '../base/request';
-import { authMockEntries } from './auth.mock';
 import { chatMockEntries } from './chat.mock';
 import { dashboardMockEntries } from './dashboard.mock';
-import { userMockEntries } from './user.mock';
+// Auth endpoints intentionally excluded from mock fallback.
 
 export const USE_MOCK_FALLBACK =
   (import.meta.env.VITE_USE_MOCK_FALLBACK ?? 'true') === 'true';
@@ -24,8 +23,6 @@ export interface MockRegistryEntry<T = unknown> {
 }
 
 const mockRegistry: MockRegistryEntry[] = [
-  ...authMockEntries,
-  ...userMockEntries,
   ...dashboardMockEntries,
   ...chatMockEntries
 ];

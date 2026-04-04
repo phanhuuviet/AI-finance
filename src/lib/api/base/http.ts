@@ -1,4 +1,6 @@
 import type { ApiResponse, PaginationMeta } from '../../models';
+import type { RefreshResponse } from '../../models/auth.model';
+import { tokenStorage } from '../../utils/token';
 import {
   resolveMockFallback,
   USE_MOCK_FALLBACK
@@ -12,8 +14,12 @@ import {
   applyErrorInterceptors,
   applyResponseInterceptors
 } from './response';
+import { goto } from '$app/navigation';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_URL = import.meta.env.VITE_API_BASE_URL;
+
+let isRefreshing = false;
+let refreshQueue: Array<(token: string) => void> = [];
 
 export class ApiError extends Error {
   constructor(
@@ -37,6 +43,15 @@ export class ApiError extends Error {
 export interface HttpResult<T> {
   data: T;
   pagination?: PaginationMeta;
+}
+
+function rejectRefreshQueue(error: ApiError): void {
+  const pending = [...refreshQueue];
+  refreshQueue = [];
+  for (const resolve of pending) {
+    resolve('');
+  }
+  throw error;
 }
 
 function withQuery(
@@ -103,16 +118,80 @@ export async function http<T>(
   const url = `${API_URL}${resolvedEndpoint}`;
   const method = (requestContext.config.method || 'GET').toUpperCase();
 
-  try {
-    const response = await fetch(url, {
+  const makeRequest = async (accessToken?: string | null): Promise<Response> => {
+    const headers = buildHeaders(requestContext.config);
+    if (accessToken) {
+      headers.Authorization = `Bearer ${accessToken}`;
+    }
+
+    return fetch(url, {
       method: requestContext.config.method || 'GET',
-      headers: buildHeaders(requestContext.config),
+      headers,
       body: toBody(requestContext.config.body),
       signal: requestContext.config.signal
     });
+  };
 
-    const rawPayload = await parseResponse(response);
-    const envelope = toEnvelope<T>(rawPayload, response);
+  try {
+    let response = await makeRequest(tokenStorage.getAccess());
+    let rawPayload = await parseResponse(response);
+    let envelope = toEnvelope<T>(rawPayload, response);
+
+    if (response.status === 401 && !resolvedEndpoint.startsWith('/auth/refresh')) {
+      const refreshToken = tokenStorage.getRefresh();
+
+      if (!refreshToken) {
+        tokenStorage.clearTokens();
+        goto('/login');
+        throw new ApiError(401, 'UNAUTHORIZED', null);
+      }
+
+      if (isRefreshing) {
+        const nextToken = await new Promise<string>((resolve) => {
+          refreshQueue.push(resolve);
+        });
+
+        if (!nextToken) {
+          throw new ApiError(401, 'SESSION_EXPIRED', null);
+        }
+
+        response = await makeRequest(nextToken);
+        rawPayload = await parseResponse(response);
+        envelope = toEnvelope<T>(rawPayload, response);
+      } else {
+        isRefreshing = true;
+        try {
+          const refreshRes = await fetch(`${API_URL}/auth/refresh`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ refresh_token: refreshToken })
+          });
+          const refreshRaw = await parseResponse(refreshRes);
+          const refreshEnvelope = toEnvelope<RefreshResponse>(refreshRaw, refreshRes);
+
+          if (!refreshRes.ok || refreshEnvelope.statusCode >= 400 || !refreshEnvelope.data) {
+            tokenStorage.clearTokens();
+            goto('/login');
+            rejectRefreshQueue(new ApiError(401, 'SESSION_EXPIRED', null));
+          }
+
+          const { access_token, refresh_token } = refreshEnvelope.data;
+          tokenStorage.setTokens(access_token, refresh_token);
+
+          const pending = [...refreshQueue];
+          refreshQueue = [];
+          for (const resolve of pending) {
+            resolve(access_token);
+          }
+
+          response = await makeRequest(access_token);
+          rawPayload = await parseResponse(response);
+          envelope = toEnvelope<T>(rawPayload, response);
+        } finally {
+          isRefreshing = false;
+        }
+      }
+    }
 
     if (!response.ok || envelope.statusCode >= 400) {
       throw new ApiError(
