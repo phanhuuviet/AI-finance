@@ -8,7 +8,6 @@ import { userApi } from '../lib/api/modules/user.api';
 
 /** @type {import('svelte/store').Readable<User | null>} */
 export const user = derived(authStore, ($s) => /** @type {User | null} */ ($s.user));
-console.log('user data', get(user));
 const initialAsync = {
   data: null,
   loading: false,

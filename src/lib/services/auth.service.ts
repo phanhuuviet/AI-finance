@@ -25,7 +25,6 @@ export const authService = {
     try {
       await authApi.register(body);
       authStore.update((s) => ({ ...s, isLoading: false }));
-      goto('/login');
     } catch (err) {
       const message = err instanceof ApiError ? err.message : 'REGISTER_FAILED';
       authStore.update((s) => ({ ...s, error: message, isLoading: false }));
