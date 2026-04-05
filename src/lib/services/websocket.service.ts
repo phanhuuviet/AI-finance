@@ -30,10 +30,14 @@ class WebSocketService {
   } | null = null;
   private pingInterval: ReturnType<typeof setInterval> | null = null;
   private isGenerating = false;
+  private receivedInitialChunk = false;
+  private skippingInitialScript = false;
 
   connect(sessionId: string): void {
     this.disconnect();
     this.sessionId = sessionId;
+    this.receivedInitialChunk = false;
+    this.skippingInitialScript = false;
 
     chatStore.update((s) => ({
       ...s,
@@ -82,11 +86,25 @@ class WebSocketService {
     switch (msg.type) {
       case 'ack':
         if (msg.payload?.message === 'CHAT_CONNECTED') {
+          this.receivedInitialChunk = false;
+          this.skippingInitialScript = false;
           chatStore.update((s) => ({ ...s, isConnecting: false, wsError: null }));
         }
         break;
 
       case 'assistant_chunk': {
+        const phase = msg.payload?.data?.phase as string | undefined;
+        const isInitialScript = phase === 'initial_script';
+        if (isInitialScript && !this.receivedInitialChunk) {
+          this.receivedInitialChunk = true;
+          this.skippingInitialScript = true;
+          return;
+        }
+
+        if (this.skippingInitialScript) {
+          return;
+        }
+
         const content = (msg.payload?.data?.content as string) ?? '';
         this.isGenerating = true;
         chatStore.update((s) => ({
@@ -98,6 +116,11 @@ class WebSocketService {
       }
 
       case 'assistant_done':
+        if (this.skippingInitialScript) {
+          this.skippingInitialScript = false;
+          return;
+        }
+
         chatStore.update((s) => {
           const finishedContent = s.streamingContent ?? '';
           if (!finishedContent) return { ...s, isGenerating: false, streamingContent: '' };
@@ -203,6 +226,8 @@ class WebSocketService {
     if (this.pendingRetry?.timeoutId) clearTimeout(this.pendingRetry.timeoutId);
     this.pendingRetry = null;
     this.isGenerating = false;
+    this.receivedInitialChunk = false;
+    this.skippingInitialScript = false;
     if (this.ws) {
       this.ws.onclose = null;
       this.ws.close();

@@ -364,7 +364,7 @@ through 2025 and beyond.`;
 
                 <td class="px-3 sm:px-4 py-4 text-right">
                   <button
-                    class="btn-delete"
+                    class="px-3 py-1 rounded-[var(--radius-sm,6px)] border border-[var(--border-rose,#FECDD3)] bg-[var(--rose-50,#FFF1F2)] text-[var(--rose-600,#E11D48)] text-[13px] font-medium cursor-pointer transition-all duration-150 ease-in-out hover:bg-[var(--rose-100,#FFE4E6)] hover:border-[var(--rose-400,#FB7185)]"
                     on:click={() => openDeleteConfirm(document)}
                     aria-label={`Delete ${document.title}`}
                     type="button"
@@ -378,12 +378,13 @@ through 2025 and beyond.`;
         </table>
 
         {#if $documentPagination && $documentPagination.totalPages > 1}
-          <div class="pagination">
-            <span class="pagination-info">
+          <div class="flex items-center justify-between py-3 border-t border-[var(--border-subtle)]">
+            <span class="text-[13px] text-[var(--text-secondary)]">
               Showing {($currentPage - 1) * 20 + 1}-{Math.min($currentPage * 20, $documentPagination.total)} of {$documentPagination.total}
             </span>
-            <div class="pagination-controls">
+            <div class="flex gap-1">
               <button
+                class="min-w-8 h-8 px-2 rounded-[var(--radius-sm,6px)] border border-[var(--border-default)] bg-[var(--bg-card)] text-[var(--text-primary)] text-[13px] cursor-pointer enabled:hover:bg-[var(--purple-50)] enabled:hover:border-[var(--border-purple)] disabled:opacity-40 disabled:cursor-not-allowed"
                 disabled={$currentPage === 1}
                 on:click={() => documentService.goToPage($currentPage - 1)}
               >
@@ -392,7 +393,7 @@ through 2025 and beyond.`;
 
               {#each Array($documentPagination.totalPages) as _, i}
                 <button
-                  class:active={$currentPage === i + 1}
+                  class={`min-w-8 h-8 px-2 rounded-[var(--radius-sm,6px)] border text-[13px] cursor-pointer ${$currentPage === i + 1 ? "[background:var(--gradient-accent)] text-white border-transparent font-semibold" : "border-[var(--border-default)] bg-[var(--bg-card)] text-[var(--text-primary)] hover:bg-[var(--purple-50)] hover:border-[var(--border-purple)]"}`}
                   on:click={() => documentService.goToPage(i + 1)}
                 >
                   {i + 1}
@@ -400,6 +401,7 @@ through 2025 and beyond.`;
               {/each}
 
               <button
+                class="min-w-8 h-8 px-2 rounded-[var(--radius-sm,6px)] border border-[var(--border-default)] bg-[var(--bg-card)] text-[var(--text-primary)] text-[13px] cursor-pointer enabled:hover:bg-[var(--purple-50)] enabled:hover:border-[var(--border-purple)] disabled:opacity-40 disabled:cursor-not-allowed"
                 disabled={$currentPage === $documentPagination.totalPages}
                 on:click={() => documentService.goToPage($currentPage + 1)}
               >
@@ -412,20 +414,20 @@ through 2025 and beyond.`;
     {/if}
 
     {#if showDeleteConfirm}
-      <div class="modal-overlay" on:click={closeDeleteConfirm} role="presentation"></div>
+      <div class="absolute inset-0 bg-[rgba(30,27,75,0.45)] [border-radius:inherit] z-10" on:click={closeDeleteConfirm} role="presentation"></div>
 
-      <div class="confirm-modal" role="dialog" aria-modal="true">
-        <h3 class="confirm-title">Delete Document</h3>
-        <p class="confirm-body">
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[11] bg-[var(--bg-card,#FFFFFF)] border border-[var(--border-default,#E5E7EB)] rounded-[var(--radius-lg,12px)] p-6 w-[400px] max-w-[90%]" role="dialog" aria-modal="true">
+        <h3 class="text-base font-semibold text-[var(--text-primary)] mb-2">Delete Document</h3>
+        <p class="text-sm text-[var(--text-secondary)] mb-5 leading-relaxed">
           Are you sure you want to delete
           <strong>"{documentToDelete?.title}"</strong>?
           This action cannot be undone.
         </p>
-        <div class="confirm-actions">
-          <button class="btn-cancel" on:click={closeDeleteConfirm} disabled={isDeleting} type="button">
+        <div class="flex gap-2 justify-end">
+          <button class="px-4 py-2 rounded-[var(--radius-md,8px)] border border-[var(--border-default)] bg-[var(--bg-card)] text-[var(--text-secondary)] text-sm cursor-pointer hover:bg-[var(--bg-card-hover)]" on:click={closeDeleteConfirm} disabled={isDeleting} type="button">
             Cancel
           </button>
-          <button class="btn-confirm-delete" on:click={confirmDelete} disabled={isDeleting} type="button">
+          <button class="px-4 py-2 rounded-[var(--radius-md,8px)] border-0 bg-[var(--rose-600,#E11D48)] text-white text-sm font-semibold cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed enabled:hover:bg-[var(--rose-800,#9F1239)]" on:click={confirmDelete} disabled={isDeleting} type="button">
             {isDeleting ? 'Deleting...' : 'Delete'}
           </button>
         </div>
@@ -433,145 +435,3 @@ through 2025 and beyond.`;
     {/if}
   </div>
 </div>
-
-<style>
-  .btn-delete {
-    padding: 4px 12px;
-    border-radius: var(--radius-sm, 6px);
-    border: 1px solid var(--border-rose, #fecdd3);
-    background: var(--rose-50, #fff1f2);
-    color: var(--rose-600, #e11d48);
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.15s ease, border-color 0.15s ease;
-  }
-
-  .btn-delete:hover {
-    background: var(--rose-100, #ffe4e6);
-    border-color: var(--rose-400, #fb7185);
-  }
-
-  .modal-overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(30, 27, 75, 0.45);
-    border-radius: inherit;
-    z-index: 10;
-  }
-
-  .confirm-modal {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 11;
-    background: var(--bg-card, #ffffff);
-    border: 1px solid var(--border-default, #e5e7eb);
-    border-radius: var(--radius-lg, 12px);
-    padding: 24px;
-    width: 400px;
-    max-width: 90%;
-  }
-
-  .confirm-title {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin: 0 0 8px;
-  }
-
-  .confirm-body {
-    font-size: 14px;
-    color: var(--text-secondary);
-    margin: 0 0 20px;
-    line-height: 1.6;
-  }
-
-  .confirm-actions {
-    display: flex;
-    gap: 8px;
-    justify-content: flex-end;
-  }
-
-  .btn-cancel {
-    padding: 8px 16px;
-    border-radius: var(--radius-md, 8px);
-    border: 1px solid var(--border-default);
-    background: var(--bg-card);
-    color: var(--text-secondary);
-    font-size: 14px;
-    cursor: pointer;
-  }
-
-  .btn-cancel:hover {
-    background: var(--bg-card-hover);
-  }
-
-  .btn-confirm-delete {
-    padding: 8px 16px;
-    border-radius: var(--radius-md, 8px);
-    border: none;
-    background: var(--rose-600, #e11d48);
-    color: #ffffff;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-  }
-
-  .btn-confirm-delete:hover:not(:disabled) {
-    background: var(--rose-800, #9f1239);
-  }
-
-  .btn-confirm-delete:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-
-  .pagination {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 0;
-    border-top: 1px solid var(--border-subtle);
-  }
-
-  .pagination-info {
-    font-size: 13px;
-    color: var(--text-secondary);
-  }
-
-  .pagination-controls {
-    display: flex;
-    gap: 4px;
-  }
-
-  .pagination-controls button {
-    min-width: 32px;
-    height: 32px;
-    padding: 0 8px;
-    border-radius: var(--radius-sm, 6px);
-    border: 1px solid var(--border-default);
-    background: var(--bg-card);
-    color: var(--text-primary);
-    font-size: 13px;
-    cursor: pointer;
-  }
-
-  .pagination-controls button:hover:not(:disabled) {
-    background: var(--purple-50);
-    border-color: var(--border-purple);
-  }
-
-  .pagination-controls button.active {
-    background: var(--gradient-accent);
-    color: #ffffff;
-    border-color: transparent;
-    font-weight: 600;
-  }
-
-  .pagination-controls button:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
-</style>

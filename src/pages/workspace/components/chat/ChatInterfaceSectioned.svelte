@@ -85,13 +85,13 @@
     </h2>
     <div class="flex items-center gap-3">
       {#if $isConnecting}
-        <span class="ws-status ws-status--connecting">Connecting...</span>
+        <span class="text-xs font-medium text-[var(--amber-500)]">Connecting...</span>
       {:else if $activeSessionId}
-        <span class="ws-status ws-status--connected">● Live</span>
+        <span class="text-xs font-medium text-[var(--green-500)]">● Live</span>
       {/if}
 
       {#if $wsError}
-        <span class="ws-status ws-status--error">{$wsError}</span>
+        <span class="text-xs font-medium text-[var(--rose-500)]">{$wsError}</span>
       {/if}
     </div>
   </div>
@@ -124,7 +124,7 @@
       <div transition:fade={{ duration: 180 }}>
         {#each messages as msg}
           <div
-            class={`mb-3 flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+            class={`mb-3 flex ${msg.role === "assistant" ? "justify-start" : "justify-end"}`}
           >
             <div class="max-w-[88%] sm:max-w-[75%]">
               {#if msg.role === "assistant"}
@@ -135,17 +135,17 @@
 
               <div
                 class={`rounded-[12px] p-3 text-sm leading-relaxed ${
-                  msg.role === "user"
-                    ? "bg-[var(--gradient-accent)] text-white rounded-tr-none"
-                    : "bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-purple)] rounded-tl-none"
+                  msg.role === "assistant"
+                    ? "bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-purple)] rounded-tl-none"
+                    : "bg-[var(--indigo-600,#4F46E5)] text-white border-0 rounded-[12px_0_12px_12px]"
                 }`}
               >
                 {#if msg.role === "assistant"}
-                  <div class="markdown-body">{@html renderMarkdown(msg.content)}</div>
+                  <div class="markdown-body [&>p]:m-0 [&>p+p]:mt-2 [&_ul]:mt-1 [&_ul]:ml-4 [&_ol]:mt-1 [&_ol]:ml-4 [&_code]:rounded [&_code]:bg-[rgba(99,102,241,0.12)] [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-[0.85em]">{@html renderMarkdown(msg.content)}</div>
                 {:else}
-                  <p class="whitespace-pre-wrap">{msg.content}</p>
+                  <p class="whitespace-pre-wrap text-white">{msg.content}</p>
                 {/if}
-                <span class={`mt-2 block text-xs ${msg.role === "user" ? "text-white/80" : "text-[var(--text-muted)]"}`}>
+                <span class={`mt-2 block text-xs ${msg.role === "assistant" ? "text-[var(--text-muted)]" : "text-white/80"}`}>
                   {formatTime(msg.created_at)}
                 </span>
               </div>
@@ -159,8 +159,8 @@
               <span class="mb-1 inline-flex rounded-full bg-[var(--purple-100)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.05em] text-[var(--purple-700)]">
                 AI
               </span>
-              <div class="bubble--streaming rounded-[12px] rounded-tl-none border p-3 text-sm leading-relaxed text-[var(--text-primary)]">
-                <div class="markdown-body inline">{@html renderMarkdown($streamingContent)}</div><span class="cursor-blink">|</span>
+              <div class="rounded-[12px] rounded-tl-none border border-[var(--border-purple)] bg-[var(--purple-50)] p-3 text-sm leading-relaxed text-[var(--text-primary)]">
+                <div class="markdown-body inline [&>p]:m-0 [&>p+p]:mt-2 [&_ul]:mt-1 [&_ul]:ml-4 [&_ol]:mt-1 [&_ol]:ml-4 [&_code]:rounded [&_code]:bg-[rgba(99,102,241,0.12)] [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-[0.85em]">{@html renderMarkdown($streamingContent)}</div><span class="inline-block ml-0.5 text-[var(--purple-400)] [animation:blink_1s_step-end_infinite]">|</span>
               </div>
             </div>
           </div>
@@ -169,24 +169,35 @@
     {/if}
   </div>
 
-  <div class="chat-input-row bg-[var(--color-bg-surface)] rounded-b-lg">
+  <div class="flex gap-2 items-end p-3 border-t border-[var(--border-subtle)] bg-[var(--color-bg-surface)] rounded-b-lg">
     <TextField
       bare
       unstyled
       bind:value={inputValue}
       placeholder="Type your message..."
       disabled={$isGenerating || !sessionId || $isConnecting}
-      on:keydown={handleKeydown}
+      onkeydown={handleKeydown}
       inputClass="w-full px-3 sm:px-4 py-2.5 min-h-11 rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-border-accent)] focus:[box-shadow:0_0_0_3px_rgba(91,79,207,0.12)]"
     />
 
     {#if $isGenerating}
-      <button class="btn-stop" on:click={handleStop} aria-label="Stop generation" type="button">
-        <span class="stop-icon">■</span>
+      <button
+        class="shrink-0 flex items-center gap-1.5 px-5 py-2.5 rounded-[var(--radius-md)] border-[1.5px] border-[var(--rose-400)] bg-[var(--rose-50)] text-[var(--rose-600)] font-semibold text-sm whitespace-nowrap hover:bg-[var(--rose-100)]"
+        on:click={handleStop}
+        aria-label="Stop generation"
+        type="button"
+      >
+        <span class="text-[10px]">■</span>
         Stop
       </button>
     {:else}
-      <button class="btn-send" disabled={!canSend} on:click={handleSend} aria-label="Send message" type="button">
+      <button
+        class="shrink-0 px-5 py-2.5 rounded-[var(--radius-md)] border-0 [background:var(--gradient-accent)] text-white font-semibold text-sm whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+        disabled={!canSend}
+        on:click={handleSend}
+        aria-label="Send message"
+        type="button"
+      >
         Send
       </button>
     {/if}
@@ -194,80 +205,6 @@
 </div>
 
 <style>
-  .chat-input-row {
-    display: flex;
-    gap: 8px;
-    align-items: flex-end;
-    padding: 12px;
-    border-top: 1px solid var(--border-subtle);
-  }
-
-  .btn-send {
-    flex-shrink: 0;
-    padding: 10px 20px;
-    border-radius: var(--radius-md);
-    border: none;
-    background: var(--gradient-accent);
-    color: #ffffff;
-    font-weight: 600;
-    font-size: 14px;
-    cursor: pointer;
-    white-space: nowrap;
-  }
-
-  .btn-send:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  .btn-stop {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 10px 20px;
-    border-radius: var(--radius-md);
-    border: 1.5px solid var(--rose-400);
-    background: var(--rose-50);
-    color: var(--rose-600);
-    font-weight: 600;
-    font-size: 14px;
-    cursor: pointer;
-    white-space: nowrap;
-  }
-
-  .btn-stop:hover {
-    background: var(--rose-100);
-  }
-
-  .stop-icon {
-    font-size: 10px;
-  }
-
-  .ws-status {
-    font-size: 12px;
-    font-weight: 500;
-  }
-
-  .ws-status--connecting {
-    color: var(--amber-500);
-  }
-
-  .ws-status--connected {
-    color: var(--green-500);
-  }
-
-  .ws-status--error {
-    color: var(--rose-500);
-  }
-
-  .cursor-blink {
-    display: inline-block;
-    animation: blink 1s step-end infinite;
-    color: var(--purple-400);
-    margin-left: 2px;
-  }
-
   @keyframes blink {
     0%,
     100% {
@@ -277,31 +214,5 @@
     50% {
       opacity: 0;
     }
-  }
-
-  .bubble--streaming {
-    border-color: var(--border-purple);
-    background: var(--purple-50);
-  }
-
-  .markdown-body :global(p) {
-    margin: 0;
-  }
-
-  .markdown-body :global(p + p) {
-    margin-top: 0.5rem;
-  }
-
-  .markdown-body :global(ul),
-  .markdown-body :global(ol) {
-    margin: 0.35rem 0 0 1rem;
-    padding: 0;
-  }
-
-  .markdown-body :global(code) {
-    font-size: 0.85em;
-    background: rgba(99, 102, 241, 0.12);
-    border-radius: 4px;
-    padding: 0.1rem 0.25rem;
   }
 </style>

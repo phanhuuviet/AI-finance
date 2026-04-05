@@ -3,7 +3,7 @@ import type { Id, ISODateString } from './common.model';
 export interface ChatMessage {
   id: string;
   session_id: string;
-  role: 'assistant' | 'user';
+  role: 'assistant' | 'user' | 'user_message';
   content: string;
   metadata_json: Record<string, unknown>;
   created_at: string;

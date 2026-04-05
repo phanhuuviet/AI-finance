@@ -124,6 +124,9 @@
         for={id || undefined}
       >
         {label}
+        {#if required}
+          <span class="ml-0.5 text-[var(--rose-500,#F43F5E)]">*</span>
+        {/if}
       </label>
     {/if}
 

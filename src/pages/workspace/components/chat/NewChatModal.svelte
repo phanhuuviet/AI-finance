@@ -70,30 +70,30 @@
       <TextField bind:value={title} label="Chat Title" placeholder="Enter chat title..." required />
 
       <div class="field">
-        <div class="field-label">
-          Video Concept <span class="required-mark">*</span>
-        </div>
+        <label for="video-concept-select" class="mb-1.5 block text-[13px] font-medium text-[var(--text-primary,#1e1b4b)]">
+          Video Concept <span class="text-[var(--rose-500,#F43F5E)]">*</span>
+        </label>
 
-        <div class="concept-list" role="listbox" aria-label="Video Concept" aria-required="true">
         {#if $sessionStore.isLoadingConcepts}
-          {#each Array(3) as _}
-            <div class="concept-card concept-card--skeleton" aria-hidden="true"></div>
-          {/each}
+          <select
+            id="video-concept-select"
+            disabled
+            class="w-full px-3 py-2.5 min-h-11 border border-[var(--border-default)] rounded-[var(--radius-md)] bg-[var(--bg-input)] text-sm text-[var(--text-primary)]"
+          >
+            <option>Loading concepts...</option>
+          </select>
         {:else}
-          {#each $videoConcepts as concept}
-            <button
-              type="button"
-              class="concept-card"
-              class:concept-card--selected={selectedConceptId === concept.id}
-              on:click={() => (selectedConceptId = concept.id)}
-              aria-pressed={selectedConceptId === concept.id}
-            >
-              <span class="concept-name">{concept.name}</span>
-              <span class="concept-desc">{concept.description}</span>
-            </button>
-          {/each}
+          <select
+            id="video-concept-select"
+            bind:value={selectedConceptId}
+            class="w-full px-3 py-2.5 min-h-11 border border-[var(--border-default)] rounded-[var(--radius-md)] bg-[var(--bg-input)] text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--indigo-400)] focus:[box-shadow:0_0_0_3px_rgba(99,102,241,0.15)]"
+          >
+            <option value="" disabled>Select a video concept...</option>
+            {#each $videoConcepts as concept}
+              <option value={concept.id}>{concept.name} — {concept.description}</option>
+            {/each}
+          </select>
         {/if}
-        </div>
       </div>
 
       {#if selectedConcept}
@@ -136,87 +136,3 @@
     </div>
   </div>
 </div>
-
-<style>
-  .field-label {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text-primary, #1e1b4b);
-    margin-bottom: 6px;
-  }
-
-  .required-mark {
-    color: var(--rose-500, #f43f5e);
-  }
-
-  .concept-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    max-height: 240px;
-    overflow-y: auto;
-    padding-right: 4px;
-  }
-
-  .concept-card {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    width: 100%;
-    text-align: left;
-    padding: 12px 14px;
-    border-radius: var(--radius-md, 8px);
-    border: 1.5px solid var(--border-default, #e5e7eb);
-    background: var(--bg-card, #ffffff);
-    cursor: pointer;
-    transition: border-color 0.15s ease, background 0.15s ease;
-  }
-
-  .concept-card:hover {
-    border-color: var(--border-purple, #ddd6fe);
-    background: var(--purple-50, #f5f3ff);
-  }
-
-  .concept-card--selected {
-    border-color: var(--purple-600, #7c3aed);
-    background: var(--purple-50, #f5f3ff);
-    border-left: 3px solid var(--purple-600, #7c3aed);
-  }
-
-  .concept-name {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text-primary, #1e1b4b);
-    line-height: 1.4;
-  }
-
-  .concept-desc {
-    font-size: 12px;
-    color: var(--text-secondary, #6b7280);
-    line-height: 1.5;
-  }
-
-  .concept-card--skeleton {
-    height: 58px;
-    background: linear-gradient(
-      90deg,
-      var(--bg-app, #f7f5ff) 25%,
-      var(--purple-50, #f5f3ff) 50%,
-      var(--bg-app, #f7f5ff) 75%
-    );
-    background-size: 200% 100%;
-    animation: shimmer 1.4s ease-in-out infinite;
-    border: 1.5px solid var(--border-subtle, #f3f4f6);
-    cursor: default;
-  }
-
-  @keyframes shimmer {
-    0% {
-      background-position: 200% 0;
-    }
-
-    100% {
-      background-position: -200% 0;
-    }
-  }
-</style>
