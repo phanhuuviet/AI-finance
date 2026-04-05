@@ -2,6 +2,7 @@ import { goto } from '$app/navigation';
 import { authApi } from '$lib/api/modules/auth.api';
 import { ApiError } from '$lib/api/base/http';
 import { authStore } from '$lib/stores/auth.store';
+import { sessionService } from './session.service';
 import { tokenStorage } from '$lib/utils/token';
 import type { LoginRequest, RegisterRequest } from '$lib/models/auth.model';
 
@@ -12,6 +13,7 @@ export const authService = {
       const { data } = await authApi.login(body);
       tokenStorage.setTokens(data.access_token, data.refresh_token);
       authStore.update((s) => ({ ...s, user: data.user, isLoading: false }));
+      await sessionService.loadSessions();
       goto('/workspace');
     } catch (err) {
       const message = err instanceof ApiError ? err.message : 'LOGIN_FAILED';

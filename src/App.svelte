@@ -2,6 +2,8 @@
   import { onMount, onDestroy } from "svelte";
   import { user } from "./stores/auth.js";
   import { authService } from "$lib/services/auth.service";
+  import { sessionService } from "$lib/services/session.service";
+  import { tokenStorage } from "$lib/utils/token";
   import { route } from "./stores/router.js";
   import { connectWebSocket, disconnectWebSocket } from "./lib/services/websocket.service";
   import { initLanguage, t } from "./lib/i18n";
@@ -16,6 +18,11 @@
     initRouter();
     try {
       await authService.rehydrate();
+
+      if (tokenStorage.hasValidSession()) {
+        await sessionService.loadSessions();
+      }
+
       connectWebSocket();
     } catch {
       // ignore

@@ -6,14 +6,10 @@
   import { chatStore } from "../stores/chat.js";
   import { workspaceStore } from "../stores/workspace.js";
   import WorkspacePanel from "../pages/workspace/WorkspacePanel.svelte";
+  import NewChatModal from "../pages/workspace/components/chat/NewChatModal.svelte";
   import { route, navigate } from "../stores/router.js";
-  import { dashboardService } from "../lib/services/dashboard.service";
   import Button from "$lib/components/common/Button.svelte";
-  import TextField from "$lib/components/common/TextField.svelte";
   import { language, setLanguage, t } from "../lib/i18n";
-
-  /** @typedef {import('../lib/models').DocumentItem} DocumentItem */
-  /** @typedef {import('../lib/models').ChatSession} ChatSession */
 
   let activeTab = "home"; // home | analytics | settings
   let mobileNavOpen = false;
@@ -41,43 +37,12 @@
   }
 
   let isNewChatModalOpen = false;
-  let newChatTitle = "";
-  /** @type {string[]} */
-  let selectedDocs = [];
-  /** @type {DocumentItem[]} */
-  let availableDocs = [];
-
-  async function fetchDocs() {
-    try {
-      availableDocs = /** @type {DocumentItem[]} */ (await dashboardService.getDocuments());
-    } catch (e) {
-      console.error("Failed to fetch docs", e);
-    }
-  }
-
-  async function handleNewChat() {
-    if (!newChatTitle.trim()) return;
-    try {
-      /** @type {ChatSession} */
-      const created = await chatStore.createSession(newChatTitle, selectedDocs);
-      isNewChatModalOpen = false;
-      newChatTitle = "";
-      selectedDocs = [];
-
-      // Route reflects the newly created chat
-      navigate(`/workspace/${created?._id}`);
-    } catch (error) {
-      alert($t("chat.createFailed", { message: error.message }));
-    }
-  }
 
   function pageTitle(page) {
     if (page === "analytics") return $t("header.analytics");
     if (page === "settings") return $t("header.settings");
     return $t("header.workspace");
   }
-
-  $: if (isNewChatModalOpen) fetchDocs();
 
   $: if ($route.page) {
     mobileNavOpen = false;
@@ -253,95 +218,7 @@
       </div>
 
       {#if isNewChatModalOpen}
-        <div
-          class="fixed inset-0 bg-black/50 flex items-center justify-center p-3 sm:p-4 z-50"
-        >
-          <div
-            class="bg-[var(--color-bg-elevated)] rounded-xl w-full max-w-md max-h-[90dvh] overflow-hidden border border-[var(--color-border-default)]"
-          >
-            <div class="p-6 border-b border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)]">
-              <h3 class="text-xl font-semibold text-[var(--color-text-primary)]">
-                {$t("chat.startNew")}
-              </h3>
-            </div>
-
-            <div class="p-4 sm:p-6 space-y-4 overflow-y-auto max-h-[calc(90dvh-140px)]">
-              <div>
-                <label
-                  for="title"
-                  class="block text-sm font-medium text-[var(--color-text-secondary)] mb-1"
-                  >{$t("chat.chatTitle")}</label
-                >
-                <TextField
-                  bare
-                  unstyled
-                  id="title"
-                  type="text"
-                  bind:value={newChatTitle}
-                  placeholder={$t("chat.chatTitlePlaceholder")}
-                  inputClass="w-full px-4 py-2 border border-[var(--color-border-default)] rounded-lg bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-border-accent)] focus:[box-shadow:0_0_0_3px_rgba(91,79,207,0.12)]"
-                />
-              </div>
-
-              <div>
-                <div class="block text-sm font-medium text-[var(--color-text-secondary)] mb-1">
-                  {$t("chat.linkDocumentsOptional")}
-                </div>
-                {#if availableDocs.length === 0}
-                  <p class="text-sm text-[var(--color-text-muted)] italic">
-                    {$t("chat.noDocumentsAvailable")}
-                  </p>
-                {:else}
-                  <div
-                    class="max-h-40 overflow-y-auto border border-[var(--color-border-default)] rounded-md p-2 bg-[var(--color-bg-surface)]"
-                  >
-                    {#each availableDocs as doc}
-                      <label
-                        class="flex items-center space-x-2 p-1 hover:bg-[var(--color-bg-hover)] rounded"
-                      >
-                        <TextField
-                          bare
-                          unstyled
-                          type="checkbox"
-                          bind:group={selectedDocs}
-                          value={doc._id}
-                          inputClass="rounded border-[var(--color-border-default)] text-[var(--color-accent)]"
-                        />
-                        <span class="text-sm truncate" title={doc.title}
-                          >{doc.title}</span
-                        >
-                        <span
-                          class="text-xs px-2 py-0.5 rounded-full bg-[var(--color-status-ready-bg)] text-[var(--color-status-ready)] border border-[var(--color-status-ready-border)] ml-auto"
-                          >{doc.status}</span
-                        >
-                      </label>
-                    {/each}
-                  </div>
-                {/if}
-              </div>
-            </div>
-
-            <div
-              class="p-4 bg-[var(--color-bg-app)] border-t border-[var(--color-border-subtle)] flex flex-col-reverse sm:flex-row sm:justify-end gap-3"
-            >
-              <Button
-                unstyled
-                on:click={() => (isNewChatModalOpen = false)}
-                className="w-full sm:w-auto px-4 py-2 min-h-11 text-sm font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)] rounded-lg transition-colors border border-[var(--color-border-default)]"
-              >
-                {$t("common.cancel")}
-              </Button>
-              <Button
-                unstyled
-                on:click={handleNewChat}
-                disabled={!newChatTitle.trim()}
-                className="w-full sm:w-auto px-4 py-2 min-h-11 text-sm font-medium text-white bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {$t("chat.createChat")}
-              </Button>
-            </div>
-          </div>
-        </div>
+        <NewChatModal onClose={() => (isNewChatModalOpen = false)} />
       {/if}
     {:else if $route.page === "analytics"}
       <div class="flex-1 overflow-auto px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-6">
