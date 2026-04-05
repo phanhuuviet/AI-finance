@@ -3,7 +3,6 @@
   import TokenUsageChart from "../pages/token-usage-chart/TokenUsageChart.svelte";
   import Settings from "../pages/settings/Settings.svelte";
 
-  import { chatStore } from "../stores/chat.js";
   import { workspaceStore } from "../stores/workspace.js";
   import WorkspacePanel from "../pages/workspace/WorkspacePanel.svelte";
   import NewChatModal from "../pages/workspace/components/chat/NewChatModal.svelte";
@@ -58,19 +57,14 @@
     if (!chatId) {
       if ($workspaceStore.currentSessionId) {
         workspaceStore.setCurrentSession(null);
-        chatStore.setCurrentSession(null);
       }
     }
     if (chatId && chatId !== $workspaceStore.currentSessionId) {
       workspaceStore.setCurrentSession(chatId);
-      chatStore.setCurrentSession(chatId);
       lastLoadedChatId = chatId;
-      chatStore.loadMessages(chatId);
     } else if (chatId && chatId === $workspaceStore.currentSessionId && lastLoadedChatId !== chatId) {
       // Direct URL load (or back/forward) where store already has chatId but messages not loaded in this session
       lastLoadedChatId = chatId;
-      chatStore.setCurrentSession(chatId);
-      chatStore.loadMessages(chatId);
     }
   }
 </script>

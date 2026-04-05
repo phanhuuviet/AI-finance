@@ -1,15 +1,21 @@
 import type { Id, ISODateString } from './common.model';
 
-export type ChatRole = 'user' | 'assistant' | 'system';
-
 export interface ChatMessage {
-  id: Id;
-  role: ChatRole;
+  id: string;
+  session_id: string;
+  role: 'assistant' | 'user_message';
   content: string;
-  created_at?: ISODateString;
-  [key: string]: unknown;
+  metadata_json: Record<string, unknown>;
+  created_at: string;
 }
 
+export interface ChatHistory {
+  session_id: string;
+  messages: ChatMessage[];
+  count: number;
+}
+
+// Legacy types kept to avoid breaking older JS stores/components.
 export interface ChatSession {
   _id: Id;
   title: string;

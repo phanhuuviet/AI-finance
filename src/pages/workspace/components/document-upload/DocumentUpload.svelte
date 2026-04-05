@@ -2,8 +2,14 @@
   import { fade } from "svelte/transition";
   import { onMount } from "svelte";
   import { dashboardStore } from "../../../../stores/dashboard.js";
-  import { workspaceStore } from "../../../../stores/workspace.js";
-  import { attachmentsStore } from "../../../../stores/attachments.js";
+  import { documentService } from "$lib/services/document.service";
+  import {
+    documentStore,
+    documents,
+    documentPagination,
+    currentPage,
+    isCreatingDoc,
+  } from "$lib/stores/document.store";
   import Button from "$lib/components/common/Button.svelte";
   import TextField from "$lib/components/common/TextField.svelte";
   import TextareaField from "$lib/components/common/TextareaField.svelte";
@@ -11,12 +17,11 @@
   import ErrorFallback from "$lib/components/common/ErrorFallback.svelte";
   import { t } from "../../../../lib/i18n";
 
-  /** @typedef {import('../../../../lib/models').DocumentItem} DocumentItem */
-
   /** @type {FileList | null} */
   let file = null;
   let url = "";
   let activeInputMethod = "upload";
+  let title = "";
   let pastedText = `Artificial intelligence (AI) is transforming industries worldwide.
 From healthcare diagnostics to financial forecasting, AI systems are
 enabling faster, more accurate decision-making. This document explores
@@ -24,25 +29,15 @@ key trends, challenges, and opportunities in enterprise AI adoption
 through 2025 and beyond.`;
   let success = "";
 
-  /** @type {string | null} */
-  let sessionId = null;
-  /** @type {Set<string>} */
-  let selectedSet = new Set();
-
-  $: sessionId = $workspaceStore.currentSessionId;
   $: documentsState = $dashboardStore.documents;
-  /** @type {DocumentItem[]} */
-  $: documents = documentsState.data || [];
-  $: selectedSet = sessionId
-    ? ($attachmentsStore[sessionId] ?? new Set())
-    : new Set();
+  $: documentState = $documentStore;
 
   onMount(() => {
-    dashboardStore.fetchDocuments();
+    documentService.loadDocuments(1);
   });
 
   async function fetchDocuments() {
-    await dashboardStore.fetchDocuments();
+    await documentService.loadDocuments($currentPage);
   }
 
   async function handleFileUpload() {
@@ -73,31 +68,48 @@ through 2025 and beyond.`;
     }
   }
 
-  function handleAddText() {
-    if (!pastedText.trim()) return;
-
-    // Mock action only: this lets QA verify the pasted content payload quickly.
-    console.log("Pasted text content:", pastedText);
-    success = "Text added successfully.";
-  }
-
-  /**
-   * @param {string} docId
-   * @param {Event} e
-   */
-  function toggleAttach(docId, e) {
-    const target = /** @type {HTMLInputElement} */ (e.currentTarget);
-    attachmentsStore.toggleDocument(sessionId, docId, target.checked);
-  }
-
-  async function deleteDocument(id) {
-    if (!confirm($t("documents.confirmDelete"))) return;
-
+  async function handleAddText() {
+    if (!title.trim() || !pastedText.trim()) return;
     try {
-      await dashboardStore.deleteDocument(id);
-    } catch (err) {
-      alert($t("documents.deleteFailed", { message: err.message }));
+      await documentService.createDocument(title.trim(), pastedText.trim());
+      title = "";
+      pastedText = "";
+    } catch {
+      // error is displayed from $documentStore.error
     }
+  }
+
+  function truncateContent(content) {
+    if (!content) return "";
+    return content.length > 80 ? `${content.slice(0, 80)}...` : content;
+  }
+
+  function formatDateTime(value) {
+    const date = new Date(value);
+    const dd = String(date.getDate()).padStart(2, "0");
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const yyyy = date.getFullYear();
+    const hh = String(date.getHours()).padStart(2, "0");
+    const min = String(date.getMinutes()).padStart(2, "0");
+    return `${dd}/${mm}/${yyyy} ${hh}:${min}`;
+  }
+
+  function statusLabel(status) {
+    if (status === "processed") return "Ready";
+    if (status === "processing") return "Processing";
+    return "Error";
+  }
+
+  function statusDotClass(status) {
+    if (status === "processed") return "bg-[var(--green-500,#10B981)]";
+    if (status === "processing") return "bg-[var(--amber-500,#F59E0B)] animate-pulse";
+    return "bg-[var(--rose-500,#F43F5E)]";
+  }
+
+  function sourceTypeClass(sourceType) {
+    if (sourceType === "raw") return "bg-[var(--teal-50,#F0FDFA)] text-[var(--teal-600,#0D9488)]";
+    if (sourceType === "url") return "bg-[var(--blue-50,#EFF6FF)] text-[var(--blue-600,#2563EB)]";
+    return "bg-[var(--amber-50,#FFFBEB)] text-[var(--amber-600,#D97706)]";
   }
 </script>
 
@@ -206,6 +218,14 @@ through 2025 and beyond.`;
           Paste or type raw content directly into the workspace.
         </p>
 
+        <TextField
+          bind:value={title}
+          label="Title"
+          placeholder="Enter document title..."
+          required
+          containerClass="mb-4"
+        />
+
         <TextareaField
           id="pasted_text_document"
           label=" "
@@ -219,11 +239,15 @@ through 2025 and beyond.`;
         <Button
           block
           on:click={handleAddText}
-          disabled={!pastedText.trim()}
+          disabled={!title.trim() || !pastedText.trim() || $isCreatingDoc}
           rounded="rounded-md"
         >
-          Add Text
+          {$isCreatingDoc ? "Saving..." : "Add Text"}
         </Button>
+
+        {#if documentState.error}
+          <p class="mt-3 text-sm text-[var(--color-danger)]">{documentState.error}</p>
+        {/if}
       </div>
     {/if}
   </div>
@@ -241,107 +265,161 @@ through 2025 and beyond.`;
       </Button>
     </div>
 
-    {#if !sessionId}
-      <div
-        class="p-4 rounded-md bg-[var(--color-bg-app)] border border-[var(--color-border-default)] text-sm text-[var(--color-text-secondary)]"
-      >
-        {$t("documents.selectSessionHint")}
-      </div>
-    {/if}
-
-    {#if documentsState.loading}
+    {#if documentState.isLoading}
       <div class="overflow-x-auto" aria-live="polite">
         <div class="space-y-3 py-2">
-          <LoadingBlock rows={1} rowHeight="h-8" active={documentsState.showLoading} />
-          <LoadingBlock rows={6} rowHeight="h-12" active={documentsState.showLoading} />
+          <LoadingBlock rows={1} rowHeight="h-8" active={documentState.isLoading} />
+          <LoadingBlock rows={6} rowHeight="h-12" active={documentState.isLoading} />
         </div>
       </div>
-    {:else if documentsState.error}
+    {:else if documentState.error}
       <ErrorFallback
         compact={true}
-        message={documentsState.error}
+        message={documentState.error}
         retryLabel={$t("documents.retryDocuments")}
         on:retry={fetchDocuments}
       />
-    {:else if documents.length === 0}
+    {:else if $documents.length === 0}
       <p class="text-[var(--color-text-muted)] text-center py-4">{$t("documents.empty")}</p>
     {:else}
       <div class="overflow-x-auto" transition:fade={{ duration: 180 }}>
         <table class="w-full min-w-[680px] text-sm text-left text-[var(--color-text-secondary)]">
           <thead class="text-xs uppercase bg-[var(--color-bg-app)] text-[var(--color-text-muted)] border-b border-[var(--color-border-default)] tracking-[0.06em]">
             <tr>
-              <th scope="col" class="px-3 sm:px-4 py-3">{$t("documents.attach")}</th>
-              <th scope="col" class="px-3 sm:px-4 py-3">{$t("documents.title")}</th>
-              <th scope="col" class="px-3 sm:px-4 py-3">{$t("documents.source")}</th>
-              <th scope="col" class="px-3 sm:px-4 py-3">{$t("common.status")}</th>
-              <th scope="col" class="px-3 sm:px-4 py-3">{$t("documents.dateAdded")}</th>
-              <th scope="col" class="px-3 sm:px-4 py-3 text-right">{$t("common.actions")}</th>
+              <th scope="col" class="px-3 sm:px-4 py-3">Title</th>
+              <th scope="col" class="px-3 sm:px-4 py-3">Content</th>
+              <th scope="col" class="px-3 sm:px-4 py-3">Source Type</th>
+              <th scope="col" class="px-3 sm:px-4 py-3">Status</th>
+              <th scope="col" class="px-3 sm:px-4 py-3">Created At</th>
             </tr>
           </thead>
           <tbody>
-            {#each documents as doc}
+            {#each $documents as document}
               <tr class="bg-transparent border-b border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-hover)]">
-                <td class="px-3 sm:px-4 py-4">
-                  <TextField
-                    bare
-                    unstyled
-                    type="checkbox"
-                    checked={selectedSet.has(doc._id)}
-                    disabled={!sessionId}
-                    on:change={(e) => toggleAttach(doc._id, e)}
-                    aria-label={$t("documents.attachToChat", { title: doc.title })}
-                    inputClass="h-4 w-4 rounded border-[var(--color-border-default)] text-[var(--color-accent)] focus:[box-shadow:0_0_0_3px_rgba(91,79,207,0.12)] disabled:opacity-50 accent-[var(--color-accent)]"
-                  />
-                </td>
                 <td
                   class="px-3 sm:px-4 py-4 font-medium text-[var(--color-text-primary)] truncate max-w-[140px] sm:max-w-[200px]"
-                  title={doc.title}
+                  title={document.title}
                 >
-                  {doc.title}
-                </td>
-                <td class="px-3 sm:px-4 py-4">
-                  <span class="px-2 py-1 rounded-md text-[11px] font-medium uppercase tracking-[0.04em] bg-[var(--color-bg-hover)] text-[var(--color-text-secondary)] border border-[var(--color-border-default)]"
-                    >{doc.source_type}</span
-                  >
-                </td>
-                <td class="px-3 sm:px-4 py-4">
-                  {#if doc.status === "ready"}
-                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-md border border-[var(--color-status-ready-border)] bg-[var(--color-status-ready-bg)] text-[var(--color-status-ready)] text-xs font-medium">
-                      <span class="w-2 h-2 rounded-full bg-[var(--color-status-ready)]"></span> {$t("documents.statusReady")}
-                    </span>
-                  {:else if doc.status === "processing"}
-                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-md border border-[var(--color-status-processing-border)] bg-[var(--color-status-processing-bg)] text-[var(--color-status-processing)] text-xs font-medium">
-                      <span
-                        class="w-2 h-2 rounded-full bg-[var(--color-status-processing)]"
-                      ></span> {$t("documents.statusProcessing")}
-                    </span>
-                  {:else}
-                    <span
-                      class="inline-flex items-center gap-1.5 px-2 py-1 rounded-md border border-[var(--color-danger-light)] bg-[var(--color-status-error-bg)] text-[var(--color-status-error)] text-xs font-medium"
-                      title={String(doc.error_message ?? "")}
+                  {#if document.source_url}
+                    <a
+                      href={document.source_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="text-[var(--color-accent-text)] hover:underline"
                     >
-                      <span class="w-2 h-2 rounded-full bg-[var(--color-status-error)]"></span> {$t("documents.statusFailed")}
-                    </span>
+                      {document.title}
+                    </a>
+                  {:else}
+                    <span>{document.title}</span>
                   {/if}
                 </td>
-                <td class="px-3 sm:px-4 py-4"
-                  >{new Date(doc.created_at).toLocaleDateString()}</td
-                >
-                <td class="px-3 sm:px-4 py-4 text-right">
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    className="px-3 py-1.5 rounded-md"
-                    on:click={() => deleteDocument(doc._id)}
-                  >
-                    {$t("common.delete")}
-                  </Button>
+
+                <td class="px-3 sm:px-4 py-4 max-w-[320px] truncate" title={document.content}>
+                  {truncateContent(document.content)}
+                </td>
+
+                <td class="px-3 sm:px-4 py-4">
+                  <span class={`inline-flex rounded-md px-2 py-1 text-[11px] font-medium uppercase tracking-[0.04em] ${sourceTypeClass(document.source_type)}`}>
+                    {document.source_type}
+                  </span>
+                </td>
+
+                <td class="px-3 sm:px-4 py-4">
+                  <span class="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--color-text-secondary)]">
+                    <span class={`h-2 w-2 rounded-full ${statusDotClass(document.status)}`}></span>
+                    {statusLabel(document.status)}
+                  </span>
+                </td>
+
+                <td class="px-3 sm:px-4 py-4">
+                  {formatDateTime(document.created_at)}
                 </td>
               </tr>
             {/each}
           </tbody>
         </table>
+
+        {#if $documentPagination && $documentPagination.totalPages > 1}
+          <div class="pagination">
+            <span class="pagination-info">
+              Showing {($currentPage - 1) * 20 + 1}-{Math.min($currentPage * 20, $documentPagination.total)} of {$documentPagination.total}
+            </span>
+            <div class="pagination-controls">
+              <button
+                disabled={$currentPage === 1}
+                on:click={() => documentService.goToPage($currentPage - 1)}
+              >
+                &larr; Prev
+              </button>
+
+              {#each Array($documentPagination.totalPages) as _, i}
+                <button
+                  class:active={$currentPage === i + 1}
+                  on:click={() => documentService.goToPage(i + 1)}
+                >
+                  {i + 1}
+                </button>
+              {/each}
+
+              <button
+                disabled={$currentPage === $documentPagination.totalPages}
+                on:click={() => documentService.goToPage($currentPage + 1)}
+              >
+                Next &rarr;
+              </button>
+            </div>
+          </div>
+        {/if}
       </div>
     {/if}
   </div>
 </div>
+
+<style>
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  .pagination-info {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  .pagination-controls {
+    display: flex;
+    gap: 4px;
+  }
+
+  .pagination-controls button {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    border-radius: var(--radius-sm, 6px);
+    border: 1px solid var(--border-default);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .pagination-controls button:hover:not(:disabled) {
+    background: var(--purple-50);
+    border-color: var(--border-purple);
+  }
+
+  .pagination-controls button.active {
+    background: var(--gradient-accent);
+    color: #ffffff;
+    border-color: transparent;
+    font-weight: 600;
+  }
+
+  .pagination-controls button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+</style>

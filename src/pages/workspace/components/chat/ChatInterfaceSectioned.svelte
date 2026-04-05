@@ -1,7 +1,9 @@
 <script>
   import { afterUpdate } from "svelte";
   import { fade } from "svelte/transition";
-  import { chatStore } from "../../../../stores/chat.js";
+  import { marked } from "marked";
+  import { chatStore, chatMessages } from "$lib/stores/chat.store";
+  import { chatService } from "$lib/services/chat.service";
   import { wsStore } from "../../../../stores/websocket.js";
 
   import { sendWebSocketMessage } from "../../../../lib/services/websocket.service";
@@ -23,18 +25,25 @@
   let chatContainer = null;
 
   /** @type {ChatMessage[]} */
-  $: messages = sessionId ? $chatStore.messages[sessionId] || [] : [];
-  $: messageState = sessionId
-    ? ($chatStore.messagesState?.[sessionId] || {
-        data: null,
-        loading: false,
-        showLoading: false,
-        error: null
-      })
-    : { data: null, loading: false, showLoading: false, error: null };
+  $: messages = (sessionId && $chatStore.activeSessionId === sessionId
+    ? $chatMessages
+    : [])
+    .slice()
+    .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+
+  $: isLoadingHistory = Boolean(sessionId) && $chatStore.isLoading;
+  $: historyError = $chatStore.error;
   $: isConnected = $wsStore.status === "connected";
   $: selectedDocIds = $currentSessionSelectedDocIds;
   $: selectedCount = selectedDocIds?.length ?? 0;
+
+  function renderMarkdown(content) {
+    return /** @type {string} */ (marked.parse(content));
+  }
+
+  function formatTime(value) {
+    return new Date(value).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
+  }
 
   function scrollToBottom() {
     if (chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -81,40 +90,53 @@
       <div class="h-full flex items-center justify-center text-[var(--color-text-muted)]">
         {$t("chat.selectChatHint")}
       </div>
-    {:else if messageState.loading}
+    {:else if isLoadingHistory}
       <div class="space-y-4" aria-live="polite">
-        <LoadingBlock rows={2} rowHeight="h-10" className="max-w-[75%]" active={messageState.showLoading} />
+        <LoadingBlock rows={2} rowHeight="h-10" className="max-w-[72%]" active={true} />
         <div class="flex justify-end">
-          <LoadingBlock rows={1} rowHeight="h-10" className="w-[60%]" active={messageState.showLoading} />
+          <LoadingBlock rows={1} rowHeight="h-10" className="w-[58%]" active={true} />
         </div>
-        <LoadingBlock rows={2} rowHeight="h-10" className="max-w-[70%]" active={messageState.showLoading} />
+        <LoadingBlock rows={2} rowHeight="h-10" className="max-w-[68%]" active={true} />
       </div>
-    {:else if messageState.error}
+    {:else if historyError}
       <ErrorFallback
         compact={true}
-        message={messageState.error}
+        message={historyError}
         retryLabel={$t("chat.retryLoadingMessages")}
-        on:retry={() => sessionId && chatStore.loadMessages(sessionId)}
+        on:retry={() => sessionId && chatService.loadHistory(sessionId)}
       />
     {:else if messages.length === 0}
       <div class="h-full flex items-center justify-center text-[var(--color-text-muted)]">
-        {$t("chat.empty")}
+        No messages yet. Start a conversation.
       </div>
     {:else}
       <div transition:fade={{ duration: 180 }}>
         {#each messages as msg}
           <div
-            class={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+            class={`mb-3 flex ${msg.role === "user_message" ? "justify-end" : "justify-start"}`}
           >
-            <div
-              class={`max-w-[88%] sm:max-w-[75%] rounded-lg p-3 ${
-                msg.role === "user"
-                  ? "bg-[var(--color-accent)] text-white rounded-br-none"
-                  : "bg-[var(--color-bg-hover)] text-[var(--color-text-primary)] rounded-bl-none"
-              }`}
-            >
-              <div class="whitespace-pre-wrap font-sans text-sm leading-relaxed">
-                {msg.content}
+            <div class="max-w-[88%] sm:max-w-[75%]">
+              {#if msg.role === "assistant"}
+                <span class="mb-1 inline-flex rounded-full bg-[var(--purple-100)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.05em] text-[var(--purple-700)]">
+                  Assistant
+                </span>
+              {/if}
+
+              <div
+                class={`rounded-[12px] p-3 text-sm leading-relaxed ${
+                  msg.role === "user_message"
+                    ? "bg-[var(--gradient-accent)] text-white rounded-tr-none"
+                    : "bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-purple)] rounded-tl-none"
+                }`}
+              >
+                {#if msg.role === "assistant"}
+                  <div class="markdown-body">{@html renderMarkdown(msg.content)}</div>
+                {:else}
+                  <p class="whitespace-pre-wrap">{msg.content}</p>
+                {/if}
+                <span class={`mt-2 block text-xs ${msg.role === "user_message" ? "text-white/80" : "text-[var(--text-muted)]"}`}>
+                  {formatTime(msg.created_at)}
+                </span>
               </div>
             </div>
           </div>
@@ -190,3 +212,26 @@
     </div>
   </div>
 </div>
+
+<style>
+  .markdown-body :global(p) {
+    margin: 0;
+  }
+
+  .markdown-body :global(p + p) {
+    margin-top: 0.5rem;
+  }
+
+  .markdown-body :global(ul),
+  .markdown-body :global(ol) {
+    margin: 0.35rem 0 0 1rem;
+    padding: 0;
+  }
+
+  .markdown-body :global(code) {
+    font-size: 0.85em;
+    background: rgba(99, 102, 241, 0.12);
+    border-radius: 4px;
+    padding: 0.1rem 0.25rem;
+  }
+</style>

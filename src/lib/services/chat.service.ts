@@ -1,29 +1,24 @@
-import { chatApi } from '../api';
-import { ApiError } from '../api/base/http';
-import type { ChatSession, ChatSessionDetail, Id, PaginationMeta } from '../models';
+import { chatApi } from '$lib/api/modules/chat.api';
+import { chatStore } from '$lib/stores/chat.store';
+import { ApiError } from '$lib/api/base/http';
 
 export const chatService = {
-  async getSessions(): Promise<{ data: ChatSession[]; pagination?: PaginationMeta }> {
+  async loadHistory(sessionId: string): Promise<void> {
+    chatStore.update((s) => ({ ...s, activeSessionId: sessionId, isLoading: true, error: null, messages: [] }));
     try {
-      return await chatApi.getSessions();
-    } catch (error) {
-      throw ApiError.fromUnknown(error);
+      const { data } = await chatApi.getHistory(sessionId);
+      chatStore.update((s) => ({
+        ...s,
+        messages: data.messages,
+        isLoading: false,
+      }));
+    } catch (err) {
+      const message = err instanceof ApiError ? err.message : 'HISTORY_LOAD_FAILED';
+      chatStore.update((s) => ({ ...s, error: message, isLoading: false }));
     }
   },
 
-  async createSession(title: string, documentIds: Id[] = []): Promise<ChatSession> {
-    try {
-      return await chatApi.createSession(title, documentIds);
-    } catch (error) {
-      throw ApiError.fromUnknown(error);
-    }
+  clearHistory(): void {
+    chatStore.update((s) => ({ ...s, messages: [], activeSessionId: null }));
   },
-
-  async getSessionDetail(sessionId: Id): Promise<ChatSessionDetail> {
-    try {
-      return await chatApi.getSessionDetail(sessionId);
-    } catch (error) {
-      throw ApiError.fromUnknown(error);
-    }
-  }
 };

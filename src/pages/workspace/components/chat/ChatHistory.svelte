@@ -4,6 +4,7 @@
   import { workspaceStore } from "../../../../stores/workspace.js";
   import { navigate } from "../../../../stores/router.js";
   import { sessionStore, sessions } from "$lib/stores/session.store";
+  import { chatService } from "$lib/services/chat.service";
   import LoadingBlock from "$lib/components/common/LoadingBlock.svelte";
   import TextField from "$lib/components/common/TextField.svelte";
   import Button from "$lib/components/common/Button.svelte";
@@ -37,6 +38,7 @@
 
   /** @param {string} id */
   async function selectSession(id) {
+    await chatService.loadHistory(id);
     dispatch("select", { id });
     navigate(`/workspace/${id}`);
   }

@@ -1,14 +1,29 @@
-import type { ISODateString, Id } from './common.model';
+export type DocumentSourceType = 'raw' | 'url' | 'file';
+export type DocumentStatus = 'processed' | 'processing' | 'error';
 
-export type DocumentStatus = 'ready' | 'processing' | 'failed' | string;
-export type DocumentSourceType = 'Video' | 'Website' | 'File' | string;
-
-export interface DocumentItem {
-  _id: Id;
+export interface Document {
+  id: string;
+  user_id: string;
   title: string;
-  source_type?: DocumentSourceType;
-  status?: DocumentStatus;
-  created_at?: ISODateString | string;
-  error_message?: string;
-  [key: string]: unknown;
+  content: string;
+  source_type: DocumentSourceType;
+  source_url: string | null;
+  status: DocumentStatus;
+  metadata_json: Record<string, unknown>;
+  model_metadata: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
 }
+
+export interface CreateDocumentRequest {
+  title: string;
+  content: string;
+  source_type: 'raw';
+  model_metadata: {
+    indexing_state: 'queued';
+    paper_context: { source: 'arxiv' };
+  };
+}
+
+// Legacy alias for existing dashboard modules.
+export type DocumentItem = Document;
