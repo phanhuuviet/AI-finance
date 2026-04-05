@@ -44,6 +44,7 @@ class WebSocketService {
       activeSessionId: sessionId,
       isConnecting: true,
       isGenerating: false,
+      isTyping: false,
       wsError: null,
       streamingContent: '',
     }));
@@ -71,7 +72,7 @@ class WebSocketService {
     this.ws.onclose = (event: CloseEvent) => {
       this.stopPing();
       this.isGenerating = false;
-      chatStore.update((s) => ({ ...s, isConnecting: false, isGenerating: false }));
+      chatStore.update((s) => ({ ...s, isConnecting: false, isGenerating: false, isTyping: false }));
 
       if (event.code === 4401) {
         tokenStorage.clearTokens();
@@ -84,13 +85,23 @@ class WebSocketService {
 
   private handleMessage(msg: WsEnvelope): void {
     switch (msg.type) {
-      case 'ack':
-        if (msg.payload?.message === 'CHAT_CONNECTED') {
+      case 'ack': {
+        const message = msg.payload?.message;
+        if (message === 'CHAT_CONNECTED') {
           this.receivedInitialChunk = false;
           this.skippingInitialScript = false;
-          chatStore.update((s) => ({ ...s, isConnecting: false, wsError: null }));
+          chatStore.update((s) => ({ ...s, isConnecting: false, isTyping: false, wsError: null }));
+        }
+
+        if (message === 'CHAT_MESSAGE_RECEIVED') {
+          chatStore.update((s) => ({
+            ...s,
+            isTyping: true,
+            streamingContent: '',
+          }));
         }
         break;
+      }
 
       case 'assistant_chunk': {
         const phase = msg.payload?.data?.phase as string | undefined;
@@ -109,40 +120,56 @@ class WebSocketService {
         this.isGenerating = true;
         chatStore.update((s) => ({
           ...s,
+          isTyping: false,
           isGenerating: true,
           streamingContent: (s.streamingContent ?? '') + content,
         }));
         break;
       }
 
-      case 'assistant_done':
+      case 'assistant_done': {
         if (this.skippingInitialScript) {
           this.skippingInitialScript = false;
+          chatStore.update((s) => ({ ...s, isTyping: false, isGenerating: false }));
           return;
         }
 
         chatStore.update((s) => {
-          const finishedContent = s.streamingContent ?? '';
-          if (!finishedContent) return { ...s, isGenerating: false, streamingContent: '' };
-          const newMessage = {
-            id: crypto.randomUUID(),
-            session_id: s.activeSessionId ?? '',
-            role: 'assistant' as const,
-            content: finishedContent,
-            metadata_json: {},
-            created_at: new Date().toISOString(),
-          };
+          const finishedContent = s.streamingContent?.trim() ?? '';
+          const newMessages = finishedContent
+            ? [
+                ...s.messages,
+                {
+                  id: crypto.randomUUID(),
+                  session_id: s.activeSessionId ?? '',
+                  role: 'assistant' as const,
+                  content: finishedContent,
+                  metadata_json: {},
+                  created_at: new Date().toISOString(),
+                },
+              ]
+            : s.messages;
+
           return {
             ...s,
-            messages: [...s.messages, newMessage],
+            messages: newMessages,
             streamingContent: '',
             isGenerating: false,
+            isTyping: false,
           };
         });
         this.isGenerating = false;
         break;
+      }
 
       case 'error': {
+        chatStore.update((s) => ({
+          ...s,
+          isTyping: false,
+          isGenerating: false,
+          streamingContent: '',
+        }));
+
         const payload = msg.payload;
         const retryable = payload?.data?.retryable as boolean | undefined;
         const retryAfter = (payload?.data?.retry_after_seconds as number | undefined) ?? 3;
@@ -160,8 +187,6 @@ class WebSocketService {
           this.isGenerating = false;
           chatStore.update((s) => ({
             ...s,
-            isGenerating: false,
-            streamingContent: '',
             wsError: payload?.message ?? 'UNKNOWN_ERROR',
           }));
         }
@@ -218,7 +243,7 @@ class WebSocketService {
     }
     this.ws.send(JSON.stringify({ type: 'stop_generation' }));
     this.isGenerating = false;
-    chatStore.update((s) => ({ ...s, isGenerating: false, streamingContent: '' }));
+    chatStore.update((s) => ({ ...s, isGenerating: false, isTyping: false, streamingContent: '' }));
   }
 
   disconnect(): void {
@@ -237,6 +262,7 @@ class WebSocketService {
       ...s,
       isConnecting: false,
       isGenerating: false,
+      isTyping: false,
       streamingContent: '',
       wsError: null,
     }));

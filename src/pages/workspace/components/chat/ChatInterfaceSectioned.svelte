@@ -6,6 +6,7 @@
     chatStore,
     chatMessages,
     isGenerating,
+    isTyping,
     isConnecting,
     streamingContent,
     wsError,
@@ -16,6 +17,7 @@
 
   import LoadingBlock from "$lib/components/common/LoadingBlock.svelte";
   import ErrorFallback from "$lib/components/common/ErrorFallback.svelte";
+  import TypingIndicator from "$lib/components/common/TypingIndicator.svelte";
   import TextField from "$lib/components/common/TextField.svelte";
   import Button from "$lib/components/common/Button.svelte";
   import { t } from "../../../../lib/i18n";
@@ -39,7 +41,7 @@
 
   $: isLoadingHistory = Boolean(sessionId) && $chatStore.isLoading;
   $: historyError = $chatStore.error;
-  $: canSend = inputValue.trim().length > 0 && !$isGenerating && !$isConnecting;
+  $: canSend = inputValue.trim().length > 0 && !$isGenerating && !$isTyping && !$isConnecting;
 
   function renderMarkdown(content) {
     return /** @type {string} */ (marked.parse(content));
@@ -153,7 +155,18 @@
           </div>
         {/each}
 
-        {#if $streamingContent}
+        {#if $isTyping}
+          <div class="mb-3 flex justify-start">
+            <div class="max-w-[88%] sm:max-w-[75%]">
+              <span class="mb-1 inline-flex rounded-full bg-[var(--purple-100)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.05em] text-[var(--purple-700)]">
+                AI
+              </span>
+              <TypingIndicator />
+            </div>
+          </div>
+        {/if}
+
+        {#if $streamingContent && !$isTyping}
           <div class="mb-3 flex justify-start">
             <div class="max-w-[88%] sm:max-w-[75%]">
               <span class="mb-1 inline-flex rounded-full bg-[var(--purple-100)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.05em] text-[var(--purple-700)]">
@@ -175,12 +188,12 @@
       unstyled
       bind:value={inputValue}
       placeholder="Type your message..."
-      disabled={$isGenerating || !sessionId || $isConnecting}
+      disabled={$isGenerating || $isTyping || !sessionId || $isConnecting}
       onkeydown={handleKeydown}
       inputClass="w-full px-3 sm:px-4 py-2.5 min-h-11 rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-border-accent)] focus:[box-shadow:0_0_0_3px_rgba(91,79,207,0.12)]"
     />
 
-    {#if $isGenerating}
+    {#if $isGenerating || $isTyping}
       <button
         class="shrink-0 flex items-center gap-1.5 px-5 py-2.5 rounded-[var(--radius-md)] border-[1.5px] border-[var(--rose-400)] bg-[var(--rose-50)] text-[var(--rose-600)] font-semibold text-sm whitespace-nowrap hover:bg-[var(--rose-100)]"
         on:click={handleStop}
