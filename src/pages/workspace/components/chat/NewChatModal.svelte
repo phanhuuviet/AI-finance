@@ -1,7 +1,9 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { sessionService } from '$lib/services/session.service';
+  import type { VideoConcept } from '$lib/models/session.model';
   import { sessionStore, videoConcepts, isCreating } from '$lib/stores/session.store';
+  import Autocomplete from '$lib/components/common/Autocomplete.svelte';
   import TextField from '$lib/components/common/TextField.svelte';
   import Button from '$lib/components/common/Button.svelte';
 
@@ -28,6 +30,15 @@
       .filter((p) => p.required)
       .some((p) => !promptValues[p.key]?.trim()) ||
     $isCreating;
+
+  async function fetchConceptOptions(query: string): Promise<VideoConcept[]> {
+    const keyword = query.trim().toLowerCase();
+    const all = $videoConcepts ?? [];
+    if (!keyword) return all;
+    return all.filter((concept) =>
+      `${concept.name} ${concept.description}`.toLowerCase().includes(keyword)
+    );
+  }
 
   onMount(() => {
     sessionService.loadVideoConcepts();
@@ -69,31 +80,19 @@
     <div class="p-5 sm:p-6 space-y-4 overflow-y-auto max-h-[calc(90dvh-154px)]">
       <TextField bind:value={title} label="Chat Title" placeholder="Enter chat title..." required />
 
-      <div class="field">
-        <label for="video-concept-select" class="mb-1.5 block text-[13px] font-medium text-[var(--text-primary,#1e1b4b)]">
-          Video Concept <span class="text-[var(--rose-500,#F43F5E)]">*</span>
-        </label>
+      <div class="mb-4">
+        <div class="block text-sm font-medium text-[var(--text-secondary)] mb-1.5">
+          Video Concept
+          <span class="text-[var(--rose-500,#F43F5E)] ml-0.5">*</span>
+        </div>
 
-        {#if $sessionStore.isLoadingConcepts}
-          <select
-            id="video-concept-select"
-            disabled
-            class="w-full px-3 py-2.5 min-h-11 border border-[var(--border-default)] rounded-[var(--radius-md)] bg-[var(--bg-input)] text-sm text-[var(--text-primary)]"
-          >
-            <option>Loading concepts...</option>
-          </select>
-        {:else}
-          <select
-            id="video-concept-select"
-            bind:value={selectedConceptId}
-            class="w-full px-3 py-2.5 min-h-11 border border-[var(--border-default)] rounded-[var(--radius-md)] bg-[var(--bg-input)] text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--indigo-400)] focus:[box-shadow:0_0_0_3px_rgba(99,102,241,0.15)]"
-          >
-            <option value="" disabled>Select a video concept...</option>
-            {#each $videoConcepts as concept}
-              <option value={concept.id}>{concept.name} — {concept.description}</option>
-            {/each}
-          </select>
-        {/if}
+        <Autocomplete
+          options={$videoConcepts}
+          bind:value={selectedConceptId}
+          loading={$sessionStore.isLoadingConcepts}
+          placeholder="Select a video concept..."
+          loadOptions={fetchConceptOptions}
+        />
       </div>
 
       {#if selectedConcept}
