@@ -1,3 +1,4 @@
+import { get } from 'svelte/store';
 import { documentApi } from '$lib/api/modules/document.api';
 import { documentStore } from '$lib/stores/document.store';
 import { ApiError } from '$lib/api/base/http';
@@ -44,5 +45,18 @@ export const documentService = {
 
   goToPage(page: number): void {
     documentService.loadDocuments(page);
+  },
+
+  async deleteDocument(documentId: string): Promise<void> {
+    documentStore.update((s) => ({ ...s, isLoading: true, error: null }));
+    try {
+      await documentApi.deleteDocument(documentId);
+      const currentPage = get(documentStore).currentPage;
+      await documentService.loadDocuments(currentPage);
+    } catch (err) {
+      const message = err instanceof ApiError ? err.message : 'DOCUMENT_DELETE_FAILED';
+      documentStore.update((s) => ({ ...s, error: message, isLoading: false }));
+      throw err;
+    }
   },
 };

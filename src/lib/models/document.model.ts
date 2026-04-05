@@ -25,5 +25,9 @@ export interface CreateDocumentRequest {
   };
 }
 
+export interface DeleteDocumentResponse {
+  document_id: string;
+}
+
 // Legacy alias for existing dashboard modules.
 export type DocumentItem = Document;

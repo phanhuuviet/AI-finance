@@ -28,6 +28,9 @@ enabling faster, more accurate decision-making. This document explores
 key trends, challenges, and opportunities in enterprise AI adoption
 through 2025 and beyond.`;
   let success = "";
+  let documentToDelete = null;
+  let showDeleteConfirm = false;
+  let isDeleting = false;
 
   $: documentsState = $dashboardStore.documents;
   $: documentState = $documentStore;
@@ -111,10 +114,33 @@ through 2025 and beyond.`;
     if (sourceType === "url") return "bg-[var(--blue-50,#EFF6FF)] text-[var(--blue-600,#2563EB)]";
     return "bg-[var(--amber-50,#FFFBEB)] text-[var(--amber-600,#D97706)]";
   }
+
+  function openDeleteConfirm(doc) {
+    documentToDelete = doc;
+    showDeleteConfirm = true;
+  }
+
+  function closeDeleteConfirm() {
+    documentToDelete = null;
+    showDeleteConfirm = false;
+  }
+
+  async function confirmDelete() {
+    if (!documentToDelete) return;
+    isDeleting = true;
+    try {
+      await documentService.deleteDocument(documentToDelete.id);
+      closeDeleteConfirm();
+    } catch {
+      // error shown from $documentStore.error
+    } finally {
+      isDeleting = false;
+    }
+  }
 </script>
 
 <div class="w-full max-w-5xl mx-auto space-y-4 sm:space-y-6 lg:space-y-8">
-  <div class="bg-[var(--color-bg-surface)] p-4 sm:p-6 rounded-xl border border-[var(--color-border-default)]">
+  <div class="relative bg-[var(--color-bg-surface)] p-4 sm:p-6 rounded-xl border border-[var(--color-border-default)]">
     <h2 class="text-lg sm:text-xl font-semibold mb-4 text-[var(--color-text-primary)]">{$t("documents.addDocuments")}</h2>
 
     {#if success}
@@ -291,6 +317,7 @@ through 2025 and beyond.`;
               <th scope="col" class="px-3 sm:px-4 py-3">Source Type</th>
               <th scope="col" class="px-3 sm:px-4 py-3">Status</th>
               <th scope="col" class="px-3 sm:px-4 py-3">Created At</th>
+              <th scope="col" class="px-3 sm:px-4 py-3 text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -334,6 +361,17 @@ through 2025 and beyond.`;
                 <td class="px-3 sm:px-4 py-4">
                   {formatDateTime(document.created_at)}
                 </td>
+
+                <td class="px-3 sm:px-4 py-4 text-right">
+                  <button
+                    class="btn-delete"
+                    on:click={() => openDeleteConfirm(document)}
+                    aria-label={`Delete ${document.title}`}
+                    type="button"
+                  >
+                    Delete
+                  </button>
+                </td>
               </tr>
             {/each}
           </tbody>
@@ -372,10 +410,124 @@ through 2025 and beyond.`;
         {/if}
       </div>
     {/if}
+
+    {#if showDeleteConfirm}
+      <div class="modal-overlay" on:click={closeDeleteConfirm} role="presentation"></div>
+
+      <div class="confirm-modal" role="dialog" aria-modal="true">
+        <h3 class="confirm-title">Delete Document</h3>
+        <p class="confirm-body">
+          Are you sure you want to delete
+          <strong>"{documentToDelete?.title}"</strong>?
+          This action cannot be undone.
+        </p>
+        <div class="confirm-actions">
+          <button class="btn-cancel" on:click={closeDeleteConfirm} disabled={isDeleting} type="button">
+            Cancel
+          </button>
+          <button class="btn-confirm-delete" on:click={confirmDelete} disabled={isDeleting} type="button">
+            {isDeleting ? 'Deleting...' : 'Delete'}
+          </button>
+        </div>
+      </div>
+    {/if}
   </div>
 </div>
 
 <style>
+  .btn-delete {
+    padding: 4px 12px;
+    border-radius: var(--radius-sm, 6px);
+    border: 1px solid var(--border-rose, #fecdd3);
+    background: var(--rose-50, #fff1f2);
+    color: var(--rose-600, #e11d48);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+
+  .btn-delete:hover {
+    background: var(--rose-100, #ffe4e6);
+    border-color: var(--rose-400, #fb7185);
+  }
+
+  .modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(30, 27, 75, 0.45);
+    border-radius: inherit;
+    z-index: 10;
+  }
+
+  .confirm-modal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 11;
+    background: var(--bg-card, #ffffff);
+    border: 1px solid var(--border-default, #e5e7eb);
+    border-radius: var(--radius-lg, 12px);
+    padding: 24px;
+    width: 400px;
+    max-width: 90%;
+  }
+
+  .confirm-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 8px;
+  }
+
+  .confirm-body {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin: 0 0 20px;
+    line-height: 1.6;
+  }
+
+  .confirm-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  .btn-cancel {
+    padding: 8px 16px;
+    border-radius: var(--radius-md, 8px);
+    border: 1px solid var(--border-default);
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .btn-cancel:hover {
+    background: var(--bg-card-hover);
+  }
+
+  .btn-confirm-delete {
+    padding: 8px 16px;
+    border-radius: var(--radius-md, 8px);
+    border: none;
+    background: var(--rose-600, #e11d48);
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .btn-confirm-delete:hover:not(:disabled) {
+    background: var(--rose-800, #9f1239);
+  }
+
+  .btn-confirm-delete:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
   .pagination {
     display: flex;
     align-items: center;

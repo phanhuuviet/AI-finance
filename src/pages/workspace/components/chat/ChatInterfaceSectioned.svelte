@@ -2,15 +2,21 @@
   import { afterUpdate } from "svelte";
   import { fade } from "svelte/transition";
   import { marked } from "marked";
-  import { chatStore, chatMessages } from "$lib/stores/chat.store";
+  import {
+    chatStore,
+    chatMessages,
+    isGenerating,
+    isConnecting,
+    streamingContent,
+    wsError,
+    activeSessionId,
+  } from "$lib/stores/chat.store";
   import { chatService } from "$lib/services/chat.service";
-  import { wsStore } from "../../../../stores/websocket.js";
+  import { wsService } from "$lib/services/websocket.service";
 
-  import { sendWebSocketMessage } from "../../../../lib/services/websocket.service";
-  import { currentSessionSelectedDocIds } from "../../../../stores/attachments.js";
   import LoadingBlock from "$lib/components/common/LoadingBlock.svelte";
   import ErrorFallback from "$lib/components/common/ErrorFallback.svelte";
-  import TextareaField from "$lib/components/common/TextareaField.svelte";
+  import TextField from "$lib/components/common/TextField.svelte";
   import Button from "$lib/components/common/Button.svelte";
   import { t } from "../../../../lib/i18n";
 
@@ -20,7 +26,7 @@
   /** @type {string | null} */
   export let sessionId = null;
 
-  let messageInput = "";
+  let inputValue = "";
   /** @type {HTMLDivElement | null} */
   let chatContainer = null;
 
@@ -33,9 +39,7 @@
 
   $: isLoadingHistory = Boolean(sessionId) && $chatStore.isLoading;
   $: historyError = $chatStore.error;
-  $: isConnected = $wsStore.status === "connected";
-  $: selectedDocIds = $currentSessionSelectedDocIds;
-  $: selectedCount = selectedDocIds?.length ?? 0;
+  $: canSend = inputValue.trim().length > 0 && !$isGenerating && !$isConnecting;
 
   function renderMarkdown(content) {
     return /** @type {string} */ (marked.parse(content));
@@ -51,17 +55,21 @@
 
   afterUpdate(scrollToBottom);
 
-  function sendMessage() {
-    if (!messageInput.trim() || !sessionId || !isConnected) return;
-    sendWebSocketMessage(sessionId, messageInput, selectedDocIds);
-    messageInput = "";
+  function handleSend() {
+    if (!canSend) return;
+    const content = inputValue.trim();
+    inputValue = "";
+    wsService.sendMessage(content, []);
   }
 
-  /** @param {KeyboardEvent} e */
+  function handleStop() {
+    wsService.stopGeneration();
+  }
+
   function handleKeydown(e) {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey && canSend) {
       e.preventDefault();
-      sendMessage();
+      handleSend();
     }
   }
 </script>
@@ -75,13 +83,16 @@
     <h2 class="text-base sm:text-lg font-semibold text-[var(--color-text-primary)]">
       {sessionId ? $t("chat.session") : $t("chat.selectChat")}
     </h2>
-    <div class="flex items-center gap-2">
-      <div
-        class={`w-3 h-3 rounded-full ${isConnected ? "bg-green-500" : "bg-red-500"}`}
-      ></div>
-      <span class="text-sm text-[var(--color-text-muted)]"
-        >{isConnected ? $t("chat.connected") : $t("chat.disconnected")}</span
-      >
+    <div class="flex items-center gap-3">
+      {#if $isConnecting}
+        <span class="ws-status ws-status--connecting">Connecting...</span>
+      {:else if $activeSessionId}
+        <span class="ws-status ws-status--connected">● Live</span>
+      {/if}
+
+      {#if $wsError}
+        <span class="ws-status ws-status--error">{$wsError}</span>
+      {/if}
     </div>
   </div>
 
@@ -113,7 +124,7 @@
       <div transition:fade={{ duration: 180 }}>
         {#each messages as msg}
           <div
-            class={`mb-3 flex ${msg.role === "user_message" ? "justify-end" : "justify-start"}`}
+            class={`mb-3 flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
           >
             <div class="max-w-[88%] sm:max-w-[75%]">
               {#if msg.role === "assistant"}
@@ -124,7 +135,7 @@
 
               <div
                 class={`rounded-[12px] p-3 text-sm leading-relaxed ${
-                  msg.role === "user_message"
+                  msg.role === "user"
                     ? "bg-[var(--gradient-accent)] text-white rounded-tr-none"
                     : "bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-purple)] rounded-tl-none"
                 }`}
@@ -134,86 +145,145 @@
                 {:else}
                   <p class="whitespace-pre-wrap">{msg.content}</p>
                 {/if}
-                <span class={`mt-2 block text-xs ${msg.role === "user_message" ? "text-white/80" : "text-[var(--text-muted)]"}`}>
+                <span class={`mt-2 block text-xs ${msg.role === "user" ? "text-white/80" : "text-[var(--text-muted)]"}`}>
                   {formatTime(msg.created_at)}
                 </span>
               </div>
             </div>
           </div>
         {/each}
+
+        {#if $streamingContent}
+          <div class="mb-3 flex justify-start">
+            <div class="max-w-[88%] sm:max-w-[75%]">
+              <span class="mb-1 inline-flex rounded-full bg-[var(--purple-100)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.05em] text-[var(--purple-700)]">
+                AI
+              </span>
+              <div class="bubble--streaming rounded-[12px] rounded-tl-none border p-3 text-sm leading-relaxed text-[var(--text-primary)]">
+                <div class="markdown-body inline">{@html renderMarkdown($streamingContent)}</div><span class="cursor-blink">|</span>
+              </div>
+            </div>
+          </div>
+        {/if}
       </div>
     {/if}
   </div>
 
-  <div class="p-3 sm:p-4 border-t border-[var(--color-border-default)] bg-[var(--color-bg-surface)] rounded-b-lg">
-    <div class="relative flex items-center">
-      <TextareaField
-        bare
-        unstyled
-        bind:value={messageInput}
-        onkeydown={handleKeydown}
-        disabled={!sessionId || !isConnected}
-        placeholder={!sessionId
-          ? $t("chat.selectChatFirst")
-          : $t("chat.typeMessage")}
-        textareaClass="w-full pl-3 sm:pl-4 pr-24 py-2.5 min-h-11 rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-border-accent)] focus:[box-shadow:0_0_0_3px_rgba(91,79,207,0.12)] resize-none h-12"
-        rows={1}
-      ></TextareaField>
+  <div class="chat-input-row bg-[var(--color-bg-surface)] rounded-b-lg">
+    <TextField
+      bare
+      unstyled
+      bind:value={inputValue}
+      placeholder="Type your message..."
+      disabled={$isGenerating || !sessionId || $isConnecting}
+      on:keydown={handleKeydown}
+      inputClass="w-full px-3 sm:px-4 py-2.5 min-h-11 rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-border-accent)] focus:[box-shadow:0_0_0_3px_rgba(91,79,207,0.12)]"
+    />
 
-      <!-- docs indicator (icon + badge) -->
-      <div class="absolute right-12 flex items-center">
-        <Button
-          unstyled
-          type="button"
-          className="relative p-2 min-h-11 min-w-11 text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"
-          aria-label={$t("chat.selectedDocuments")}
-          title={$t("chat.selectedDocuments")}
-          disabled
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            class="w-5 h-5"
-          >
-            <path
-              d="M7.5 3.75A2.25 2.25 0 0 0 5.25 6v12A2.25 2.25 0 0 0 7.5 20.25h9A2.25 2.25 0 0 0 18.75 18V9.621a2.25 2.25 0 0 0-.659-1.591l-3.371-3.371A2.25 2.25 0 0 0 13.129 4H7.5z"
-            />
-          </svg>
-          {#if selectedCount > 0}
-            <span
-              class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-[var(--color-accent)] text-white text-[10px] leading-[18px] text-center"
-              aria-label={$t("chat.documentsSelected", { count: selectedCount })}
-              >{selectedCount}</span
-            >
-          {/if}
-        </Button>
-      </div>
-
-      <Button
-        unstyled
-        on:click={sendMessage}
-        disabled={!messageInput.trim() || !sessionId || !isConnected}
-        className="absolute right-1.5 sm:right-2 p-2 min-h-11 min-w-11 inline-flex items-center justify-center text-[var(--color-accent-text)] hover:text-[var(--color-accent)] disabled:text-[var(--color-text-muted)] disabled:cursor-not-allowed"
-        aria-label={$t("chat.sendMessage")}
-        title={$t("chat.send")}
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          class="w-6 h-6"
-        >
-          <path
-            d="M3.478 2.404a.75.75 0 00-.926.941l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.404z"
-          />
-        </svg>
-      </Button>
-    </div>
+    {#if $isGenerating}
+      <button class="btn-stop" on:click={handleStop} aria-label="Stop generation" type="button">
+        <span class="stop-icon">■</span>
+        Stop
+      </button>
+    {:else}
+      <button class="btn-send" disabled={!canSend} on:click={handleSend} aria-label="Send message" type="button">
+        Send
+      </button>
+    {/if}
   </div>
 </div>
 
 <style>
+  .chat-input-row {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+    padding: 12px;
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  .btn-send {
+    flex-shrink: 0;
+    padding: 10px 20px;
+    border-radius: var(--radius-md);
+    border: none;
+    background: var(--gradient-accent);
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .btn-send:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn-stop {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 20px;
+    border-radius: var(--radius-md);
+    border: 1.5px solid var(--rose-400);
+    background: var(--rose-50);
+    color: var(--rose-600);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .btn-stop:hover {
+    background: var(--rose-100);
+  }
+
+  .stop-icon {
+    font-size: 10px;
+  }
+
+  .ws-status {
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .ws-status--connecting {
+    color: var(--amber-500);
+  }
+
+  .ws-status--connected {
+    color: var(--green-500);
+  }
+
+  .ws-status--error {
+    color: var(--rose-500);
+  }
+
+  .cursor-blink {
+    display: inline-block;
+    animation: blink 1s step-end infinite;
+    color: var(--purple-400);
+    margin-left: 2px;
+  }
+
+  @keyframes blink {
+    0%,
+    100% {
+      opacity: 1;
+    }
+
+    50% {
+      opacity: 0;
+    }
+  }
+
+  .bubble--streaming {
+    border-color: var(--border-purple);
+    background: var(--purple-50);
+  }
+
   .markdown-body :global(p) {
     margin: 0;
   }
