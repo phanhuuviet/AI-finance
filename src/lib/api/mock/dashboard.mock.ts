@@ -6,23 +6,6 @@ import type {
 } from '../../models';
 import type { MockRegistryEntry } from './mock.registry';
 
-let documents: DocumentItem[] = [
-  {
-    _id: 'doc_001',
-    title: 'Investor Brief Q1 2026.pdf',
-    source_type: 'File',
-    status: 'ready',
-    created_at: '2026-03-30T11:00:00.000Z'
-  },
-  {
-    _id: 'doc_002',
-    title: 'Market Signals March 2026',
-    source_type: 'Website',
-    status: 'processing',
-    created_at: '2026-04-01T07:30:00.000Z'
-  }
-];
-
 const studioBySession: Record<string, StudioOutput[]> = {
   chat_session_001: [
     {
@@ -107,46 +90,7 @@ export const dashboardMockEntries: MockRegistryEntry[] = [
   {
     method: 'GET',
     pattern: /^\/documents\/?$/,
-    handler: () => documents
-  },
-  {
-    method: 'POST',
-    pattern: /^\/documents\/upload\/?$/,
-    handler: () => {
-      const created: DocumentItem = {
-        _id: `doc_${Date.now()}`,
-        title: 'Uploaded Document.pdf',
-        source_type: 'File',
-        status: 'processing',
-        created_at: new Date().toISOString()
-      };
-      documents = [created, ...documents];
-      return { ok: true, document: created };
-    }
-  },
-  {
-    method: 'POST',
-    pattern: /^\/documents\/crawl\/?$/,
-    handler: () => {
-      const created: DocumentItem = {
-        _id: `doc_${Date.now()}`,
-        title: 'Crawled Website Content',
-        source_type: 'Website',
-        status: 'processing',
-        created_at: new Date().toISOString()
-      };
-      documents = [created, ...documents];
-      return { ok: true, document: created };
-    }
-  },
-  {
-    method: 'DELETE',
-    pattern: /^\/documents\/[^/]+\/?$/,
-    handler: ({ path }) => {
-      const id = decodeURIComponent(path.split('/').pop() || '');
-      documents = documents.filter((item) => item._id !== id);
-      return { ok: true };
-    }
+    handler: () => document
   },
   {
     method: 'GET',
