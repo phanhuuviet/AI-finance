@@ -73,6 +73,9 @@
 
   let modalTool = null;
   let pendingTool = null;
+  let isCreatingOutput = false;
+  let creatingModalProps = {};
+  $: creatingModalProps = { isCreating: isCreatingOutput };
 
   let isModalOpen = false;
   let isScriptPickerOpen = false;
@@ -177,7 +180,9 @@
   }
 
   async function createSelectedOutput() {
-    if (!sessionId || !modalTool) return;
+    if (!sessionId || !modalTool || isCreatingOutput) return;
+
+    isCreatingOutput = true;
 
     try {
       if (modalTool === "video_overview") {
@@ -204,6 +209,8 @@
       closeModal();
     } catch (e) {
       toast.show(e?.message || $t("studio.createFailed"), "error");
+    } finally {
+      isCreatingOutput = false;
     }
   }
 
@@ -365,6 +372,7 @@
 />
 
 <StudioModalAudioOverview
+  {...creatingModalProps}
   isOpen={isModalOpen && modalTool === "audio_overview"}
   title={$t(toolTitleKey("audio_overview"))}
   sessionId={sessionId}
@@ -375,6 +383,7 @@
 />
 
 <StudioModalVideoOverview
+  {...creatingModalProps}
   isOpen={isModalOpen && modalTool === "video_overview"}
   title={$t(toolTitleKey("video_overview"))}
   sessionId={sessionId}
@@ -389,6 +398,7 @@
 />
 
 <StudioModalMindmap
+  {...creatingModalProps}
   isOpen={isModalOpen && modalTool === "mindmap"}
   title={$t(toolTitleKey("mindmap"))}
   sessionId={sessionId}
@@ -399,6 +409,7 @@
 />
 
 <StudioModalReport
+  {...creatingModalProps}
   isOpen={isModalOpen && modalTool === "report"}
   title={$t(toolTitleKey("report"))}
   sessionId={sessionId}
@@ -409,6 +420,7 @@
 />
 
 <StudioModalQuiz
+  {...creatingModalProps}
   isOpen={isModalOpen && modalTool === "quiz"}
   title={$t(toolTitleKey("quiz"))}
   sessionId={sessionId}
@@ -419,6 +431,7 @@
 />
 
 <StudioModalData
+  {...creatingModalProps}
   isOpen={isModalOpen && modalTool === "data"}
   title={$t(toolTitleKey("data"))}
   sessionId={sessionId}

@@ -18,6 +18,9 @@
   /** @type {string | null} */
   export let sessionId = null;
 
+  /** @type {boolean} */
+  export let isCreating = false;
+
   /** @type {string} */
   export let commonLanguage = "vi";
 
@@ -61,10 +64,12 @@
       : `${Math.floor(videoDurationSeconds / 60)}m ${videoDurationSeconds % 60}s (${estimatedChunks} chunks)`;
 
   function close() {
+    if (isCreating) return;
     dispatch("close");
   }
 
   function create() {
+    if (isCreating) return;
     dispatch("create");
   }
 </script>
@@ -132,6 +137,7 @@
       variant="secondary"
       rounded="rounded-xl"
       on:click={close}
+      disabled={isCreating}
       type="button"
     >
       {$t("common.cancel")}
@@ -139,10 +145,10 @@
     <Button
       rounded="rounded-xl"
       on:click={create}
-      disabled={!sessionId || !selectedScript.trim()}
+      disabled={isCreating || !sessionId || !selectedScript.trim()}
       type="button"
     >
-      {$t("common.create")}
+      {isCreating ? $t("common.processing") : $t("common.create")}
     </Button>
   </svelte:fragment>
 </ModalDialog>
