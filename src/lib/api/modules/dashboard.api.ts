@@ -63,6 +63,23 @@ export const dashboardApi = {
     return data;
   },
 
+  async generateVideoScriptPrompts(payload: {
+    chunk_count: number;
+    script: string;
+    session_id: Id;
+    video_prompt_input_values: {
+      aspect_ratio: string;
+      target_platform: string;
+      visual_style: string;
+    };
+  }): Promise<unknown> {
+    const { data } = await http<unknown>('/video-script-generator', {
+      method: 'POST',
+      body: payload
+    });
+    return data;
+  },
+
   async renameStudioOutput(outputId: Id, title: string): Promise<{ ok?: boolean }> {
     const { data } = await http<{ ok?: boolean }>(`/studio/outputs/${encodeURIComponent(String(outputId))}`, {
       method: 'PATCH',

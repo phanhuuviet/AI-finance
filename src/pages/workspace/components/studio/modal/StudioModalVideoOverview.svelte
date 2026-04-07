@@ -4,7 +4,6 @@
   import Button from "$lib/components/common/Button.svelte";
   import SelectField from "$lib/components/common/SelectField.svelte";
   import TextareaField from "$lib/components/common/TextareaField.svelte";
-  import TextField from "$lib/components/common/TextField.svelte";
   import RangeSliderField from "$lib/components/common/RangeSliderField.svelte";
   import { t } from "../../../../../lib/i18n";
 
@@ -23,30 +22,38 @@
   export let commonLanguage = "vi";
 
   /** @type {string} */
-  export let videoFormat = "explainer";
+  export let selectedScript = "";
 
   /** @type {string} */
-  export let videoStyle = "auto";
+  export let aspectRatio = "9:16";
 
   /** @type {string} */
-  export let aspectRatio = "16:9";
+  export let targetPlatform = "tiktok";
 
   /** @type {string} */
-  export let videoFocus = "";
+  export let visualStyle = "cinematic realistic";
 
-  let videoDuration = 120;
-  let formattedVideoDuration = "2m 0s";
+  export let chunkCount = 8;
 
   $: languageOptions = [
     { value: "vi", label: $t("studio.languageVietnamese") },
     { value: "en", label: $t("studio.languageEnglish") }
   ];
 
-  // Keep the live label readable while dragging the native range input.
-  $: formattedVideoDuration =
-    videoDuration < 60
-      ? `${videoDuration}s`
-      : `${Math.floor(videoDuration / 60)}m ${videoDuration % 60}s`;
+  $: aspectRatioOptions = [
+    { value: "9:16", label: "9:16" },
+    { value: "16:9", label: "16:9" },
+    { value: "1:1", label: "1:1" }
+  ];
+
+  $: platformOptions = [
+    { value: "tiktok", label: "TikTok" },
+    { value: "youtube_shorts", label: "YouTube Shorts" },
+    { value: "reels", label: "Instagram Reels" },
+    { value: "youtube", label: "YouTube" }
+  ];
+
+  $: formattedChunkCount = `${chunkCount} chunks`;
 
   function close() {
     dispatch("close");
@@ -71,106 +78,48 @@
     options={languageOptions}
   />
 
+  <TextareaField
+    id="selected_script"
+    label={$t("studio.video.selectedScript")}
+    bind:value={selectedScript}
+    rows={8}
+    textareaClass="min-h-[180px]"
+  />
+
   <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-    <div class="rounded-xl border border-gray-200 bg-gray-50 p-4">
-      <div class="text-sm font-medium text-gray-900">{$t("studio.video.format")}</div>
-      <div class="mt-3 space-y-2">
-        <label class="flex items-start gap-2">
-          <TextField bare unstyled type="radio" name="format" value="explainer" bind:group={videoFormat} />
-          <div>
-            <div class="text-sm text-gray-900">{$t("studio.video.explainer")}</div>
-            <div class="text-xs text-gray-500">{$t("studio.video.explainerHint")}</div>
-          </div>
-        </label>
-        <label class="flex items-start gap-2">
-          <TextField bare unstyled type="radio" name="format" value="summary" bind:group={videoFormat} />
-          <div>
-            <div class="text-sm text-gray-900">{$t("studio.video.summary")}</div>
-            <div class="text-xs text-gray-500">{$t("studio.video.summaryHint")}</div>
-          </div>
-        </label>
-      </div>
-    </div>
+    <SelectField
+      id="video_platform"
+      label={$t("studio.video.targetPlatform")}
+      bind:value={targetPlatform}
+      options={platformOptions}
+    />
 
-    <div class="rounded-xl border border-gray-200 bg-gray-50 p-4">
-      <div class="text-sm font-medium text-gray-900">{$t("studio.video.moreOptions")}</div>
-
-      <div class="block mt-3 text-xs font-medium text-gray-600">{$t("studio.video.imageStyle")}</div>
-      <div class="mt-1 flex gap-2">
-        <Button
-          unstyled
-          className={`flex-1 rounded-lg border px-3 py-2 text-sm ${
-            videoStyle === "auto"
-              ? "border-blue-300 bg-blue-50 text-blue-700"
-              : "border-gray-200 bg-white hover:bg-gray-50"
-          }`}
-          on:click={() => (videoStyle = "auto")}
-          type="button"
-        >
-          {$t("studio.video.auto")}
-        </Button>
-        <Button
-          unstyled
-          className={`flex-1 rounded-lg border px-3 py-2 text-sm ${
-            videoStyle === "custom"
-              ? "border-blue-300 bg-blue-50 text-blue-700"
-              : "border-gray-200 bg-white hover:bg-gray-50"
-          }`}
-          on:click={() => (videoStyle = "custom")}
-          type="button"
-        >
-          {$t("studio.video.custom")}
-        </Button>
-      </div>
-
-      <div class="block mt-3 text-xs font-medium text-gray-600">{$t("studio.video.aspectRatio")}</div>
-      <div class="mt-1 flex gap-2">
-        <Button
-          unstyled
-          className={`flex-1 rounded-lg border px-3 py-2 text-sm ${
-            aspectRatio === "16:9"
-              ? "border-blue-300 bg-blue-50 text-blue-700"
-              : "border-gray-200 bg-white hover:bg-gray-50"
-          }`}
-          on:click={() => (aspectRatio = "16:9")}
-          type="button"
-        >
-          16:9
-        </Button>
-        <Button
-          unstyled
-          className={`flex-1 rounded-lg border px-3 py-2 text-sm ${
-            aspectRatio === "3:2"
-              ? "border-blue-300 bg-blue-50 text-blue-700"
-              : "border-gray-200 bg-white hover:bg-gray-50"
-          }`}
-          on:click={() => (aspectRatio = "3:2")}
-          type="button"
-        >
-          3:2
-        </Button>
-      </div>
-    </div>
+    <SelectField
+      id="video_aspect_ratio"
+      label={$t("studio.video.aspectRatio")}
+      bind:value={aspectRatio}
+      options={aspectRatioOptions}
+    />
   </div>
 
   <TextareaField
-    id="video_focus"
-    label={$t("studio.video.focus")}
-    bind:value={videoFocus}
-    rows={6}
-    textareaClass="min-h-[140px]"
+    id="video_visual_style"
+    label={$t("studio.video.visualStyle")}
+    bind:value={visualStyle}
+    rows={3}
+    textareaClass="min-h-[96px]"
   />
 
   <RangeSliderField
-    id="video_duration"
-    label="Video Duration"
-    bind:value={videoDuration}
-    min={40}
-    max={480}
-    step={10}
-    displayValue={formattedVideoDuration}
-    minLabel="40s"
-    maxLabel="8m"
+    id="video_chunk_count"
+    label={$t("studio.video.chunkCount")}
+    bind:value={chunkCount}
+    min={4}
+    max={16}
+    step={1}
+    displayValue={formattedChunkCount}
+    minLabel="4"
+    maxLabel="16"
   />
 
   <svelte:fragment slot="footer">
@@ -185,7 +134,7 @@
     <Button
       rounded="rounded-xl"
       on:click={create}
-      disabled={!sessionId}
+      disabled={!sessionId || !selectedScript.trim()}
       type="button"
     >
       {$t("common.create")}

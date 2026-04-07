@@ -15,6 +15,7 @@
     "rename": "Đổi tên",
     "download": "Tải xuống",
     "share": "Chia sẻ",
+    "continue": "Tiếp tục",
     "language": "Ngôn ngữ",
     "actions": "Thao tác",
     "status": "Trạng thái"
@@ -163,7 +164,18 @@
       "auto": "Tự động",
       "custom": "Tùy chỉnh",
       "aspectRatio": "Tỷ lệ video",
-      "focus": "AI nên tập trung vào điều gì?"
+      "focus": "AI nên tập trung vào điều gì?",
+      "selectedScript": "Kịch bản đã chọn",
+      "targetPlatform": "Nền tảng mục tiêu",
+      "visualStyle": "Phong cách hình ảnh",
+      "chunkCount": "Số đoạn (chunk)",
+      "generateSuccess": "Đã tạo prompt video thành công."
+    },
+    "scriptPicker": {
+      "title": "Chọn kịch bản để xuất",
+      "description": "Chọn một kịch bản AI để dùng cho {{tool}}.",
+      "empty": "Chưa có kịch bản AI trong cuộc trò chuyện này.",
+      "scriptLabel": "Kịch bản {{index}}"
     },
     "languageVietnamese": "Tiếng Việt",
     "languageEnglish": "English"

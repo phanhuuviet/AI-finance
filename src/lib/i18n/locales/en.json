@@ -15,6 +15,7 @@
     "rename": "Rename",
     "download": "Download",
     "share": "Share",
+    "continue": "Continue",
     "language": "Language",
     "actions": "Actions",
     "status": "Status"
@@ -163,7 +164,18 @@
       "auto": "Auto",
       "custom": "Custom",
       "aspectRatio": "Video aspect ratio",
-      "focus": "What should AI focus on?"
+      "focus": "What should AI focus on?",
+      "selectedScript": "Selected script",
+      "targetPlatform": "Target platform",
+      "visualStyle": "Visual style",
+      "chunkCount": "Chunk count",
+      "generateSuccess": "Video prompts generated successfully."
+    },
+    "scriptPicker": {
+      "title": "Pick a script to export",
+      "description": "Choose an AI script to use for {{tool}}.",
+      "empty": "No AI script found in this conversation yet.",
+      "scriptLabel": "Script {{index}}"
     },
     "languageVietnamese": "Vietnamese",
     "languageEnglish": "English"

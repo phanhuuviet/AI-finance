@@ -6,6 +6,7 @@
   import { dashboardStore } from "../../../../stores/dashboard.js";
   import StudioModalAudioOverview from "./modal/StudioModalAudioOverview.svelte";
   import StudioModalVideoOverview from "./modal/StudioModalVideoOverview.svelte";
+  import StudioModalScriptPicker from "./modal/StudioModalScriptPicker.svelte";
   import StudioModalMindmap from "./modal/StudioModalMindmap.svelte";
   import StudioModalReport from "./modal/StudioModalReport.svelte";
   import StudioModalQuiz from "./modal/StudioModalQuiz.svelte";
@@ -14,6 +15,7 @@
   import Button from "$lib/components/common/Button.svelte";
   import LoadingBlock from "$lib/components/common/LoadingBlock.svelte";
   import ErrorFallback from "$lib/components/common/ErrorFallback.svelte";
+  import { chatStore } from "$lib/stores/chat.store";
   import { t } from "../../../../lib/i18n";
 
   /** @typedef {import('../../../../lib/models').StudioOutput} StudioOutput */
@@ -66,8 +68,11 @@
 
   // Modal state
   let isModalOpen = false;
+  let isScriptPickerOpen = false;
   /** @type {string | null} */
   let modalTool = null;
+  /** @type {string | null} */
+  let pendingTool = null;
 
   // Tool requirements (minimal)
   let commonLanguage = "vi";
@@ -78,10 +83,36 @@
 
 
   // Video-specific requirements
-  let videoFormat = "explainer"; // explainer | summary
-  let videoStyle = "auto"; // auto | custom
-  let aspectRatio = "16:9"; // 16:9 | 3:2
-  let videoFocus = commonRequirements;
+  let aspectRatio = "9:16";
+  let targetPlatform = "tiktok";
+  let visualStyle = "cinematic realistic";
+  let chunkCount = 8;
+
+  /** @type {{ id: string; content: string; index: number }[]} */
+  let selectableScripts = [];
+  /** @type {string | null} */
+  let selectedScriptId = null;
+  let selectedScript = "";
+
+  $: currentSessionMessages =
+    sessionId && $chatStore.activeSessionId === sessionId ? ($chatStore.messages || []) : [];
+
+  $: selectableScripts = currentSessionMessages
+    .filter((msg) => msg?.role === "assistant" && String(msg?.content || "").trim().length > 0)
+    .map((msg, idx) => ({
+      id: String(msg.id),
+      content: String(msg.content || "").trim(),
+      index: idx + 1
+    }));
+
+  $: {
+    if (!selectedScriptId && selectableScripts.length > 0) {
+      selectedScriptId = selectableScripts[selectableScripts.length - 1].id;
+    }
+  }
+
+  $: selectedScript =
+    selectableScripts.find((item) => item.id === selectedScriptId)?.content || "";
 
   // List outputs
   /** @type {StudioOutput[]} */
@@ -132,14 +163,35 @@
   $: outputsError = studioState.error || "";
 
   function openToolModal(toolKey) {
-    activeTool = toolKey;
-    modalTool = toolKey;
-    isModalOpen = true;
-    openMenuForId = null;
+    if (!sessionId) {
+      alert($t("studio.selectSessionHint"));
+      return;
+    }
 
-    // Seed tool-specific requirements from common fields.
-    if (toolKey === "video_overview") {
-      videoFocus = commonRequirements;
+    activeTool = toolKey;
+    pendingTool = toolKey;
+    isScriptPickerOpen = true;
+    openMenuForId = null;
+  }
+
+  function closeScriptPicker() {
+    isScriptPickerOpen = false;
+    pendingTool = null;
+  }
+
+  function confirmScriptSelection() {
+    if (!selectedScript.trim()) {
+      alert($t("studio.scriptPicker.empty"));
+      return;
+    }
+
+    isScriptPickerOpen = false;
+    modalTool = pendingTool;
+    isModalOpen = true;
+    pendingTool = null;
+
+    if (modalTool !== "video_overview") {
+      commonRequirements = selectedScript;
     }
   }
 
@@ -174,18 +226,26 @@
       requirements: commonRequirements
     };
 
-    if (modalTool === "video_overview") {
-      payload = {
-        format: videoFormat,
-        language: commonLanguage,
-        style: videoStyle,
-        aspect_ratio: aspectRatio,
-        focus: videoFocus
-      };
-    }
-
     try {
-      await dashboardStore.createStudioOutput(sessionId, modalTool, payload);
+      if (modalTool === "video_overview") {
+        await dashboardStore.generateVideoScriptPrompts({
+          chunk_count: Number(chunkCount) || 8,
+          script: selectedScript,
+          session_id: sessionId,
+          video_prompt_input_values: {
+            aspect_ratio: aspectRatio,
+            target_platform: targetPlatform,
+            visual_style: visualStyle
+          }
+        });
+        alert($t("studio.video.generateSuccess"));
+      } else {
+        payload = {
+          language: commonLanguage,
+          requirements: commonRequirements
+        };
+        await dashboardStore.createStudioOutput(sessionId, modalTool, payload);
+      }
 
       closeModal();
     } catch (e) {
@@ -438,6 +498,16 @@
   </div>
 </div>
 
+<StudioModalScriptPicker
+  isOpen={isScriptPickerOpen}
+  title={$t("studio.scriptPicker.title")}
+  toolLabel={pendingTool ? $t(toolTitleKey(pendingTool)) : ""}
+  scripts={selectableScripts}
+  bind:selectedScriptId
+  on:close={closeScriptPicker}
+  on:confirm={confirmScriptSelection}
+/>
+
 <StudioModalAudioOverview
   isOpen={isModalOpen && modalTool === "audio_overview"}
   title={$t(toolTitleKey("audio_overview"))}
@@ -453,10 +523,11 @@
   title={$t(toolTitleKey("video_overview"))}
   sessionId={sessionId}
   bind:commonLanguage
-  bind:videoFormat
-  bind:videoStyle
+  bind:selectedScript
   bind:aspectRatio
-  bind:videoFocus
+  bind:targetPlatform
+  bind:visualStyle
+  bind:chunkCount
   on:close={closeModal}
   on:create={createStudioOutput}
 />

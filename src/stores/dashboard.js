@@ -295,6 +295,10 @@ function createDashboardStore() {
       return created;
     },
 
+    async generateVideoScriptPrompts(payload) {
+      return dashboardService.generateVideoScriptPrompts(payload);
+    },
+
     async renameStudioOutput(sessionId, outputId, title) {
       await dashboardService.renameStudioOutput(outputId, title);
       await this.fetchStudioOutputs(sessionId);
