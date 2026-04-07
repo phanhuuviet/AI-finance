@@ -1,6 +1,4 @@
 import { writable } from 'svelte/store';
-import { chatService } from '../lib/services/chat.service';
-import { createLoadingGate } from '../lib/utils/loading.js';
 
 /** @typedef {import('../lib/models').ChatSession} ChatSession */
 /** @typedef {import('../lib/models').ChatSessionDetail} ChatSessionDetail */
@@ -40,191 +38,18 @@ function createChatStore() {
     })
   );
 
-  const sessionsGate = createLoadingGate(() => {
-    update((state) => ({
-      ...state,
-      sessionsState: {
-        ...state.sessionsState,
-        showLoading: true
-      }
-    }));
-  });
-
-  let sessionsRequestId = 0;
-  /** @type {Record<string, number>} */
-  const messageRequestIds = {};
-
-  /** @param {string} sessionId */
-  function createMessageGate(sessionId) {
-    return createLoadingGate(() => {
-      update((state) => ({
-        ...state,
-        messagesState: {
-          ...state.messagesState,
-          [sessionId]: {
-            ...(state.messagesState[sessionId] || createAsyncState()),
-            showLoading: true
-          }
-        }
-      }));
-    });
-  }
-
   return {
     subscribe,
     set,
     update,
-    fetchSessions: async () => {
-      const requestId = ++sessionsRequestId;
-      sessionsGate.start();
-      update((state) => ({
-        ...state,
-        sessions: [],
-        sessionsPagination: null,
-        sessionsState: {
-          ...state.sessionsState,
-          data: null,
-          loading: true,
-          showLoading: false,
-          error: null
-        }
-      }));
-      try {
-        const result = await chatService.getSessions();
-        /** @type {ChatSession[]} */
-        const data = Array.isArray(result?.data) ? result.data : [];
-        if (requestId !== sessionsRequestId) return;
-        update(state => ({
-          ...state,
-          sessions: data,
-          sessionsPagination: result?.pagination || null,
-          sessionsState: {
-            ...state.sessionsState,
-            data,
-            error: null
-          }
-        }));
-      } catch (error) {
-        if (requestId !== sessionsRequestId) return;
-        update((state) => ({
-          ...state,
-          sessionsState: {
-            ...state.sessionsState,
-            error: error?.message || 'Failed to fetch chat sessions.'
-          }
-        }));
-      } finally {
-        if (requestId !== sessionsRequestId) return;
-        sessionsGate.stop();
-        update((state) => ({
-          ...state,
-          sessionsState: {
-            ...state.sessionsState,
-            loading: false,
-            showLoading: false
-          }
-        }));
-      }
-    },
     /**
      * @param {string} title
      * @param {string[]} [documentIds]
      * @returns {Promise<ChatSession>}
      */
-    createSession: async (title, documentIds = []) => {
-      try {
-        /** @type {ChatSession} */
-        const data = await chatService.createSession(title, documentIds);
-        
-        update(state => {
-          const sessions = [data, ...state.sessions];
-          return { ...state, sessions, currentSessionId: data._id };
-        });
-        return data;
-      } catch (error) {
-        console.error('Failed to create chat session:', error);
-        throw error;
-      }
-    },
     /** @param {string | null} sessionId */
     setCurrentSession: (sessionId) => {
       update(state => ({ ...state, currentSessionId: sessionId }));
-    },
-    /**
-     * @param {string} sessionId
-     * @returns {Promise<void>}
-     */
-    loadMessages: async (sessionId) => {
-      const requestId = (messageRequestIds[sessionId] || 0) + 1;
-      messageRequestIds[sessionId] = requestId;
-      const messagesGate = createMessageGate(sessionId);
-      messagesGate.start();
-      update((state) => ({
-        ...state,
-        messages: {
-          ...state.messages,
-          [sessionId]: []
-        },
-        messagesState: {
-          ...state.messagesState,
-          [sessionId]: {
-            ...(state.messagesState[sessionId] || createAsyncState()),
-            loading: true,
-            showLoading: false,
-            error: null,
-            data: null
-          }
-        }
-      }));
-
-      try {
-        /** @type {ChatSessionDetail} */
-        const data = await chatService.getSessionDetail(sessionId);
-        if (requestId !== messageRequestIds[sessionId]) return;
-        update(state => {
-          const newMessages = { ...state.messages };
-          newMessages[sessionId] = data.messages || [];
-          return {
-            ...state,
-            messages: newMessages,
-            currentSessionId: sessionId,
-            messagesState: {
-              ...state.messagesState,
-              [sessionId]: {
-                ...(state.messagesState[sessionId] || createAsyncState()),
-                data: data.messages || [],
-                error: null
-              }
-            }
-          };
-        });
-      } catch (error) {
-        if (requestId !== messageRequestIds[sessionId]) return;
-        update((state) => ({
-          ...state,
-          messagesState: {
-            ...state.messagesState,
-            [sessionId]: {
-              ...(state.messagesState[sessionId] || createAsyncState()),
-              error: error?.message || 'Failed to load chat messages.'
-            }
-          }
-        }));
-      } finally {
-        if (requestId !== messageRequestIds[sessionId]) return;
-        messagesGate.stop();
-        update((state) => ({
-          ...state,
-          messagesState: {
-            ...state.messagesState,
-            [sessionId]: {
-              ...(state.messagesState[sessionId] || createAsyncState()),
-              loading: false,
-              showLoading: false
-            }
-          }
-        }));
-      }
     },
     /**
      * @param {string} chatId
