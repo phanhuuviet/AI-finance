@@ -27,10 +27,3 @@ export interface StudioOutputListResponse {
   items: StudioOutput[];
   [key: string]: unknown;
 }
-
-export interface AttachDocumentsResponse {
-  session_id: Id;
-  document_ids: Id[];
-  attached: boolean;
-  [key: string]: unknown;
-}

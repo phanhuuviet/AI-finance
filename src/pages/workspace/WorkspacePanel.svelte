@@ -1,10 +1,12 @@
 <script>
   import DocumentUploadV2 from "./components/document-upload/DocumentUpload.svelte";
   import StudioPanel from "./components/studio/StudioPanel.svelte";
+  import GenerationDetailView from "./components/studio/GenerationDetailView.svelte";
   import ChatInterface from "./components/chat/ChatInterfaceSectioned.svelte";
   import ChatHistory from "./components/chat/ChatHistory.svelte";
   import ResponsiveWorkspaceLayout from "./components/layout/ResponsiveWorkspaceLayout.svelte";
   import Button from "$lib/components/common/Button.svelte";
+  import { route } from "../../stores/router.js";
 
   import { fade } from "svelte/transition";
   import { t } from "../../lib/i18n";
@@ -22,6 +24,7 @@
   $: section = sessionId
     ? ($workspaceStore.activeSectionBySession?.[sessionId] ?? "chat")
     : "chat";
+  $: generationId = $route.page === "workspace" ? /** @type {any} */ ($route).generationId : null;
 
   /** @param {WorkspaceSection} next */
   function setSection(next) {
@@ -93,6 +96,8 @@
             </div>
           </div>
         </div>
+      {:else if generationId}
+        <GenerationDetailView sessionId={sessionId} {generationId} />
       {:else if section === "documents"}
         <DocumentUploadV2 />
       {:else if section === "studio"}

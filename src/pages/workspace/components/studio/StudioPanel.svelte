@@ -1,7 +1,7 @@
 <script>
-  import { onDestroy, onMount } from "svelte";
-  import { cubicOut } from "svelte/easing";
-  import { fade, fly, scale } from "svelte/transition";
+  import { onDestroy } from "svelte";
+  import { fade } from "svelte/transition";
+  import { goto } from "$app/navigation";
   import { workspaceStore } from "../../../../stores/workspace.js";
   import { dashboardStore } from "../../../../stores/dashboard.js";
   import StudioModalAudioOverview from "./modal/StudioModalAudioOverview.svelte";
@@ -13,15 +13,22 @@
   import StudioModalData from "./modal/StudioModalData.svelte";
   import StudioToolIcon from "../../../../components/icons/StudioToolIcon.svelte";
   import Button from "$lib/components/common/Button.svelte";
-  import LoadingBlock from "$lib/components/common/LoadingBlock.svelte";
   import ErrorFallback from "$lib/components/common/ErrorFallback.svelte";
+  import StatusBadge from "$lib/components/common/StatusBadge.svelte";
+  import ChunkProgressBar from "$lib/components/common/ChunkProgressBar.svelte";
   import { chatStore } from "$lib/stores/chat.store";
+  import {
+    generations,
+    generationPagination,
+    generationCurrentPage,
+    isLoadingList,
+    generationStore
+  } from "$lib/stores/generation.store";
+  import { generationService } from "$lib/services/generation.service";
+  import { formatDuration, formatRelativeDate } from "$lib/utils/format";
   import { createToastController } from "$lib/utils/toast";
   import { t } from "../../../../lib/i18n";
 
-  /** @typedef {import('../../../../lib/models').StudioOutput} StudioOutput */
-
-  /** @type {string | null} */
   let sessionId = null;
   $: sessionId = $workspaceStore.currentSessionId;
 
@@ -30,60 +37,49 @@
       key: "audio_overview",
       titleKey: "studio.tool.audio.title",
       subtitleKey: "studio.tool.audio.subtitle",
-      color: "#4F8CFF" // blue
+      color: "#4F8CFF"
     },
     {
       key: "video_overview",
       titleKey: "studio.tool.video.title",
       subtitleKey: "studio.tool.video.subtitle",
-      color: "#FFB347" // orange
+      color: "#FFB347"
     },
     {
       key: "mindmap",
       titleKey: "studio.tool.mindmap.title",
       subtitleKey: "studio.tool.mindmap.subtitle",
-      color: "#6DD47E" // green
+      color: "#6DD47E"
     },
     {
       key: "report",
       titleKey: "studio.tool.report.title",
       subtitleKey: "studio.tool.report.subtitle",
-      color: "#A259FF" // purple
+      color: "#A259FF"
     },
     {
       key: "quiz",
       titleKey: "studio.tool.quiz.title",
       subtitleKey: "studio.tool.quiz.subtitle",
-      color: "#FF6B81" // red
+      color: "#FF6B81"
     },
     {
       key: "data",
       titleKey: "studio.tool.data.title",
       subtitleKey: "studio.tool.data.subtitle",
-      color: "#00CFCF" // teal
+      color: "#00CFCF"
     }
   ]);
 
-  /** @type {string} */
-  let activeTool = "audio_overview";
-
-  // Modal state
-  let isModalOpen = false;
-  let isScriptPickerOpen = false;
-  /** @type {string | null} */
   let modalTool = null;
-  /** @type {string | null} */
   let pendingTool = null;
 
-  // Tool requirements (minimal)
+  let isModalOpen = false;
+  let isScriptPickerOpen = false;
+
   let commonLanguage = "vi";
   let commonRequirements = "";
-  $: if (!commonRequirements) {
-    commonRequirements = $t("studio.defaultRequirements");
-  }
-
-
-  // Video-specific requirements
+  $: if (!commonRequirements) commonRequirements = $t("studio.defaultRequirements");
   let aspectRatio = "9:16";
   let targetPlatform = "tiktok";
   let visualStyle = "cinematic realistic";
@@ -98,11 +94,10 @@
     if (patch.visible !== undefined) showToastBanner = patch.visible;
   });
 
-  /** @type {{ id: string; content: string; index: number }[]} */
   let selectableScripts = [];
-  /** @type {string | null} */
   let selectedScriptId = null;
   let selectedScript = "";
+  let loadedGenerationSessionId = null;
 
   $: currentSessionMessages =
     sessionId && $chatStore.activeSessionId === sessionId ? ($chatStore.messages || []) : [];
@@ -117,63 +112,35 @@
       index: idx + 1
     }));
 
-  $: {
-    if (!selectedScriptId && selectableScripts.length > 0) {
-      selectedScriptId = selectableScripts[0].id;
-    }
+  $: if (!selectedScriptId && selectableScripts.length > 0) {
+    selectedScriptId = selectableScripts[0].id;
   }
 
   $: selectedScript =
     selectableScripts.find((item) => item.id === selectedScriptId)?.content || "";
 
-  // List outputs
-  /** @type {StudioOutput[]} */
-  let outputs = [];
-  let loadingOutputs = false;
-  let outputsError = "";
+  $: listError = $generationStore.error;
 
-  // Row menu
-  /** @type {string | null} */
-  let openMenuForId = null;
-
-  /** @type {() => void} */
-  let cleanupGlobalClick = () => {};
-
-  onMount(() => {
-    const onGlobalClick = (e) => {
-      const el = /** @type {HTMLElement} */ (e.target);
-      if (el?.closest?.("[data-studio-menu-root='true']")) return;
-      openMenuForId = null;
-    };
-    document.addEventListener("click", onGlobalClick);
-    cleanupGlobalClick = () => document.removeEventListener("click", onGlobalClick);
-
-    void refreshOutputs();
-  });
-
-  $: if (sessionId) {
-    // When switching sessions, reload outputs.
-    void refreshOutputs();
-  } else {
-    outputs = [];
+  $: if (sessionId && sessionId !== loadedGenerationSessionId) {
+    loadedGenerationSessionId = sessionId;
+    generationService.loadGenerations(sessionId, 1);
+  } else if (!sessionId) {
+    loadedGenerationSessionId = null;
+    generationStore.update((s) => ({
+      ...s,
+      generations: [],
+      pagination: null,
+      currentPage: 1,
+      error: null
+    }));
   }
-
-  $: rawStudioState = sessionId ? $dashboardStore.studioBySession?.[sessionId] : null;
-  /** @type {{ data: StudioOutput[] | null; loading: boolean; showLoading: boolean; error: string | null }} */
-  $: studioState = {
-    data: Array.isArray(rawStudioState?.data)
-      ? /** @type {StudioOutput[]} */ (rawStudioState.data)
-      : null,
-    loading: Boolean(rawStudioState?.loading),
-    showLoading: Boolean(rawStudioState?.showLoading),
-    error: rawStudioState?.error ? String(rawStudioState.error) : null
-  };
-  $: outputs = /** @type {StudioOutput[]} */ (studioState.data || []);
-  $: loadingOutputs = studioState.showLoading;
-  $: outputsError = studioState.error || "";
 
   function durationToChunkCount(seconds) {
     return Math.max(1, Math.round(Number(seconds || 0) / 5));
+  }
+
+  function toolTitleKey(key) {
+    return tools.find((item) => item.key === key)?.titleKey ?? "studio.title";
   }
 
   function openToolModal(toolKey) {
@@ -181,16 +148,12 @@
       toast.show($t("studio.selectSessionHint"), "warning");
       return;
     }
-
-    activeTool = toolKey;
     pendingTool = toolKey;
     isScriptPickerOpen = true;
-    openMenuForId = null;
   }
 
   function closeScriptPicker() {
     isScriptPickerOpen = false;
-    pendingTool = null;
   }
 
   function confirmScriptSelection() {
@@ -201,12 +164,11 @@
 
     isScriptPickerOpen = false;
     modalTool = pendingTool;
-    isModalOpen = true;
     pendingTool = null;
-
     if (modalTool !== "video_overview") {
       commonRequirements = selectedScript;
     }
+    isModalOpen = true;
   }
 
   function closeModal() {
@@ -214,31 +176,8 @@
     modalTool = null;
   }
 
-  function toolTitleKey(key) {
-    return tools.find((t) => t.key === key)?.titleKey ?? "studio.title";
-  }
-
-  function formatDate(iso) {
-    try {
-      return new Date(iso).toLocaleString();
-    } catch {
-      return String(iso ?? "");
-    }
-  }
-
-  async function refreshOutputs() {
-    if (!sessionId) return;
-    await dashboardStore.fetchStudioOutputs(sessionId);
-  }
-
-  async function createStudioOutput() {
+  async function createSelectedOutput() {
     if (!sessionId || !modalTool) return;
-
-    /** @type {any} */
-    let payload = {
-      language: commonLanguage,
-      requirements: commonRequirements
-    };
 
     try {
       if (modalTool === "video_overview") {
@@ -253,12 +192,12 @@
           }
         });
         toast.show($t("studio.video.generateSuccess"), "success");
+        await generationService.loadGenerations(sessionId, 1);
       } else {
-        payload = {
+        await dashboardStore.createStudioOutput(sessionId, modalTool, {
           language: commonLanguage,
           requirements: commonRequirements
-        };
-        await dashboardStore.createStudioOutput(sessionId, modalTool, payload);
+        });
         toast.show($t("studio.createSuccess"), "success");
       }
 
@@ -268,55 +207,11 @@
     }
   }
 
-  async function renameOutput(item) {
-    const nextTitle = prompt($t("studio.renamePrompt"), String(item?.title ?? ""));
-    if (!nextTitle) return;
-    try {
-      await dashboardStore.renameStudioOutput(sessionId, item.id, nextTitle);
-      toast.show($t("studio.renameSuccess"), "success");
-    } catch (e) {
-      toast.show(e?.message || $t("studio.renameFailed"), "error");
-    }
-  }
-
-  async function deleteOutput(item) {
-    if (!confirm($t("studio.confirmDelete"))) return;
-    try {
-      await dashboardStore.deleteStudioOutput(sessionId, item.id);
-      toast.show($t("studio.deleteSuccess"), "success");
-    } catch (e) {
-      toast.show(e?.message || $t("studio.deleteFailed"), "error");
-    }
-  }
-
-  async function shareOutput(item) {
-    try {
-      const res = await dashboardStore.shareStudioOutput(item.id);
-      const url = res?.share_url || res?.url;
-      if (url && navigator?.clipboard?.writeText) {
-        await navigator.clipboard.writeText(String(url));
-        toast.show($t("studio.copiedShareLink"), "success");
-      } else {
-        toast.show(url ? $t("studio.shareLink", { url }) : $t("studio.shareUnavailable"), "info");
-      }
-    } catch (e) {
-      toast.show(e?.message || $t("studio.shareFailed"), "error");
-    }
-  }
-
-  async function downloadOutput(item) {
-    try {
-      const res = await dashboardStore.downloadStudioOutput(item.id);
-      const url = res?.download_url || item?.result_url;
-      if (url) window.open(String(url), "_blank", "noopener,noreferrer");
-      else toast.show($t("studio.downloadUnavailable"), "warning");
-    } catch (e) {
-      toast.show(e?.message || $t("studio.downloadFailed"), "error");
-    }
+  function goToDetail(generation) {
+    goto(`/workspace/${generation.session_id}/generations/${generation.id}`);
   }
 
   onDestroy(() => {
-    cleanupGlobalClick();
     toast.clear();
   });
 </script>
@@ -341,32 +236,28 @@
   </div>
 {/if}
 
-<div
-  class="h-full flex flex-col bg-[var(--color-bg-surface)] rounded-xl border border-[var(--color-border-default)] overflow-hidden"
->
+<div class="h-full flex flex-col bg-[var(--color-bg-surface)] rounded-xl border border-[var(--color-border-default)] overflow-hidden">
   <div class="px-4 sm:px-5 py-4 border-b border-[var(--color-border-default)] bg-[var(--color-bg-surface)]">
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between gap-3">
       <h2 class="text-base font-semibold text-[var(--color-text-primary)]">{$t("studio.title")}</h2>
       <div class="text-xs text-[var(--color-text-muted)]">{$t("studio.perSession")}</div>
     </div>
   </div>
 
   <div class="p-4 sm:p-5 overflow-y-auto flex-1 min-h-0">
-    <!-- Tools grid -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
       {#each tools as tool}
         <Button
           unstyled
-          className={`group rounded-xl border px-4 py-3 min-h-11 text-left transition bg-[var(--color-bg-surface)] hover:bg-[var(--color-bg-hover)] hover:border-[var(--color-border-accent)] hover:cursor-pointer`}
+          className="w-full group rounded-xl border px-4 py-3 min-h-11 text-left transition bg-[var(--color-bg-surface)] hover:bg-[var(--color-bg-hover)] hover:border-[var(--color-border-accent)] hover:cursor-pointer"
           style={`border-left: 6px solid ${tool.color}; border-color: var(--color-border-default);`}
           on:click={() => openToolModal(tool.key)}
           type="button"
         >
           <div class="flex items-start gap-3">
-            <div class="mt-0.5 shrink-0" style={`color: ${tool.color}`}> 
+            <div class="mt-0.5 shrink-0" style={`color: ${tool.color}`}>
               <StudioToolIcon name={tool.key} className="h-5 w-5" />
             </div>
-
             <div class="min-w-0">
               <div class="text-sm font-medium text-[var(--color-text-primary)]">{$t(tool.titleKey)}</div>
               <div class="mt-1 text-xs text-[var(--color-text-secondary)]">{$t(tool.subtitleKey)}</div>
@@ -376,165 +267,88 @@
       {/each}
     </div>
 
-    <!-- Outputs list -->
     <div class="mt-6">
-      <div class="flex items-center justify-between">
+      <div class="flex items-center justify-between mb-3">
         <div class="text-sm font-semibold text-[var(--color-text-primary)]">
           {$t("studio.createdInSession")}
         </div>
-        <Button
-          unstyled
-          className="text-sm text-[var(--color-accent-text)] min-h-11 px-2 rounded-md hover:text-[var(--color-accent)] disabled:opacity-50"
-          on:click={refreshOutputs}
-          disabled={!sessionId || loadingOutputs}
-          type="button"
-        >
-          {$t("common.refresh")}
-        </Button>
       </div>
 
       {#if !sessionId}
-        <div
-          class="mt-3 p-4 rounded-xl bg-[var(--color-bg-app)] border border-[var(--color-border-default)] text-sm text-[var(--color-text-secondary)]"
-          transition:fade={{ duration: 140 }}
-        >
+        <div class="p-6 rounded-2xl border border-[var(--color-border-default)] bg-[var(--color-bg-app)] text-sm text-[var(--color-text-secondary)]">
           {$t("studio.selectSessionHint")}
         </div>
-      {:else if outputsError}
-        <div class="mt-3" transition:fade={{ duration: 140 }}>
-          <ErrorFallback
-            compact={true}
-            message={outputsError}
-            retryLabel={$t("studio.retryOutputs")}
-            on:retry={refreshOutputs}
-          />
-        </div>
-      {:else if studioState.loading}
-        <div
-          class="mt-3 p-4 rounded-xl bg-[var(--color-bg-app)] border border-[var(--color-border-default)] text-sm text-[var(--color-text-secondary)]"
-          transition:fade={{ duration: 140 }}
-        >
-          <LoadingBlock rows={4} rowHeight="h-10" active={studioState.showLoading} />
-        </div>
-      {:else if outputs.length === 0}
-        <div
-          class="mt-3 p-6 rounded-2xl border border-[var(--color-border-default)] bg-[var(--color-bg-app)] text-sm text-[var(--color-text-secondary)]"
-          transition:fade={{ duration: 140 }}
-        >
-          {$t("studio.empty")}
-        </div>
+      {:else if listError}
+        <ErrorFallback
+          compact={true}
+          message={listError}
+          retryLabel={$t("studio.retryOutputs")}
+          on:retry={() => generationService.loadGenerations(sessionId, 1)}
+        />
       {:else}
-        <div class="mt-3 space-y-2">
-          {#each outputs as item (item.id)}
-            <div
-              class="rounded-xl border border-[var(--color-border-default)] bg-[var(--color-bg-surface)] px-3 sm:px-4 py-3 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3"
-              transition:fly={{ y: 8, duration: 180, easing: cubicOut }}
+        <div class="space-y-3">
+          {#each $generations as generation (generation.id)}
+            <button
+              class="w-full text-left bg-white border border-gray-200 rounded-xl p-4 hover:border-purple-300 hover:bg-purple-50 transition-all duration-150 cursor-pointer group"
+              on:click={() => goToDetail(generation)}
+              type="button"
             >
-              <div class="min-w-0">
-                <div class="text-sm font-medium text-[var(--color-text-primary)] truncate">
-                  {item.title || $t(toolTitleKey(item.type))}
+              <div class="flex items-start justify-between gap-3 mb-3">
+                <div class="flex-1 min-w-0">
+                  <h3 class="text-sm font-semibold text-gray-800 truncate">
+                    {generation.resolved_prompt_values?.title ?? "Untitled"}
+                  </h3>
+                  <p class="text-xs text-gray-500 mt-0.5">{generation.video_concept}</p>
                 </div>
-                <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--color-text-muted)]">
-                  <span class="capitalize">{String(item.type).replaceAll("_", " ")}</span>
-                  <span>•</span>
-                  <span>{formatDate(item.created_at)}</span>
-                  <span>•</span>
-                  {#if item.status === "ready"}
-                    <span class="text-[var(--color-status-ready)]">{$t("studio.statusReady")}</span>
-                  {:else if item.status === "processing"}
-                    <span class="text-[var(--color-status-processing)]">{$t("studio.statusProcessing")}</span>
-                  {:else}
-                    <span class="text-[var(--color-status-error)]">{String(item.status)}</span>
-                  {/if}
-                </div>
+                <StatusBadge status={generation.status} />
               </div>
 
-              <div class="shrink-0 flex items-center gap-2 self-end sm:self-auto" data-studio-menu-root="true">
-                {#if item.result_url}
-                  <Button
-                    unstyled
-                    className="rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-surface)] px-3 py-2 min-h-11 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)]"
-                    on:click={() => window.open(String(item.result_url), "_blank", "noopener,noreferrer")}
-                    type="button"
-                  >
-                    {$t("common.open")}
-                  </Button>
-                {/if}
-
-                <div class="relative">
-                  <Button
-                    unstyled
-                    className="rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-surface)] px-2.5 py-2 min-h-11 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)]"
-                    aria-haspopup="menu"
-                    aria-expanded={openMenuForId === item.id}
-                    on:click={() => (openMenuForId = openMenuForId === item.id ? null : item.id)}
-                    type="button"
-                    title={$t("studio.menu")}
-                  >
-                    ⋮
-                  </Button>
-
-                  {#if openMenuForId === item.id}
-                    <div
-                      class="absolute right-0 mt-2 w-44 rounded-xl border border-[var(--color-border-default)] bg-[var(--color-bg-elevated)] overflow-hidden z-10 origin-top-right"
-                      role="menu"
-                      transition:scale={{ start: 0.96, duration: 140, easing: cubicOut }}
-                    >
-                      <Button
-                        unstyled
-                        className="w-full text-left px-3 py-2 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)]"
-                        on:click={() => {
-                          openMenuForId = null;
-                          renameOutput(item);
-                        }}
-                        type="button"
-                        role="menuitem"
-                      >
-                        {$t("common.rename")}
-                      </Button>
-                      <Button
-                        unstyled
-                        className="w-full text-left px-3 py-2 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)]"
-                        on:click={() => {
-                          openMenuForId = null;
-                          downloadOutput(item);
-                        }}
-                        type="button"
-                        role="menuitem"
-                      >
-                        {$t("common.download")}
-                      </Button>
-                      <Button
-                        unstyled
-                        className="w-full text-left px-3 py-2 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)]"
-                        on:click={() => {
-                          openMenuForId = null;
-                          shareOutput(item);
-                        }}
-                        type="button"
-                        role="menuitem"
-                      >
-                        {$t("common.share")}
-                      </Button>
-                      <Button
-                        unstyled
-                        className="w-full text-left px-3 py-2 text-sm text-[var(--color-danger)] hover:bg-[var(--color-danger-light)]"
-                        on:click={() => {
-                          openMenuForId = null;
-                          deleteOutput(item);
-                        }}
-                        type="button"
-                        role="menuitem"
-                      >
-                        {$t("common.delete")}
-                      </Button>
-                    </div>
-                  {/if}
-                </div>
+              <div class="flex items-center gap-4 text-xs text-gray-500 mb-3">
+                <span class="flex items-center gap-1">🎬 {generation.total_chunks} chunks</span>
+                <span class="flex items-center gap-1">⏱ {formatDuration(generation.estimated_total_duration_seconds)}</span>
+                <span class="flex items-center gap-1">🤖 {generation.model}</span>
               </div>
-            </div>
+
+              <ChunkProgressBar summary={generation.summary} total={generation.total_chunks} />
+
+              <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+                <span class="text-xs text-gray-400">{formatRelativeDate(generation.created_at)}</span>
+                <span class="text-xs text-purple-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                  View details →
+                </span>
+              </div>
+            </button>
+          {:else}
+            {#if $isLoadingList}
+              {#each Array(3) as _}
+                <div class="h-32 bg-purple-50 rounded-xl animate-pulse"></div>
+              {/each}
+            {:else}
+              <div class="text-center py-12 text-gray-400">
+                <p class="text-sm">No generations yet.</p>
+                <p class="text-xs mt-1">Generate a script from the chat to see outputs here.</p>
+              </div>
+            {/if}
           {/each}
         </div>
+
+        {#if $generationPagination && $generationPagination.totalPages > 1}
+          <div class="flex items-center justify-between pt-3 mt-3 border-t border-gray-100 text-xs text-gray-500">
+            <button
+              class="px-2 py-1 rounded hover:bg-purple-50 disabled:opacity-40 disabled:cursor-not-allowed"
+              disabled={$generationCurrentPage === 1}
+              on:click={() => generationService.goToPage(sessionId, $generationCurrentPage - 1)}
+              type="button"
+            >← Prev</button>
+            <span>{$generationCurrentPage} / {$generationPagination.totalPages}</span>
+            <button
+              class="px-2 py-1 rounded hover:bg-purple-50 disabled:opacity-40 disabled:cursor-not-allowed"
+              disabled={$generationCurrentPage === $generationPagination.totalPages}
+              on:click={() => generationService.goToPage(sessionId, $generationCurrentPage + 1)}
+              type="button"
+            >Next →</button>
+          </div>
+        {/if}
       {/if}
     </div>
   </div>
@@ -557,7 +371,7 @@
   bind:commonLanguage
   bind:commonRequirements
   on:close={closeModal}
-  on:create={createStudioOutput}
+  on:create={createSelectedOutput}
 />
 
 <StudioModalVideoOverview
@@ -571,7 +385,7 @@
   bind:visualStyle
   bind:videoDurationSeconds
   on:close={closeModal}
-  on:create={createStudioOutput}
+  on:create={createSelectedOutput}
 />
 
 <StudioModalMindmap
@@ -581,7 +395,7 @@
   bind:commonLanguage
   bind:commonRequirements
   on:close={closeModal}
-  on:create={createStudioOutput}
+  on:create={createSelectedOutput}
 />
 
 <StudioModalReport
@@ -591,7 +405,7 @@
   bind:commonLanguage
   bind:commonRequirements
   on:close={closeModal}
-  on:create={createStudioOutput}
+  on:create={createSelectedOutput}
 />
 
 <StudioModalQuiz
@@ -601,7 +415,7 @@
   bind:commonLanguage
   bind:commonRequirements
   on:close={closeModal}
-  on:create={createStudioOutput}
+  on:create={createSelectedOutput}
 />
 
 <StudioModalData
@@ -611,5 +425,5 @@
   bind:commonLanguage
   bind:commonRequirements
   on:close={closeModal}
-  on:create={createStudioOutput}
+  on:create={createSelectedOutput}
 />

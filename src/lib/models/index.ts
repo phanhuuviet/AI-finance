@@ -14,6 +14,7 @@ export type {
 } from './auth.model';
 export * from './chat.model';
 export * from './document.model';
+export * from './generation.model';
 export * from './studio.model';
 export * from './session.model';
 export * from './token-analytics.model';

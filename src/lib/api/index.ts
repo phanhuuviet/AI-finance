@@ -8,4 +8,5 @@ export { userApi } from './modules/user.api';
 export { chatApi } from './modules/chat.api';
 export { documentApi } from './modules/document.api';
 export { dashboardApi } from './modules/dashboard.api';
+export { generationApi } from './modules/generation.api';
 export { sessionApi } from './modules/session.api';

@@ -4,6 +4,7 @@
  *   pathname: string;
  *   page: Page;
  *   chatId: string | null;
+ *   generationId: string | null;
  * }} Route
  * @typedef {{
  *   name: Page;
@@ -16,13 +17,17 @@
 const workspaceRoute = /** @type {RouteDefinition} */ ({
   name: 'workspace',
   requiresAuth: true,
-  pattern: /^\/workspace(?:\/([^/]+))?$/,
+  pattern: /^\/workspace(?:\/([^/]+)(?:\/generations\/([^/]+))?)?$/,
   build: (match) => {
     const chatId = match?.[1] ?? null;
+    const generationId = match?.[2] ?? null;
     return {
-      pathname: chatId ? `/workspace/${chatId}` : '/workspace',
+      pathname: generationId
+        ? `/workspace/${chatId}/generations/${generationId}`
+        : (chatId ? `/workspace/${chatId}` : '/workspace'),
       page: 'workspace',
-      chatId
+      chatId,
+      generationId
     };
   }
 });
@@ -34,7 +39,8 @@ const analyticsRoute = /** @type {RouteDefinition} */ ({
   build: () => ({
     pathname: '/analytics',
     page: 'analytics',
-    chatId: null
+    chatId: null,
+    generationId: null
   })
 });
 
@@ -45,7 +51,8 @@ const settingsRoute = /** @type {RouteDefinition} */ ({
   build: () => ({
     pathname: '/settings',
     page: 'settings',
-    chatId: null
+    chatId: null,
+    generationId: null
   })
 });
 
@@ -56,7 +63,8 @@ const loginRoute = /** @type {RouteDefinition} */ ({
   build: () => ({
     pathname: '/login',
     page: 'login',
-    chatId: null
+    chatId: null,
+    generationId: null
   })
 });
 

@@ -3,7 +3,8 @@
     "baseUrl": ".",
     "paths": {
       "$lib/*": ["src/lib/*"],
-      "$app/navigation": ["src/app/navigation.ts"]
+      "$app/navigation": ["src/app/navigation.ts"],
+      "$app/stores": ["src/app/stores.js"]
     },
     "moduleResolution": "bundler",
     "target": "ESNext",

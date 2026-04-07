@@ -9,6 +9,7 @@ import { tokenStorage } from '../lib/utils/token';
  *   pathname: string;
  *   page: Page;
  *   chatId: string | null;
+ *   generationId: string | null;
  * }} Route
  */
 
