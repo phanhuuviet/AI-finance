@@ -1,7 +1,17 @@
 export interface Session {
   id: string;
   title: string;
+  video_concept_id: string;
+  video_concept: string;
+  status: string;
   created_at: string;
+  updated_at: string;
+}
+
+export interface SessionListResponse {
+  sessions: Session[];
+  count: number;
+  q: string | null;
 }
 
 export interface PromptInput {

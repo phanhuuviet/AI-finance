@@ -13,7 +13,7 @@ export const authService = {
       const { data } = await authApi.login(body);
       tokenStorage.setTokens(data.access_token, data.refresh_token);
       authStore.update((s) => ({ ...s, user: data.user, isLoading: false }));
-      await sessionService.loadSessions();
+      await sessionService.loadSessions(1, '');
       goto('/workspace');
     } catch (err) {
       const message = err instanceof ApiError ? err.message : 'LOGIN_FAILED';

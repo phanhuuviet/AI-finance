@@ -4,38 +4,31 @@
   import { fade } from "svelte/transition";
   import { workspaceStore } from "../../../../stores/workspace.js";
   import { navigate } from "../../../../stores/router.js";
-  import { sessionStore, sessions } from "$lib/stores/session.store";
+  import {
+    sessionStore,
+    sessions,
+    sessionPagination,
+    sessionCurrentPage,
+  } from "$lib/stores/session.store";
   import { chatService } from "$lib/services/chat.service";
+  import { sessionService } from "$lib/services/session.service";
   import { wsService } from "$lib/services/websocket.service";
-  import LoadingBlock from "$lib/components/common/LoadingBlock.svelte";
   import TextField from "$lib/components/common/TextField.svelte";
-  import Button from "$lib/components/common/Button.svelte";
+  import { formatRelativeDate } from "$lib/utils/date";
   import { t } from "$lib/i18n";
-
-  /** @typedef {{ id?: string; _id?: string; title: string; created_at?: string; updated_at?: string; }} ListSession */
 
   const dispatch = createEventDispatcher();
 
-  let searchTerm = "";
+  let searchValue = "";
+  let debounceTimer;
 
   $: selectedSessionId = $workspaceStore.currentSessionId;
-  $: sessionsState = $sessionStore;
 
-  /** @type {ListSession[]} */
-  $: filteredSessions = ($sessions || []).filter((session) =>
-    session.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  /** @param {ListSession} session */
-  function getSessionId(session) {
-    return session.id || session._id || null;
-  }
-
-  /** @param {ListSession} session */
-  function formatCreatedAt(session) {
-    const value = session.created_at || session.updated_at;
-    if (!value) return "-";
-    return new Date(value).toLocaleDateString();
+  function handleSearch() {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      sessionService.search(searchValue || "");
+    }, 400);
   }
 
   /** @param {string} id */
@@ -46,7 +39,15 @@
     navigate(`/workspace/${id}`);
   }
 
+  /** @param {{ updated_at?: string; created_at?: string }} session */
+  function formatDate(session) {
+    const value = session.updated_at || session.created_at;
+    if (!value) return "-";
+    return formatRelativeDate(value);
+  }
+
   onDestroy(() => {
+    clearTimeout(debounceTimer);
     wsService.disconnect();
   });
 </script>
@@ -60,48 +61,63 @@
       bare
       unstyled
       type="text"
-      bind:value={searchTerm}
+      bind:value={searchValue}
       placeholder={$t("chat.searchPlaceholder")}
+      on:input={handleSearch}
       inputClass="w-full px-3 py-2.5 min-h-11 bg-white border border-[var(--border-purple)] rounded-[var(--radius-md)] text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--indigo-400)] focus:[box-shadow:0_0_0_3px_rgba(99,102,241,0.15)]"
     />
   </div>
 
-  <div class="flex-1 overflow-y-auto">
-    {#if sessionsState.isLoadingSessions}
-      <div class="p-4 space-y-4">
-        <LoadingBlock rows={1} rowHeight="h-10" className="mb-2" active={sessionsState.isLoadingSessions} />
-        <LoadingBlock rows={6} rowHeight="h-14" active={sessionsState.isLoadingSessions} />
-      </div>
-    {:else if ($sessions || []).length === 0}
-      <div class="p-4 text-center text-[var(--text-muted)] text-sm">
-        No chats yet. Create one to get started.
-      </div>
-    {:else if filteredSessions.length === 0}
-      <div class="p-4 text-center text-[var(--text-muted)] text-sm">
-        {$t("chat.noSearchMatches")}
-      </div>
+  <div class="flex-1 overflow-y-auto" transition:fade={{ duration: 180 }}>
+    {#each $sessions as session (session.id)}
+      <button
+        class={`w-full text-left block p-3 sm:p-4 min-h-11 cursor-pointer transition-[background,border-color,color] duration-150 border-l-[3px] border-l-transparent hover:bg-[var(--purple-50)] hover:border-l-[var(--purple-400)] ${selectedSessionId === session.id ? "bg-[var(--purple-100)] border-l-[var(--purple-600)]" : ""}`}
+        on:click={() => session.id && selectSession(session.id)}
+        type="button"
+      >
+        <div class="flex items-start justify-between gap-2">
+          <div class="min-w-0">
+            <span class="block truncate text-[var(--text-primary)] font-semibold">{session.title}</span>
+            <span class="block truncate text-xs text-[var(--text-muted)] mt-1">{session.video_concept}</span>
+          </div>
+          <span class="text-xs text-[var(--text-muted)] shrink-0">{formatDate(session)}</span>
+        </div>
+      </button>
     {:else}
-      <div transition:fade={{ duration: 180 }}>
-        <ul class="divide-y divide-[var(--border-subtle)]">
-          {#each filteredSessions as session}
-            <li>
-              <Button
-                unstyled
-                className={`w-full text-left block p-3 sm:p-4 min-h-11 cursor-pointer transition-[background,border-color,color] duration-150 border-l-[3px] ${selectedSessionId === getSessionId(session) ? "bg-[var(--purple-100)] border-l-[var(--purple-600)]" : "border-l-transparent hover:bg-[var(--purple-50)] hover:border-l-[var(--purple-400)]"}`}
-                on:click={() => getSessionId(session) && selectSession(getSessionId(session))}
-                type="button"
-              >
-                <div class={`truncate ${selectedSessionId === getSessionId(session) ? "font-semibold text-[var(--purple-700)]" : "font-medium text-[var(--text-primary)]"}`}>
-                  {session.title}
-                </div>
-                <div class="text-xs text-[var(--text-muted)] mt-1">
-                  {formatCreatedAt(session)}
-                </div>
-              </Button>
-            </li>
+      {#if $sessionStore.isLoadingSessions}
+        <div class="p-3">
+          {#each Array(4) as _}
+            <div class="h-14 rounded-lg bg-purple-50 animate-pulse mx-2 mb-2"></div>
           {/each}
-        </ul>
-      </div>
-    {/if}
+        </div>
+      {:else}
+        <div class="flex flex-col items-center justify-center py-10 text-center px-4">
+          <p class="text-sm text-gray-400">No conversations yet.</p>
+          <p class="text-xs text-gray-300 mt-1">Click "+ New Chat" to get started.</p>
+        </div>
+      {/if}
+    {/each}
   </div>
+
+  {#if $sessionPagination && $sessionPagination.totalPages > 1}
+    <div class="flex items-center justify-between px-3 py-2 border-t border-gray-100 text-xs text-gray-500">
+      <button
+        class="px-2 py-1 rounded hover:bg-purple-50 disabled:opacity-40 disabled:cursor-not-allowed"
+        disabled={$sessionCurrentPage === 1}
+        on:click={() => sessionService.goToPage($sessionCurrentPage - 1)}
+      >
+        ← Prev
+      </button>
+
+      <span>{$sessionCurrentPage} / {$sessionPagination.totalPages}</span>
+
+      <button
+        class="px-2 py-1 rounded hover:bg-purple-50 disabled:opacity-40 disabled:cursor-not-allowed"
+        disabled={$sessionCurrentPage === $sessionPagination.totalPages}
+        on:click={() => sessionService.goToPage($sessionCurrentPage + 1)}
+      >
+        Next →
+      </button>
+    </div>
+  {/if}
 </div>

@@ -1,13 +1,8 @@
 import { sessionApi } from '$lib/api/modules/session.api';
 import { sessionStore } from '$lib/stores/session.store';
 import { ApiError } from '$lib/api/base/http';
-import type { CreateSessionRequest, Session } from '$lib/models/session.model';
-
-const FALLBACK_SESSION: Session = {
-  id: '69d276179789124457d929a9',
-  title: 'Mock Session',
-  created_at: new Date().toISOString(),
-};
+import { get } from 'svelte/store';
+import type { CreateSessionRequest } from '$lib/models/session.model';
 
 const HARDCODED_MATERIALS = [
   { asset_ref: 'https://cdn.example.com/uploads/face-1.jpg', material: 'face_photo', type: 'photo' },
@@ -16,22 +11,41 @@ const HARDCODED_MATERIALS = [
 ];
 
 export const sessionService = {
-  async loadSessions(): Promise<void> {
-    sessionStore.update((s) => ({ ...s, isLoadingSessions: true, error: null }));
+  async loadSessions(page: number = 1, q: string = ''): Promise<void> {
+    sessionStore.update((s) => ({
+      ...s,
+      isLoadingSessions: true,
+      error: null,
+      currentPage: page,
+      searchQuery: q,
+    }));
     try {
-      const { data } = await sessionApi.getSessions();
-      const fromApi: Session[] = data?.sessions ?? [];
-      const hasABCXYZ = fromApi.some((s) => s.id === FALLBACK_SESSION.id);
-      const sessions = hasABCXYZ ? fromApi : [FALLBACK_SESSION, ...fromApi];
-
-      sessionStore.update((s) => ({ ...s, sessions, isLoadingSessions: false }));
-    } catch {
+      const { data, pagination } = await sessionApi.getSessions(page, q);
       sessionStore.update((s) => ({
         ...s,
-        sessions: [FALLBACK_SESSION],
+        sessions: data.sessions,
+        pagination: pagination ?? null,
+        isLoadingSessions: false,
+      }));
+    } catch (err) {
+      const message = err instanceof ApiError ? err.message : 'SESSION_LOAD_FAILED';
+      sessionStore.update((s) => ({
+        ...s,
+        sessions: [],
+        pagination: null,
+        error: message,
         isLoadingSessions: false,
       }));
     }
+  },
+
+  goToPage(page: number): void {
+    const q = get(sessionStore).searchQuery;
+    sessionService.loadSessions(page, q);
+  },
+
+  search(q: string): void {
+    sessionService.loadSessions(1, q);
   },
 
   async loadVideoConcepts(): Promise<void> {
@@ -66,7 +80,8 @@ export const sessionService = {
       };
 
       await sessionApi.createSession(body);
-      await sessionService.loadSessions();
+    const q = get(sessionStore).searchQuery;
+    await sessionService.loadSessions(1, q);
       sessionStore.update((s) => ({ ...s, isCreating: false }));
     } catch (err) {
       const message = err instanceof ApiError ? err.message : 'SESSION_CREATE_FAILED';

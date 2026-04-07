@@ -1,9 +1,20 @@
 import { http } from '../base/http';
-import type { Session, VideoConcept, CreateSessionRequest } from '$lib/models/session.model';
+import type {
+  Session,
+  VideoConcept,
+  CreateSessionRequest,
+  SessionListResponse,
+} from '$lib/models/session.model';
 
 export const sessionApi = {
-  getSessions: () =>
-    http<{ sessions?: Session[] }>('/session-init', { method: 'GET' }),
+  getSessions: (page: number = 1, q: string = '') => {
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: '20',
+      ...(q.trim() ? { q: q.trim() } : {}),
+    });
+    return http<SessionListResponse>(`/session-chat/history?${params.toString()}`);
+  },
 
   getVideoConcepts: () =>
     http<{ video_concepts: VideoConcept[] }>('/session-init/video-concepts'),

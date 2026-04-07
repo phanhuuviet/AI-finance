@@ -20,7 +20,7 @@
       await authService.rehydrate();
 
       if (tokenStorage.hasValidSession()) {
-        await sessionService.loadSessions();
+        await sessionService.loadSessions(1, '');
       }
 
       connectWebSocket();
