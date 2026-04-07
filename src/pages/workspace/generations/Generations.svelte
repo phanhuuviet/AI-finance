@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { page } from '$app/stores';
+  import { page } from '../../../app/stores.js';
   import { goto } from '$app/navigation';
   import { generationService } from '$lib/services/generation.service';
   import {
@@ -10,7 +10,7 @@
     generationStore
   } from '$lib/stores/generation.store';
   import StatusBadge from '$lib/components/common/StatusBadge.svelte';
-  import ChunkCard from '../components/studio/ChunkCard.svelte';
+  import ChunkCard from './ChunkCard.svelte';
   import { formatDuration, formatRelativeDate } from '$lib/utils/format';
 
   $: sessionId = $page.params.sessionId;
