@@ -1,7 +1,7 @@
 <script>
   import DocumentUploadV2 from "./components/document-upload/DocumentUpload.svelte";
   import StudioPanel from "./components/studio/StudioPanel.svelte";
-  import GenerationDetailView from "./components/studio/GenerationDetailView.svelte";
+  import Generations from "./generations/Generations.svelte";
   import ChatInterface from "./components/chat/ChatInterfaceSectioned.svelte";
   import ChatHistory from "./components/chat/ChatHistory.svelte";
   import ResponsiveWorkspaceLayout from "./components/layout/ResponsiveWorkspaceLayout.svelte";
@@ -97,7 +97,7 @@
           </div>
         </div>
       {:else if generationId}
-        <GenerationDetailView sessionId={sessionId} {generationId} />
+        <Generations />
       {:else if section === "documents"}
         <DocumentUploadV2 />
       {:else if section === "studio"}
