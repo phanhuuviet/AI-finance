@@ -16,6 +16,7 @@
   import LoadingBlock from "$lib/components/common/LoadingBlock.svelte";
   import ErrorFallback from "$lib/components/common/ErrorFallback.svelte";
   import { chatStore } from "$lib/stores/chat.store";
+  import { createToastController } from "$lib/utils/toast";
   import { t } from "../../../../lib/i18n";
 
   /** @typedef {import('../../../../lib/models').StudioOutput} StudioOutput */
@@ -86,7 +87,16 @@
   let aspectRatio = "9:16";
   let targetPlatform = "tiktok";
   let visualStyle = "cinematic realistic";
-  let chunkCount = 8;
+  let videoDurationSeconds = 40;
+
+  let toastMessage = "";
+  let toastType = "info";
+  let showToastBanner = false;
+  const toast = createToastController((patch) => {
+    if (patch.message !== undefined) toastMessage = patch.message;
+    if (patch.type !== undefined) toastType = patch.type;
+    if (patch.visible !== undefined) showToastBanner = patch.visible;
+  });
 
   /** @type {{ id: string; content: string; index: number }[]} */
   let selectableScripts = [];
@@ -99,6 +109,8 @@
 
   $: selectableScripts = currentSessionMessages
     .filter((msg) => msg?.role === "assistant" && String(msg?.content || "").trim().length > 0)
+    .slice()
+    .sort((a, b) => new Date(String(b?.created_at || 0)).getTime() - new Date(String(a?.created_at || 0)).getTime())
     .map((msg, idx) => ({
       id: String(msg.id),
       content: String(msg.content || "").trim(),
@@ -107,7 +119,7 @@
 
   $: {
     if (!selectedScriptId && selectableScripts.length > 0) {
-      selectedScriptId = selectableScripts[selectableScripts.length - 1].id;
+      selectedScriptId = selectableScripts[0].id;
     }
   }
 
@@ -139,8 +151,6 @@
     void refreshOutputs();
   });
 
-  onDestroy(() => cleanupGlobalClick());
-
   $: if (sessionId) {
     // When switching sessions, reload outputs.
     void refreshOutputs();
@@ -162,9 +172,13 @@
   $: loadingOutputs = studioState.showLoading;
   $: outputsError = studioState.error || "";
 
+  function durationToChunkCount(seconds) {
+    return Math.max(1, Math.round(Number(seconds || 0) / 5));
+  }
+
   function openToolModal(toolKey) {
     if (!sessionId) {
-      alert($t("studio.selectSessionHint"));
+      toast.show($t("studio.selectSessionHint"), "warning");
       return;
     }
 
@@ -181,7 +195,7 @@
 
   function confirmScriptSelection() {
     if (!selectedScript.trim()) {
-      alert($t("studio.scriptPicker.empty"));
+      toast.show($t("studio.scriptPicker.empty"), "warning");
       return;
     }
 
@@ -229,7 +243,7 @@
     try {
       if (modalTool === "video_overview") {
         await dashboardStore.generateVideoScriptPrompts({
-          chunk_count: Number(chunkCount) || 8,
+          chunk_count: durationToChunkCount(videoDurationSeconds),
           script: selectedScript,
           session_id: sessionId,
           video_prompt_input_values: {
@@ -238,18 +252,19 @@
             visual_style: visualStyle
           }
         });
-        alert($t("studio.video.generateSuccess"));
+        toast.show($t("studio.video.generateSuccess"), "success");
       } else {
         payload = {
           language: commonLanguage,
           requirements: commonRequirements
         };
         await dashboardStore.createStudioOutput(sessionId, modalTool, payload);
+        toast.show($t("studio.createSuccess"), "success");
       }
 
       closeModal();
     } catch (e) {
-      alert(e?.message || $t("studio.createFailed"));
+      toast.show(e?.message || $t("studio.createFailed"), "error");
     }
   }
 
@@ -258,8 +273,9 @@
     if (!nextTitle) return;
     try {
       await dashboardStore.renameStudioOutput(sessionId, item.id, nextTitle);
+      toast.show($t("studio.renameSuccess"), "success");
     } catch (e) {
-      alert(e?.message || $t("studio.renameFailed"));
+      toast.show(e?.message || $t("studio.renameFailed"), "error");
     }
   }
 
@@ -267,8 +283,9 @@
     if (!confirm($t("studio.confirmDelete"))) return;
     try {
       await dashboardStore.deleteStudioOutput(sessionId, item.id);
+      toast.show($t("studio.deleteSuccess"), "success");
     } catch (e) {
-      alert(e?.message || $t("studio.deleteFailed"));
+      toast.show(e?.message || $t("studio.deleteFailed"), "error");
     }
   }
 
@@ -278,12 +295,12 @@
       const url = res?.share_url || res?.url;
       if (url && navigator?.clipboard?.writeText) {
         await navigator.clipboard.writeText(String(url));
-        alert($t("studio.copiedShareLink"));
+        toast.show($t("studio.copiedShareLink"), "success");
       } else {
-        alert(url ? $t("studio.shareLink", { url }) : $t("studio.shareUnavailable"));
+        toast.show(url ? $t("studio.shareLink", { url }) : $t("studio.shareUnavailable"), "info");
       }
     } catch (e) {
-      alert(e?.message || $t("studio.shareFailed"));
+      toast.show(e?.message || $t("studio.shareFailed"), "error");
     }
   }
 
@@ -292,12 +309,37 @@
       const res = await dashboardStore.downloadStudioOutput(item.id);
       const url = res?.download_url || item?.result_url;
       if (url) window.open(String(url), "_blank", "noopener,noreferrer");
-      else alert($t("studio.downloadUnavailable"));
+      else toast.show($t("studio.downloadUnavailable"), "warning");
     } catch (e) {
-      alert(e?.message || $t("studio.downloadFailed"));
+      toast.show(e?.message || $t("studio.downloadFailed"), "error");
     }
   }
+
+  onDestroy(() => {
+    cleanupGlobalClick();
+    toast.clear();
+  });
 </script>
+
+{#if showToastBanner}
+  <div class="fixed right-4 top-4 z-[60]" transition:fade={{ duration: 140 }}>
+    <div
+      class={`min-w-[260px] max-w-[360px] rounded-xl border px-4 py-3 text-sm shadow-md ${
+        toastType === "success"
+          ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+          : toastType === "error"
+            ? "border-rose-200 bg-rose-50 text-rose-700"
+            : toastType === "warning"
+              ? "border-amber-200 bg-amber-50 text-amber-700"
+              : "border-[var(--color-border-default)] bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)]"
+      }`}
+      role="status"
+      aria-live="polite"
+    >
+      {toastMessage}
+    </div>
+  </div>
+{/if}
 
 <div
   class="h-full flex flex-col bg-[var(--color-bg-surface)] rounded-xl border border-[var(--color-border-default)] overflow-hidden"
@@ -527,7 +569,7 @@
   bind:aspectRatio
   bind:targetPlatform
   bind:visualStyle
-  bind:chunkCount
+  bind:videoDurationSeconds
   on:close={closeModal}
   on:create={createStudioOutput}
 />

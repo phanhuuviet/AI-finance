@@ -33,7 +33,7 @@
   /** @type {string} */
   export let visualStyle = "cinematic realistic";
 
-  export let chunkCount = 8;
+  export let videoDurationSeconds = 40;
 
   $: languageOptions = [
     { value: "vi", label: $t("studio.languageVietnamese") },
@@ -53,7 +53,12 @@
     { value: "youtube", label: "YouTube" }
   ];
 
-  $: formattedChunkCount = `${chunkCount} chunks`;
+  $: estimatedChunks = Math.max(1, Math.round(Number(videoDurationSeconds || 0) / 5));
+
+  $: formattedDuration =
+    videoDurationSeconds < 60
+      ? `${videoDurationSeconds}s (${estimatedChunks} chunks)`
+      : `${Math.floor(videoDurationSeconds / 60)}m ${videoDurationSeconds % 60}s (${estimatedChunks} chunks)`;
 
   function close() {
     dispatch("close");
@@ -111,15 +116,15 @@
   />
 
   <RangeSliderField
-    id="video_chunk_count"
-    label={$t("studio.video.chunkCount")}
-    bind:value={chunkCount}
-    min={4}
-    max={16}
-    step={1}
-    displayValue={formattedChunkCount}
-    minLabel="4"
-    maxLabel="16"
+    id="video_duration_seconds"
+    label={$t("studio.video.durationSeconds")}
+    bind:value={videoDurationSeconds}
+    min={40}
+    max={480}
+    step={10}
+    displayValue={formattedDuration}
+    minLabel="40s"
+    maxLabel="8m"
   />
 
   <svelte:fragment slot="footer">
