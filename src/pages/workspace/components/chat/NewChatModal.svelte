@@ -6,6 +6,7 @@
   import Autocomplete from '$lib/components/common/Autocomplete.svelte';
   import TextField from '$lib/components/common/TextField.svelte';
   import Button from '$lib/components/common/Button.svelte';
+  import { showToast } from '$lib/utils/toast';
 
   export let onClose: () => void = () => {};
 
@@ -54,10 +55,11 @@
   async function handleSubmit(): Promise<void> {
     try {
       await sessionService.createSession(title, selectedConceptId, promptValues);
+      showToast('Chat created successfully.', 'success');
       resetForm();
       onClose();
-    } catch {
-      // error is displayed from $sessionStore.error
+    } catch (err) {
+      showToast((err as Error)?.message || $sessionStore.error || 'SESSION_CREATE_FAILED', 'error');
     }
   }
 </script>

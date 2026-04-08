@@ -1,5 +1,4 @@
 <script>
-  import { onDestroy } from "svelte";
   import { fade } from "svelte/transition";
   import { goto } from "$app/navigation";
   import { workspaceStore } from "../../../../stores/workspace.js";
@@ -26,7 +25,7 @@
   } from "$lib/stores/generation.store";
   import { generationService } from "$lib/services/generation.service";
   import { formatDuration, formatRelativeDate } from "$lib/utils/format";
-  import { createToastController } from "$lib/utils/toast";
+  import { showToast } from "$lib/utils/toast";
   import { CHAT_ROLE, MODAL_TOOL } from "$lib/constants/index.js";
   import { t } from "../../../../lib/i18n";
 
@@ -89,15 +88,6 @@
   let visualStyle = "cinematic realistic";
   let videoDurationSeconds = 40;
 
-  let toastMessage = "";
-  let toastType = "info";
-  let showToastBanner = false;
-  const toast = createToastController((patch) => {
-    if (patch.message !== undefined) toastMessage = patch.message;
-    if (patch.type !== undefined) toastType = patch.type;
-    if (patch.visible !== undefined) showToastBanner = patch.visible;
-  });
-
   let selectableScripts = [];
   let selectedScriptId = null;
   let selectedScript = "";
@@ -149,7 +139,7 @@
 
   function openToolModal(toolKey) {
     if (!sessionId) {
-      toast.show($t("studio.selectSessionHint"), "warning");
+      showToast($t("studio.selectSessionHint"), "warning");
       return;
     }
     pendingTool = toolKey;
@@ -162,7 +152,7 @@
 
   function confirmScriptSelection() {
     if (!selectedScript.trim()) {
-      toast.show($t("studio.scriptPicker.empty"), "warning");
+      showToast($t("studio.scriptPicker.empty"), "warning");
       return;
     }
 
@@ -197,19 +187,19 @@
             visual_style: visualStyle
           }
         });
-        toast.show($t("studio.video.generateSuccess"), "success");
+        showToast($t("studio.video.generateSuccess"), "success");
         await generationService.loadGenerations(sessionId, 1);
       } else {
         await dashboardStore.createStudioOutput(sessionId, modalTool, {
           language: commonLanguage,
           requirements: commonRequirements
         });
-        toast.show($t("studio.createSuccess"), "success");
+        showToast($t("studio.createSuccess"), "success");
       }
 
       closeModal();
     } catch (e) {
-      toast.show(e?.message || $t("studio.createFailed"), "error");
+      showToast(e?.message || $t("studio.createFailed"), "error");
     } finally {
       isCreatingOutput = false;
     }
@@ -218,31 +208,7 @@
   function goToDetail(generation) {
     goto(`/workspace/${generation.session_id}/generations/${generation.id}`);
   }
-
-  onDestroy(() => {
-    toast.clear();
-  });
 </script>
-
-{#if showToastBanner}
-  <div class="fixed right-4 top-4 z-[60]" transition:fade={{ duration: 140 }}>
-    <div
-      class={`min-w-[260px] max-w-[360px] rounded-xl border px-4 py-3 text-sm shadow-md ${
-        toastType === "success"
-          ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-          : toastType === "error"
-            ? "border-rose-200 bg-rose-50 text-rose-700"
-            : toastType === "warning"
-              ? "border-amber-200 bg-amber-50 text-amber-700"
-              : "border-[var(--color-border-default)] bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)]"
-      }`}
-      role="status"
-      aria-live="polite"
-    >
-      {toastMessage}
-    </div>
-  </div>
-{/if}
 
 <div class="h-full flex flex-col bg-[var(--color-bg-surface)] rounded-xl border border-[var(--color-border-default)] overflow-hidden">
   <div class="px-4 sm:px-5 py-4 border-b border-[var(--color-border-default)] bg-[var(--color-bg-surface)]">

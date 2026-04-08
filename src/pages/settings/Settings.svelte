@@ -6,6 +6,7 @@
   import SelectField from '$lib/components/common/SelectField.svelte';
   import LoadingBlock from '$lib/components/common/LoadingBlock.svelte';
   import ErrorFallback from '$lib/components/common/ErrorFallback.svelte';
+  import { showToast } from '$lib/utils/toast';
   import { t } from '../../lib/i18n';
 
   /** @typedef {import('../../lib/models').User} User */
@@ -16,8 +17,6 @@
   let email = '';
   /** @type {UserPreferences} */
   let preferences = { model: 'gpt-3.5-turbo' };
-  let message = '';
-  let errorMessage = '';
 
   $: profileState = $authState;
 
@@ -26,10 +25,10 @@
   }
 
   $: if ($user && !initialized) {
-    username = $user.username || '';
+    username = $user.full_name || '';
     email = $user.email || '';
     preferences = {
-      model: $user.preferences?.model || 'gpt-3.5-turbo'
+      model:  'gpt-3.5-turbo'
     };
     initialized = true;
   }
@@ -40,39 +39,22 @@
   ];
 
   async function saveSettings() {
-    message = '';
-    errorMessage = '';
-    
     try {
-      /** @type {User} */
-      const updated = await updateProfile({
+      await updateProfile({
         username,
         email,
         preferences
       });
 
-      message = $t('settings.saved');
-      setTimeout(() => (message = ''), 3000);
+      showToast($t('settings.saved'), 'success');
     } catch (err) {
-      errorMessage = err?.message || $t('settings.saveFailed');
+      showToast(err?.message || $t('settings.saveFailed'), 'error');
     }
   }
 </script>
 
 <div class="w-full max-w-3xl mx-auto bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200">
   <h2 class="text-lg sm:text-xl font-semibold text-gray-800 mb-6">{$t('settings.accountSettings')}</h2>
-
-  {#if message}
-    <div class="p-3 mb-6 text-sm text-green-700 bg-green-100 rounded-md transition-opacity">
-      {message}
-    </div>
-  {/if}
-
-  {#if errorMessage}
-    <div class="p-3 mb-6 text-sm text-red-700 bg-red-100 rounded-md transition-opacity">
-      {errorMessage}
-    </div>
-  {/if}
 
   {#if profileState.showLoading && !$user}
     <div class="space-y-6" aria-live="polite">

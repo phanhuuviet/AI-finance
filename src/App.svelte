@@ -9,6 +9,7 @@
   import DashboardNotebookLM from "./components/DashboardNotebookLM.svelte";
   import Login from "./pages/login/Login.svelte";
   import NotFound from "./pages/not-found/NotFound.svelte";
+  import ToastBanner from "$lib/components/common/ToastBanner.svelte";
   import { initRouter } from "./stores/router.js";
 
   let loading = true;
@@ -47,6 +48,8 @@
     {/if}
   {/if}
 </main>
+
+<ToastBanner />
 
 <style>
   :global(body) {

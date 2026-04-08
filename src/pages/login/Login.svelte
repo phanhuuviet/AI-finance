@@ -3,13 +3,23 @@
   import { authError, authLoading } from '$lib/stores/auth.store';
   import Button from '$lib/components/common/Button.svelte';
   import TextField from '$lib/components/common/TextField.svelte';
+  import { showToast } from '$lib/utils/toast';
   import { t } from '../../lib/i18n';
   
   let isLogin = true;
   let username = '';
   let email = '';
   let password = '';
-  let successMessage = '';
+  let lastAuthError = '';
+
+  $: if ($authError && $authError !== lastAuthError) {
+    lastAuthError = $authError;
+    showToast($authError, 'error');
+  }
+
+  $: if (!$authError) {
+    lastAuthError = '';
+  }
 
   function resetForm() {
     username = '';
@@ -18,7 +28,6 @@
   }
 
   async function handleSubmit() {
-    successMessage = '';
     try {
       if (isLogin) {
         await authService.login({
@@ -33,7 +42,7 @@
         });
         resetForm();
         isLogin = true;
-        successMessage = 'Register successful. Please sign in.';
+        showToast('Register successful. Please sign in.', 'success');
       }
     } catch {
       // Error state comes from authError store.
@@ -41,7 +50,6 @@
   }
 
   function toggleAuthMode() {
-    successMessage = '';
     isLogin = !isLogin;
   }
 
@@ -69,12 +77,6 @@
     <div class="flex flex-1 items-center justify-center bg-[var(--color-bg-surface)] px-4 py-8">
       <div class="w-full max-w-md bg-[var(--color-bg-card)] rounded-2xl shadow-md px-6 py-10 flex flex-col gap-6">
         <h3 class="text-2xl font-bold text-center text-[var(--color-text-primary)] mb-2 tracking-tight">{isLogin ? $t('auth.loginTitle') : $t('auth.registerTitle')}</h3>
-
-        {#if successMessage}
-          <div class="p-4 mb-2 text-base text-[var(--color-status-ready)] bg-[var(--color-status-ready-bg)] rounded-md border border-[var(--color-status-ready-border)] text-left">
-            {successMessage}
-          </div>
-        {/if}
 
         {#if $authError}
           <div class="p-4 mb-2 text-base text-[var(--color-danger)] bg-[var(--color-danger-muted)] rounded-md border border-[var(--color-danger-border)] text-left">

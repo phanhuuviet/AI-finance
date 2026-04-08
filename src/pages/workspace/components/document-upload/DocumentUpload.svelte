@@ -16,6 +16,7 @@
   import LoadingBlock from "$lib/components/common/LoadingBlock.svelte";
   import ErrorFallback from "$lib/components/common/ErrorFallback.svelte";
   import { DOC_SOURCE_TYPE, DOC_STATUS } from "$lib/constants/index.js";
+  import { showToast } from "$lib/utils/toast";
   import { t } from "../../../../lib/i18n";
 
   /** @type {FileList | null} */
@@ -28,7 +29,6 @@ From healthcare diagnostics to financial forecasting, AI systems are
 enabling faster, more accurate decision-making. This document explores
 key trends, challenges, and opportunities in enterprise AI adoption
 through 2025 and beyond.`;
-  let success = "";
   let documentToDelete = null;
   let showDeleteConfirm = false;
   let isDeleting = false;
@@ -47,28 +47,24 @@ through 2025 and beyond.`;
   async function handleFileUpload() {
     if (!file) return;
 
-    success = "";
-
     try {
       await dashboardStore.uploadDocument(file[0]);
-      success = $t("documents.uploadedSuccess");
+      showToast($t("documents.uploadedSuccess"), "success");
       file = null;
     } catch (err) {
-      console.error(err);
+      showToast(err?.message || "Failed to upload document.", "error");
     }
   }
 
   async function handleCrawl() {
     if (!url) return;
 
-    success = "";
-
     try {
       await dashboardStore.crawlWebsite(url);
-      success = $t("documents.crawlStarted");
+      showToast($t("documents.crawlStarted"), "success");
       url = "";
     } catch (err) {
-      console.error(err);
+      showToast(err?.message || "Failed to crawl website.", "error");
     }
   }
 
@@ -76,10 +72,11 @@ through 2025 and beyond.`;
     if (!title.trim() || !pastedText.trim()) return;
     try {
       await documentService.createDocument(title.trim(), pastedText.trim());
+      showToast("Document added successfully.", "success");
       title = "";
       pastedText = "";
-    } catch {
-      // error is displayed from $documentStore.error
+    } catch (err) {
+      showToast(err?.message || documentState.error || "DOCUMENT_CREATE_FAILED", "error");
     }
   }
 
@@ -131,9 +128,10 @@ through 2025 and beyond.`;
     isDeleting = true;
     try {
       await documentService.deleteDocument(documentToDelete.id);
+      showToast("Document deleted successfully.", "success");
       closeDeleteConfirm();
-    } catch {
-      // error shown from $documentStore.error
+    } catch (err) {
+      showToast(err?.message || documentState.error || "DOCUMENT_DELETE_FAILED", "error");
     } finally {
       isDeleting = false;
     }
@@ -143,12 +141,6 @@ through 2025 and beyond.`;
 <div class="w-full max-w-5xl mx-auto space-y-4 sm:space-y-6 lg:space-y-8">
   <div class="relative bg-[var(--color-bg-surface)] p-4 sm:p-6 rounded-xl border border-[var(--color-border-default)]">
     <h2 class="text-lg sm:text-xl font-semibold mb-4 text-[var(--color-text-primary)]">{$t("documents.addDocuments")}</h2>
-
-    {#if success}
-      <div class="p-3 mb-4 text-sm text-[var(--color-status-ready)] bg-[var(--color-status-ready-bg)] border border-[var(--color-status-ready-border)] rounded-md">
-        {success}
-      </div>
-    {/if}
 
     <div class="mb-4 flex flex-wrap gap-2 rounded-lg bg-[var(--color-bg-app)] p-1">
       <Button
