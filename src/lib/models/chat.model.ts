@@ -1,9 +1,13 @@
 import type { Id, ISODateString } from './common.model';
+import type { ValueOf } from '$lib/constants';
+import { CHAT_ROLE } from '$lib/constants';
+
+export type ChatRole = ValueOf<typeof CHAT_ROLE>;
 
 export interface ChatMessage {
   id: string;
   session_id: string;
-  role: 'assistant' | 'user' | 'user_message';
+  role: ChatRole;
   content: string;
   metadata_json: Record<string, unknown>;
   created_at: string;

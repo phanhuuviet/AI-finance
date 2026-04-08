@@ -9,6 +9,7 @@ export default defineConfig({
     alias: {
       $lib: fileURLToPath(new URL('./src/lib', import.meta.url)),
       '$app/navigation': fileURLToPath(new URL('./src/app/navigation.ts', import.meta.url)),
+      '$app/stores': fileURLToPath(new URL('./src/app/stores.js', import.meta.url)),
     },
   },
   plugins: [

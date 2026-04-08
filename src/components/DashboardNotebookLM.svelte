@@ -9,6 +9,7 @@
   import { route, navigate } from "../stores/router.js";
   import Button from "$lib/components/common/Button.svelte";
   import { language, setLanguage, t } from "../lib/i18n";
+  import { LOCALE } from "$lib/constants/index.js";
 
   let activeTab = "home"; // home | analytics | settings
   let mobileNavOpen = false;
@@ -170,24 +171,25 @@
       </div>
 
       <div class="flex items-center gap-2 shrink-0">
-        <div class="inline-flex items-center rounded-[var(--radius-md)] border border-[var(--border-purple)] bg-[var(--purple-50)] p-1" role="group" aria-label={$t("header.language")}>
+        <div class="inline-flex items-center rounded-[var(--radius-md)] border border-[var(--border-purple)] bg-[var(--purple-50)] p-0.5" role="group" aria-label={$t("header.language")}>
           <Button
             unstyled
             type="button"
-            className={`px-2 sm:px-3 py-2 min-h-11 text-xs sm:text-sm rounded-[var(--radius-sm)] ${$language === "vi" ? "[background:var(--gradient-accent)] text-[var(--text-on-dark)] font-medium" : "bg-transparent text-[var(--text-secondary)]"}`}
-            on:click={() => setLanguage("vi")}
-            aria-pressed={$language === "vi"}
+            className={`px-2.5 py-1 min-h-0 text-xs sm:text-sm rounded-[var(--radius-sm)] transition-all duration-150 ${$language === LOCALE.VI ? "bg-white text-[var(--purple-700,#6D28D9)] shadow-sm" : "bg-transparent text-[var(--text-secondary)]"}`}
+            on:click={() => setLanguage(LOCALE.VI)}
+            aria-pressed={$language === LOCALE.VI}
           >
-            🇻🇳 VI
+            VI
           </Button>
+          <span class="select-none text-[var(--text-muted)]">|</span>
           <Button
             unstyled
             type="button"
-            className={`px-2 sm:px-3 py-2 min-h-11 text-xs sm:text-sm rounded-[var(--radius-sm)] ${$language === "en" ? "[background:var(--gradient-accent)] text-[var(--text-on-dark)] font-medium" : "bg-transparent text-[var(--text-secondary)]"}`}
-            on:click={() => setLanguage("en")}
-            aria-pressed={$language === "en"}
+            className={`px-2.5 py-1 min-h-0 text-xs sm:text-sm rounded-[var(--radius-sm)] transition-all duration-150 ${$language === LOCALE.EN ? "bg-white text-[var(--purple-700,#6D28D9)] shadow-sm" : "bg-transparent text-[var(--text-secondary)]"}`}
+            on:click={() => setLanguage(LOCALE.EN)}
+            aria-pressed={$language === LOCALE.EN}
           >
-            🇺🇸 EN
+            EN
           </Button>
         </div>
 

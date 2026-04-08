@@ -4,6 +4,7 @@ import { ApiError } from '$lib/api/base/http';
 import { authStore } from '$lib/stores/auth.store';
 import { sessionService } from './session.service';
 import { tokenStorage } from '$lib/utils/token';
+import { ROUTES } from '$lib/constants';
 import type { LoginRequest, RegisterRequest } from '$lib/models/auth.model';
 
 export const authService = {
@@ -14,7 +15,7 @@ export const authService = {
       tokenStorage.setTokens(data.access_token, data.refresh_token);
       authStore.update((s) => ({ ...s, user: data.user, isLoading: false }));
       await sessionService.loadSessions(1, '');
-      goto('/workspace');
+      goto(ROUTES.WORKSPACE);
     } catch (err) {
       const message = err instanceof ApiError ? err.message : 'LOGIN_FAILED';
       authStore.update((s) => ({ ...s, error: message, isLoading: false }));
@@ -43,7 +44,7 @@ export const authService = {
     } finally {
       tokenStorage.clearTokens();
       authStore.set({ user: null, isLoading: false, error: null });
-      goto('/login');
+      goto(ROUTES.LOGIN);
     }
   },
 

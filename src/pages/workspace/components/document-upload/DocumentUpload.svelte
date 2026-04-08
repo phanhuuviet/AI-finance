@@ -15,6 +15,7 @@
   import TextareaField from "$lib/components/common/TextareaField.svelte";
   import LoadingBlock from "$lib/components/common/LoadingBlock.svelte";
   import ErrorFallback from "$lib/components/common/ErrorFallback.svelte";
+  import { DOC_SOURCE_TYPE, DOC_STATUS } from "$lib/constants/index.js";
   import { t } from "../../../../lib/i18n";
 
   /** @type {FileList | null} */
@@ -98,20 +99,20 @@ through 2025 and beyond.`;
   }
 
   function statusLabel(status) {
-    if (status === "processed") return "Ready";
-    if (status === "processing") return "Processing";
+    if (status === DOC_STATUS.PROCESSED) return "Ready";
+    if (status === DOC_STATUS.PROCESSING) return "Processing";
     return "Error";
   }
 
   function statusDotClass(status) {
-    if (status === "processed") return "bg-[var(--green-500,#10B981)]";
-    if (status === "processing") return "bg-[var(--amber-500,#F59E0B)] animate-pulse";
+    if (status === DOC_STATUS.PROCESSED) return "bg-[var(--green-500,#10B981)]";
+    if (status === DOC_STATUS.PROCESSING) return "bg-[var(--amber-500,#F59E0B)] animate-pulse";
     return "bg-[var(--rose-500,#F43F5E)]";
   }
 
   function sourceTypeClass(sourceType) {
-    if (sourceType === "raw") return "bg-[var(--teal-50,#F0FDFA)] text-[var(--teal-600,#0D9488)]";
-    if (sourceType === "url") return "bg-[var(--blue-50,#EFF6FF)] text-[var(--blue-600,#2563EB)]";
+    if (sourceType === DOC_SOURCE_TYPE.RAW) return "bg-[var(--teal-50,#F0FDFA)] text-[var(--teal-600,#0D9488)]";
+    if (sourceType === DOC_SOURCE_TYPE.URL) return "bg-[var(--blue-50,#EFF6FF)] text-[var(--blue-600,#2563EB)]";
     return "bg-[var(--amber-50,#FFFBEB)] text-[var(--amber-600,#D97706)]";
   }
 

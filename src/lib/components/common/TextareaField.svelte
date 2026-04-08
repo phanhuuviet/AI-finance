@@ -17,6 +17,8 @@
   export let bare = false;
   // Added to preserve original classes when replacing already-styled native textareas.
   export let unstyled = false;
+  export let maxHeight = 160;
+  export let textareaRef = null;
 
   const dispatch = createEventDispatcher();
 
@@ -26,6 +28,26 @@
 
   function handleChange(event) {
     dispatch("change", event);
+  }
+
+  function autoResize(node) {
+    function resize() {
+      node.style.height = "auto";
+      node.style.height = `${Math.min(node.scrollHeight, maxHeight)}px`;
+      node.style.overflowY = node.scrollHeight > maxHeight ? "auto" : "hidden";
+    }
+
+    node.addEventListener("input", resize);
+    resize();
+
+    return {
+      update() {
+        resize();
+      },
+      destroy() {
+        node.removeEventListener("input", resize);
+      }
+    };
   }
 
   $: resolvedTextareaClass = [
@@ -40,6 +62,8 @@
 
 {#if bare}
   <textarea
+    use:autoResize
+    bind:this={textareaRef}
     {...$$restProps}
     id={id || undefined}
     bind:value
@@ -63,6 +87,8 @@
     {/if}
 
     <textarea
+      use:autoResize
+      bind:this={textareaRef}
       {...$$restProps}
       id={id || undefined}
       bind:value

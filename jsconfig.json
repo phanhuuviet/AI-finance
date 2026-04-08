@@ -2,6 +2,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
+      "$lib/constants": ["src/lib/constants/index.ts"],
       "$lib/*": ["src/lib/*"],
       "$app/navigation": ["src/app/navigation.ts"],
       "$app/stores": ["src/app/stores.js"]
@@ -9,6 +10,7 @@
     "moduleResolution": "bundler",
     "target": "ESNext",
     "module": "ESNext",
+    "allowImportingTsExtensions": true,
     "allowArbitraryExtensions": true,
     /**
      * svelte-preprocess cannot figure out whether you have
@@ -36,5 +38,5 @@
    * Use global.d.ts instead of compilerOptions.types
    * to avoid limiting type declarations.
    */
-  "include": ["src/**/*.d.ts", "src/**/*.js", "src/**/*.svelte"]
+  "include": ["src/**/*.d.ts", "src/**/*.ts", "src/**/*.js", "src/**/*.svelte"]
 }

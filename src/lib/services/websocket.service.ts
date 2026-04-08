@@ -1,8 +1,14 @@
 import { goto } from '$app/navigation';
 import { chatStore } from '$lib/stores/chat.store';
 import { tokenStorage } from '$lib/utils/token';
+import { CHAT_ROLE, ROUTES, WS_CLOSE_CODE, WS_EVENT, WS_MESSAGE, WS_PHASE } from '$lib/constants';
 
-type WsEventType = 'ack' | 'assistant_chunk' | 'assistant_done' | 'error' | 'pong';
+type WsEventType =
+  | typeof WS_EVENT.ACK
+  | typeof WS_EVENT.ASSISTANT_CHUNK
+  | typeof WS_EVENT.ASSISTANT_DONE
+  | typeof WS_EVENT.ERROR
+  | typeof WS_EVENT.PONG;
 
 interface WsEnvelope {
   type: WsEventType;
@@ -74,10 +80,10 @@ class WebSocketService {
       this.isGenerating = false;
       chatStore.update((s) => ({ ...s, isConnecting: false, isGenerating: false, isTyping: false }));
 
-      if (event.code === 4401) {
+      if (event.code === WS_CLOSE_CODE.UNAUTHORIZED) {
         tokenStorage.clearTokens();
-        goto('/login');
-      } else if (event.code === 4403) {
+        goto(ROUTES.LOGIN);
+      } else if (event.code === WS_CLOSE_CODE.FORBIDDEN) {
         chatStore.update((s) => ({ ...s, wsError: 'FORBIDDEN' }));
       }
     };
@@ -85,15 +91,15 @@ class WebSocketService {
 
   private handleMessage(msg: WsEnvelope): void {
     switch (msg.type) {
-      case 'ack': {
+      case WS_EVENT.ACK: {
         const message = msg.payload?.message;
-        if (message === 'CHAT_CONNECTED') {
+        if (message === WS_MESSAGE.CHAT_CONNECTED) {
           this.receivedInitialChunk = false;
           this.skippingInitialScript = false;
           chatStore.update((s) => ({ ...s, isConnecting: false, isTyping: false, wsError: null }));
         }
 
-        if (message === 'CHAT_MESSAGE_RECEIVED') {
+        if (message === WS_MESSAGE.CHAT_MESSAGE_RECEIVED) {
           chatStore.update((s) => ({
             ...s,
             isTyping: true,
@@ -103,9 +109,9 @@ class WebSocketService {
         break;
       }
 
-      case 'assistant_chunk': {
+      case WS_EVENT.ASSISTANT_CHUNK: {
         const phase = msg.payload?.data?.phase as string | undefined;
-        const isInitialScript = phase === 'initial_script';
+        const isInitialScript = phase === WS_PHASE.INITIAL_SCRIPT;
         if (isInitialScript && !this.receivedInitialChunk) {
           this.receivedInitialChunk = true;
           this.skippingInitialScript = true;
@@ -127,7 +133,7 @@ class WebSocketService {
         break;
       }
 
-      case 'assistant_done': {
+      case WS_EVENT.ASSISTANT_DONE: {
         if (this.skippingInitialScript) {
           this.skippingInitialScript = false;
           chatStore.update((s) => ({ ...s, isTyping: false, isGenerating: false }));
@@ -142,7 +148,7 @@ class WebSocketService {
                 {
                   id: crypto.randomUUID(),
                   session_id: s.activeSessionId ?? '',
-                  role: 'assistant' as const,
+                  role: CHAT_ROLE.ASSISTANT,
                   content: finishedContent,
                   metadata_json: {},
                   created_at: new Date().toISOString(),
@@ -162,7 +168,7 @@ class WebSocketService {
         break;
       }
 
-      case 'error': {
+      case WS_EVENT.ERROR: {
         chatStore.update((s) => ({
           ...s,
           isTyping: false,
@@ -193,7 +199,7 @@ class WebSocketService {
         break;
       }
 
-      case 'pong':
+      case WS_EVENT.PONG:
         break;
     }
   }
@@ -215,7 +221,7 @@ class WebSocketService {
         {
           id: crypto.randomUUID(),
           session_id: s.activeSessionId ?? '',
-          role: 'user' as const,
+          role: CHAT_ROLE.USER,
           content,
           metadata_json: {},
           created_at: new Date().toISOString(),
@@ -228,7 +234,7 @@ class WebSocketService {
 
     this.ws.send(
       JSON.stringify({
-        type: 'user_message',
+        type: WS_EVENT.USER_MESSAGE,
         content,
         document_ids: documentIds,
       })
@@ -241,7 +247,7 @@ class WebSocketService {
       clearTimeout(this.pendingRetry.timeoutId);
       this.pendingRetry = null;
     }
-    this.ws.send(JSON.stringify({ type: 'stop_generation' }));
+    this.ws.send(JSON.stringify({ type: WS_EVENT.STOP_GENERATION }));
     this.isGenerating = false;
     chatStore.update((s) => ({ ...s, isGenerating: false, isTyping: false, streamingContent: '' }));
   }
@@ -271,7 +277,7 @@ class WebSocketService {
   private startPing(): void {
     this.pingInterval = setInterval(() => {
       if (this.ws?.readyState === WebSocket.OPEN) {
-        this.ws.send(JSON.stringify({ type: 'ping' }));
+        this.ws.send(JSON.stringify({ type: WS_EVENT.PING }));
       }
     }, 30000);
   }

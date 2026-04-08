@@ -17,6 +17,12 @@ function toParams(pathname) {
 }
 
 export const page = derived(route, ($route) => ({
+  route: {
+    id: $route.pathname
+  },
+  state: {
+    page: $route.page
+  },
   params: toParams($route.pathname),
   url: typeof window !== 'undefined' ? new URL(window.location.href) : undefined
 }));

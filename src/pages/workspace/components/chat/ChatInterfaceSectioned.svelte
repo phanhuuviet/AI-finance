@@ -18,9 +18,10 @@
   import LoadingBlock from "$lib/components/common/LoadingBlock.svelte";
   import ErrorFallback from "$lib/components/common/ErrorFallback.svelte";
   import TypingIndicator from "$lib/components/common/TypingIndicator.svelte";
-  import TextField from "$lib/components/common/TextField.svelte";
+  import TextareaField from "$lib/components/common/TextareaField.svelte";
   import Button from "$lib/components/common/Button.svelte";
   import { t } from "../../../../lib/i18n";
+  import { CHAT_ROLE } from "$lib/constants/index.js";
 
   /** @typedef {import('../../../../lib/models').ChatMessage} ChatMessage */
 
@@ -29,6 +30,8 @@
   export let sessionId = null;
 
   let inputValue = "";
+  /** @type {HTMLTextAreaElement | null} */
+  let textareaEl = null;
   /** @type {HTMLDivElement | null} */
   let chatContainer = null;
 
@@ -61,6 +64,9 @@
     if (!canSend) return;
     const content = inputValue.trim();
     inputValue = "";
+    if (textareaEl) {
+      textareaEl.style.height = "auto";
+    }
     wsService.sendMessage(content, []);
   }
 
@@ -69,9 +75,9 @@
   }
 
   function handleKeydown(e) {
-    if (e.key === "Enter" && !e.shiftKey && canSend) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      handleSend();
+      if (canSend) handleSend();
     }
   }
 </script>
@@ -126,10 +132,10 @@
       <div transition:fade={{ duration: 180 }}>
         {#each messages as msg}
           <div
-            class={`mb-3 flex ${msg.role === "assistant" ? "justify-start" : "justify-end"}`}
+            class={`mb-3 flex ${msg.role === CHAT_ROLE.ASSISTANT ? "justify-start" : "justify-end"}`}
           >
             <div class="max-w-[88%] sm:max-w-[75%]">
-              {#if msg.role === "assistant"}
+              {#if msg.role === CHAT_ROLE.ASSISTANT}
                 <span class="mb-1 inline-flex rounded-full bg-[var(--purple-100)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.05em] text-[var(--purple-700)]">
                   Assistant
                 </span>
@@ -137,17 +143,17 @@
 
               <div
                 class={`rounded-[12px] p-3 text-sm leading-relaxed ${
-                  msg.role === "assistant"
+                  msg.role === CHAT_ROLE.ASSISTANT
                     ? "bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-purple)] rounded-tl-none"
                     : "bg-[var(--indigo-600,#4F46E5)] text-white border-0 rounded-[12px_0_12px_12px]"
                 }`}
               >
-                {#if msg.role === "assistant"}
+                {#if msg.role === CHAT_ROLE.ASSISTANT}
                   <div class="markdown-body [&>p]:m-0 [&>p+p]:mt-2 [&_ul]:mt-1 [&_ul]:ml-4 [&_ol]:mt-1 [&_ol]:ml-4 [&_code]:rounded [&_code]:bg-[rgba(99,102,241,0.12)] [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-[0.85em]">{@html renderMarkdown(msg.content)}</div>
                 {:else}
                   <p class="whitespace-pre-wrap text-white">{msg.content}</p>
                 {/if}
-                <span class={`mt-2 block text-xs ${msg.role === "assistant" ? "text-[var(--text-muted)]" : "text-white/80"}`}>
+                <span class={`mt-2 block text-xs ${msg.role === CHAT_ROLE.ASSISTANT ? "text-[var(--text-muted)]" : "text-white/80"}`}>
                   {formatTime(msg.created_at)}
                 </span>
               </div>
@@ -183,14 +189,17 @@
   </div>
 
   <div class="flex gap-2 items-end p-3 border-t border-[var(--border-subtle)] bg-[var(--color-bg-surface)] rounded-b-lg">
-    <TextField
+    <TextareaField
       bare
       unstyled
+      bind:textareaRef={textareaEl}
       bind:value={inputValue}
-      placeholder="Type your message..."
+      maxHeight={160}
+      rows={1}
+      placeholder="Type your message... (Enter to send, Shift+Enter for new line)"
       disabled={$isGenerating || $isTyping || !sessionId || $isConnecting}
       onkeydown={handleKeydown}
-      inputClass="w-full px-3 sm:px-4 py-2.5 min-h-11 rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-border-accent)] focus:[box-shadow:0_0_0_3px_rgba(91,79,207,0.12)]"
+      textareaClass="chat-textarea w-full resize-none overflow-y-auto px-3 sm:px-4 py-2.5 min-h-11 rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)] leading-relaxed placeholder:text-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-border-accent)] focus:[box-shadow:0_0_0_3px_rgba(91,79,207,0.12)]"
     />
 
     {#if $isGenerating || $isTyping}

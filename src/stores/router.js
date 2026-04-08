@@ -1,10 +1,10 @@
 import { get, writable } from 'svelte/store';
-import { ROUTE_DEFINITIONS, DEFAULT_PROTECTED_ROUTE, LOGIN_ROUTE, ROOT_REDIRECT_PATH } from '../routes/definitions.js';
+import { ROUTE_DEFINITIONS, DEFAULT_PROTECTED_ROUTE, NOT_FOUND_ROUTE, ROOT_REDIRECT_PATH } from '../routes/definitions.js';
 import { authStore } from '../lib/stores/auth.store';
 import { tokenStorage } from '../lib/utils/token';
 
 /**
- * @typedef {'workspace' | 'analytics' | 'settings' | 'login'} Page
+ * @typedef {'workspace' | 'analytics' | 'settings' | 'login' | 'not-found'} Page
  * @typedef {{
  *   pathname: string;
  *   page: Page;
@@ -49,7 +49,7 @@ function parseRoute(pathname, hasSession) {
     }
   }
 
-  return coerceRoute(DEFAULT_PROTECTED_ROUTE, null, snapshot);
+  return coerceRoute(NOT_FOUND_ROUTE, null, snapshot);
 }
 
 /**
@@ -59,7 +59,7 @@ function parseRoute(pathname, hasSession) {
  */
 function coerceRoute(definition, match, hasSession) {
   if (definition.requiresAuth && !hasSession) {
-    return LOGIN_ROUTE.build(null);
+    return NOT_FOUND_ROUTE.build(null);
   }
 
   return definition.build(match);

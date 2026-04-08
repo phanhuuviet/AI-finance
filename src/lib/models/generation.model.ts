@@ -1,5 +1,8 @@
-export type GenerationStatus = 'pending' | 'processing' | 'completed' | 'failed';
-export type ChunkSection = 'hook' | 'body' | 'proof' | 'cta' | string;
+import type { ValueOf } from '$lib/constants';
+import { CHUNK_SECTION, GEN_STATUS } from '$lib/constants';
+
+export type GenerationStatus = ValueOf<typeof GEN_STATUS>;
+export type ChunkSection = ValueOf<typeof CHUNK_SECTION> | string;
 
 export interface GenerationSummary {
   pending: number;

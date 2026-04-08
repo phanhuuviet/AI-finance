@@ -2,6 +2,7 @@ import { get } from 'svelte/store';
 import { documentApi } from '$lib/api/modules/document.api';
 import { documentStore } from '$lib/stores/document.store';
 import { ApiError } from '$lib/api/base/http';
+import { DOC_SOURCE_TYPE } from '$lib/constants';
 
 const HARDCODED_MODEL_METADATA = {
   indexing_state: 'queued' as const,
@@ -31,7 +32,7 @@ export const documentService = {
       await documentApi.createDocument({
         title,
         content,
-        source_type: 'raw',
+        source_type: DOC_SOURCE_TYPE.RAW,
         model_metadata: HARDCODED_MODEL_METADATA,
       });
       await documentService.loadDocuments(1);

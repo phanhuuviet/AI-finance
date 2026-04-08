@@ -27,6 +27,7 @@
   import { generationService } from "$lib/services/generation.service";
   import { formatDuration, formatRelativeDate } from "$lib/utils/format";
   import { createToastController } from "$lib/utils/toast";
+  import { CHAT_ROLE, MODAL_TOOL } from "$lib/constants/index.js";
   import { t } from "../../../../lib/i18n";
 
   let sessionId = null;
@@ -34,37 +35,37 @@
 
   const tools = /** @type {{ key: string; titleKey: string; subtitleKey: string; color: string }[]} */ ([
     {
-      key: "audio_overview",
+      key: MODAL_TOOL.AUDIO_OVERVIEW,
       titleKey: "studio.tool.audio.title",
       subtitleKey: "studio.tool.audio.subtitle",
       color: "#4F8CFF"
     },
     {
-      key: "video_overview",
+      key: MODAL_TOOL.VIDEO_OVERVIEW,
       titleKey: "studio.tool.video.title",
       subtitleKey: "studio.tool.video.subtitle",
       color: "#FFB347"
     },
     {
-      key: "mindmap",
+      key: MODAL_TOOL.MINDMAP,
       titleKey: "studio.tool.mindmap.title",
       subtitleKey: "studio.tool.mindmap.subtitle",
       color: "#6DD47E"
     },
     {
-      key: "report",
+      key: MODAL_TOOL.REPORT,
       titleKey: "studio.tool.report.title",
       subtitleKey: "studio.tool.report.subtitle",
       color: "#A259FF"
     },
     {
-      key: "quiz",
+      key: MODAL_TOOL.QUIZ,
       titleKey: "studio.tool.quiz.title",
       subtitleKey: "studio.tool.quiz.subtitle",
       color: "#FF6B81"
     },
     {
-      key: "data",
+      key: MODAL_TOOL.DATA,
       titleKey: "studio.tool.data.title",
       subtitleKey: "studio.tool.data.subtitle",
       color: "#00CFCF"
@@ -106,7 +107,7 @@
     sessionId && $chatStore.activeSessionId === sessionId ? ($chatStore.messages || []) : [];
 
   $: selectableScripts = currentSessionMessages
-    .filter((msg) => msg?.role === "assistant" && String(msg?.content || "").trim().length > 0)
+    .filter((msg) => msg?.role === CHAT_ROLE.ASSISTANT && String(msg?.content || "").trim().length > 0)
     .slice()
     .sort((a, b) => new Date(String(b?.created_at || 0)).getTime() - new Date(String(a?.created_at || 0)).getTime())
     .map((msg, idx) => ({
@@ -168,7 +169,7 @@
     isScriptPickerOpen = false;
     modalTool = pendingTool;
     pendingTool = null;
-    if (modalTool !== "video_overview") {
+    if (modalTool !== MODAL_TOOL.VIDEO_OVERVIEW) {
       commonRequirements = selectedScript;
     }
     isModalOpen = true;
@@ -185,7 +186,7 @@
     isCreatingOutput = true;
 
     try {
-      if (modalTool === "video_overview") {
+      if (modalTool === MODAL_TOOL.VIDEO_OVERVIEW) {
         await dashboardStore.generateVideoScriptPrompts({
           chunk_count: durationToChunkCount(videoDurationSeconds),
           script: selectedScript,
@@ -373,8 +374,8 @@
 
 <StudioModalAudioOverview
   {...creatingModalProps}
-  isOpen={isModalOpen && modalTool === "audio_overview"}
-  title={$t(toolTitleKey("audio_overview"))}
+  isOpen={isModalOpen && modalTool === MODAL_TOOL.AUDIO_OVERVIEW}
+  title={$t(toolTitleKey(MODAL_TOOL.AUDIO_OVERVIEW))}
   sessionId={sessionId}
   bind:commonLanguage
   bind:commonRequirements
@@ -384,8 +385,8 @@
 
 <StudioModalVideoOverview
   {...creatingModalProps}
-  isOpen={isModalOpen && modalTool === "video_overview"}
-  title={$t(toolTitleKey("video_overview"))}
+  isOpen={isModalOpen && modalTool === MODAL_TOOL.VIDEO_OVERVIEW}
+  title={$t(toolTitleKey(MODAL_TOOL.VIDEO_OVERVIEW))}
   sessionId={sessionId}
   bind:commonLanguage
   bind:selectedScript
@@ -399,8 +400,8 @@
 
 <StudioModalMindmap
   {...creatingModalProps}
-  isOpen={isModalOpen && modalTool === "mindmap"}
-  title={$t(toolTitleKey("mindmap"))}
+  isOpen={isModalOpen && modalTool === MODAL_TOOL.MINDMAP}
+  title={$t(toolTitleKey(MODAL_TOOL.MINDMAP))}
   sessionId={sessionId}
   bind:commonLanguage
   bind:commonRequirements
@@ -410,8 +411,8 @@
 
 <StudioModalReport
   {...creatingModalProps}
-  isOpen={isModalOpen && modalTool === "report"}
-  title={$t(toolTitleKey("report"))}
+  isOpen={isModalOpen && modalTool === MODAL_TOOL.REPORT}
+  title={$t(toolTitleKey(MODAL_TOOL.REPORT))}
   sessionId={sessionId}
   bind:commonLanguage
   bind:commonRequirements
@@ -421,8 +422,8 @@
 
 <StudioModalQuiz
   {...creatingModalProps}
-  isOpen={isModalOpen && modalTool === "quiz"}
-  title={$t(toolTitleKey("quiz"))}
+  isOpen={isModalOpen && modalTool === MODAL_TOOL.QUIZ}
+  title={$t(toolTitleKey(MODAL_TOOL.QUIZ))}
   sessionId={sessionId}
   bind:commonLanguage
   bind:commonRequirements
@@ -432,8 +433,8 @@
 
 <StudioModalData
   {...creatingModalProps}
-  isOpen={isModalOpen && modalTool === "data"}
-  title={$t(toolTitleKey("data"))}
+  isOpen={isModalOpen && modalTool === MODAL_TOOL.DATA}
+  title={$t(toolTitleKey(MODAL_TOOL.DATA))}
   sessionId={sessionId}
   bind:commonLanguage
   bind:commonRequirements

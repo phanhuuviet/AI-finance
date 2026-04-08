@@ -1,5 +1,8 @@
-export type DocumentSourceType = 'raw' | 'url' | 'file';
-export type DocumentStatus = 'processed' | 'processing' | 'error';
+import type { ValueOf } from '$lib/constants';
+import { DOC_SOURCE_TYPE, DOC_STATUS } from '$lib/constants';
+
+export type DocumentSourceType = ValueOf<typeof DOC_SOURCE_TYPE>;
+export type DocumentStatus = ValueOf<typeof DOC_STATUS>;
 
 export interface Document {
   id: string;
@@ -18,7 +21,7 @@ export interface Document {
 export interface CreateDocumentRequest {
   title: string;
   content: string;
-  source_type: 'raw';
+  source_type: typeof DOC_SOURCE_TYPE.RAW;
   model_metadata: {
     indexing_state: 'queued';
     paper_context: { source: 'arxiv' };

@@ -1,14 +1,15 @@
 <script lang="ts">
   import type { GenerationChunk } from '$lib/models/generation.model';
   import StatusBadge from '$lib/components/common/StatusBadge.svelte';
+  import { CHUNK_SECTION, GEN_STATUS } from '$lib/constants/index.js';
 
   export let chunk: GenerationChunk;
 
   const sectionLabel: Record<string, string> = {
-    hook: 'Hook',
-    body: 'Body',
-    proof: 'Proof',
-    cta: 'Call to Action'
+    [CHUNK_SECTION.HOOK]: 'Hook',
+    [CHUNK_SECTION.BODY]: 'Body',
+    [CHUNK_SECTION.PROOF]: 'Proof',
+    [CHUNK_SECTION.CTA]: 'Call to Action'
   };
 </script>
 
@@ -28,9 +29,9 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
         </svg>
         <span class="text-xs text-gray-400">
-          {#if chunk.status === 'pending'}Pending render{/if}
-          {#if chunk.status === 'processing'}Rendering...{/if}
-          {#if chunk.status === 'failed'}Render failed{/if}
+          {#if chunk.status === GEN_STATUS.PENDING}Pending render{/if}
+          {#if chunk.status === GEN_STATUS.PROCESSING}Rendering...{/if}
+          {#if chunk.status === GEN_STATUS.FAILED}Render failed{/if}
         </span>
       </div>
     {/if}
@@ -63,7 +64,7 @@
       <p class="text-sm text-gray-700 leading-relaxed line-clamp-3">{chunk.narration}</p>
     </div>
 
-    {#if chunk.status === 'failed' && chunk.error_message}
+    {#if chunk.status === GEN_STATUS.FAILED && chunk.error_message}
       <p class="text-xs text-rose-500 bg-rose-50 px-3 py-2 rounded-lg">⚠ {chunk.error_message}</p>
     {/if}
 

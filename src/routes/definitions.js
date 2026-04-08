@@ -1,5 +1,5 @@
 /**
- * @typedef {'workspace' | 'analytics' | 'settings' | 'login'} Page
+ * @typedef {'workspace' | 'analytics' | 'settings' | 'login' | 'not-found'} Page
  * @typedef {{
  *   pathname: string;
  *   page: Page;
@@ -14,6 +14,8 @@
  * }} RouteDefinition
  */
 
+import { ROUTES } from '$lib/constants/index.js';
+
 const workspaceRoute = /** @type {RouteDefinition} */ ({
   name: 'workspace',
   requiresAuth: true,
@@ -23,8 +25,8 @@ const workspaceRoute = /** @type {RouteDefinition} */ ({
     const generationId = match?.[2] ?? null;
     return {
       pathname: generationId
-        ? `/workspace/${chatId}/generations/${generationId}`
-        : (chatId ? `/workspace/${chatId}` : '/workspace'),
+        ? `${ROUTES.WORKSPACE}/${chatId}/generations/${generationId}`
+        : (chatId ? `${ROUTES.WORKSPACE}/${chatId}` : ROUTES.WORKSPACE),
       page: 'workspace',
       chatId,
       generationId
@@ -37,7 +39,7 @@ const analyticsRoute = /** @type {RouteDefinition} */ ({
   requiresAuth: true,
   pattern: /^\/analytics$/,
   build: () => ({
-    pathname: '/analytics',
+    pathname: ROUTES.ANALYTICS,
     page: 'analytics',
     chatId: null,
     generationId: null
@@ -49,7 +51,7 @@ const settingsRoute = /** @type {RouteDefinition} */ ({
   requiresAuth: true,
   pattern: /^\/settings$/,
   build: () => ({
-    pathname: '/settings',
+    pathname: ROUTES.SETTINGS,
     page: 'settings',
     chatId: null,
     generationId: null
@@ -61,8 +63,20 @@ const loginRoute = /** @type {RouteDefinition} */ ({
   requiresAuth: false,
   pattern: /^\/login$/,
   build: () => ({
-    pathname: '/login',
+    pathname: ROUTES.LOGIN,
     page: 'login',
+    chatId: null,
+    generationId: null
+  })
+});
+
+const notFoundRoute = /** @type {RouteDefinition} */ ({
+  name: 'not-found',
+  requiresAuth: false,
+  pattern: /^\/404$/,
+  build: () => ({
+    pathname: ROUTES.NOT_FOUND,
+    page: 'not-found',
     chatId: null,
     generationId: null
   })
@@ -72,9 +86,11 @@ export const ROUTE_DEFINITIONS = /** @type {RouteDefinition[]} */ ([
   workspaceRoute,
   analyticsRoute,
   settingsRoute,
-  loginRoute
+  loginRoute,
+  notFoundRoute
 ]);
 
 export const DEFAULT_PROTECTED_ROUTE = workspaceRoute;
 export const LOGIN_ROUTE = loginRoute;
-export const ROOT_REDIRECT_PATH = '/workspace';
+export const NOT_FOUND_ROUTE = notFoundRoute;
+export const ROOT_REDIRECT_PATH = ROUTES.WORKSPACE;

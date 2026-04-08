@@ -4,6 +4,7 @@ import type {
   StudioOutputListResponse,
   TokenUsageAnalytics
 } from '../../models';
+import { GEN_STATUS, MODAL_TOOL } from '$lib/constants';
 import type { MockRegistryEntry } from './mock.registry';
 
 const studioBySession: Record<string, StudioOutput[]> = {
@@ -11,7 +12,7 @@ const studioBySession: Record<string, StudioOutput[]> = {
     {
       id: 'studio_001',
       session_id: 'chat_session_001',
-      type: 'report',
+      type: MODAL_TOOL.REPORT,
       status: 'ready',
       created_at: '2026-03-31T18:00:00.000Z',
       title: 'Q1 Revenue Report',
@@ -71,12 +72,12 @@ function listStudioOutputs(sessionId: string): StudioOutputListResponse {
 
 function createStudioOutput(payload: Record<string, unknown>): StudioOutput {
   const sessionId = String(payload.session_id || 'chat_session_001');
-  const type = String(payload.type || 'report');
+  const type = String(payload.type || MODAL_TOOL.REPORT);
   const created: StudioOutput = {
     id: `studio_${Date.now()}`,
     session_id: sessionId,
     type,
-    status: 'processing',
+    status: GEN_STATUS.PROCESSING,
     created_at: new Date().toISOString(),
     payload: payload.payload,
     title: `Generated ${type}`

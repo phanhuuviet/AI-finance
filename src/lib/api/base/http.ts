@@ -15,6 +15,7 @@ import {
   applyResponseInterceptors
 } from './response';
 import { goto } from '$app/navigation';
+import { ROUTES } from '$lib/constants';
 
 const API_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -142,7 +143,7 @@ export async function http<T>(
 
       if (!refreshToken) {
         tokenStorage.clearTokens();
-        goto('/login');
+        goto(ROUTES.LOGIN);
         throw new ApiError(401, 'UNAUTHORIZED', null);
       }
 
@@ -171,7 +172,7 @@ export async function http<T>(
 
           if (!refreshRes.ok || refreshEnvelope.statusCode >= 400 || !refreshEnvelope.data) {
             tokenStorage.clearTokens();
-            goto('/login');
+            goto(ROUTES.LOGIN);
             rejectRefreshQueue(new ApiError(401, 'SESSION_EXPIRED', null));
           }
 

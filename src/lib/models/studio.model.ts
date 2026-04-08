@@ -1,15 +1,12 @@
 import type { Id, ISODateString } from './common.model';
+import type { ValueOf } from '$lib/constants';
+import { GEN_STATUS, MODAL_TOOL } from '$lib/constants';
 
 export type StudioOutputType =
-  | 'video_overview'
-  | 'audio_overview'
-  | 'mindmap'
-  | 'report'
-  | 'quiz'
-  | 'data'
+  | ValueOf<typeof MODAL_TOOL>
   | string;
 
-export type StudioOutputStatus = 'processing' | 'ready' | 'failed' | string;
+export type StudioOutputStatus = ValueOf<typeof GEN_STATUS> | 'ready' | string;
 
 export interface StudioOutput<TPayload = unknown> {
   id: Id;
