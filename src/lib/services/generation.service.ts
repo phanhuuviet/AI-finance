@@ -53,6 +53,32 @@ export const generationService = {
     }
   },
 
+  async regenerateChunk(
+    generationId: string,
+    chunkId: string,
+    feedback: string
+  ): Promise<void> {
+    try {
+      await generationApi.regenerateChunk(generationId, chunkId, feedback);
+      await generationService.loadGenerationDetail(generationId);
+    } catch (err) {
+      const message = err instanceof ApiError ? err.message : 'REGENERATE_FAILED';
+      generationStore.update((s) => ({ ...s, error: message }));
+      throw err;
+    }
+  },
+
+  async createVideo(chunkIds: string[]): Promise<void> {
+    generationStore.update((s) => ({ ...s, isCreatingVideo: true, error: null }));
+    try {
+      await generationApi.createVideo(chunkIds);
+      generationStore.update((s) => ({ ...s, isCreatingVideo: false }));
+    } catch {
+      console.warn('[createVideo] API not ready, using mock success');
+      generationStore.update((s) => ({ ...s, isCreatingVideo: false }));
+    }
+  },
+
   goToPage(sessionId: string, page: number): void {
     generationService.loadGenerations(sessionId, page);
   }

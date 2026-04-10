@@ -1,9 +1,18 @@
 <script lang="ts">
   import type { GenerationChunk } from '$lib/models/generation.model';
   import StatusBadge from '$lib/components/common/StatusBadge.svelte';
+  import { generationService } from '$lib/services/generation.service';
   import { CHUNK_SECTION, GEN_STATUS } from '$lib/constants/index.js';
+  import { slide } from 'svelte/transition';
 
   export let chunk: GenerationChunk;
+  export let selected = false;
+  export let onToggle = (_id: string): void => {};
+
+  let showFeedback = false;
+  let feedbackText = '';
+  let isRegenerating = false;
+  let regenerateError = '';
 
   const sectionLabel: Record<string, string> = {
     [CHUNK_SECTION.HOOK]: 'Hook',
@@ -11,9 +20,48 @@
     [CHUNK_SECTION.PROOF]: 'Proof',
     [CHUNK_SECTION.CTA]: 'Call to Action'
   };
+
+  function openFeedback() {
+    showFeedback = true;
+    regenerateError = '';
+  }
+
+  function cancelFeedback() {
+    showFeedback = false;
+    feedbackText = '';
+    regenerateError = '';
+  }
+
+  async function handleRegenerate() {
+    isRegenerating = true;
+    regenerateError = '';
+    try {
+      await generationService.regenerateChunk(chunk.generation_id, chunk.id, feedbackText);
+      showFeedback = false;
+      feedbackText = '';
+    } catch (err) {
+      regenerateError = err instanceof Error ? err.message : 'REGENERATE_FAILED';
+    } finally {
+      isRegenerating = false;
+    }
+  }
 </script>
 
-<div class="flex gap-4 bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-purple-200 transition-colors duration-150">
+<div
+  class="relative flex gap-4 bg-white border rounded-xl overflow-hidden hover:border-purple-200 transition-colors duration-150"
+  class:border-purple-400={selected}
+  class:bg-purple-50={selected}
+  class:border-gray-200={!selected}
+>
+  <div class="absolute top-3 left-3 z-10">
+    <input
+      type="checkbox"
+      checked={selected}
+      on:change={() => onToggle(chunk.id)}
+      class="w-4 h-4 rounded accent-purple-600 cursor-pointer shadow-sm bg-white border border-gray-300"
+    />
+  </div>
+
   <div class="w-[40%] flex-shrink-0 bg-gray-900 flex items-center justify-center min-h-[160px]">
     {#if chunk.s3_url}
       <!-- svelte-ignore a11y-media-has-caption -->
@@ -75,5 +123,63 @@
         <span>{chunk.regenerate_count} regen(s)</span>
       {/if}
     </div>
+
+    {#if !showFeedback}
+      <div class="flex justify-end mt-3">
+        <button
+          type="button"
+          class="text-xs text-purple-600 border border-purple-200 bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded-lg font-medium flex items-center gap-1.5 transition-colors"
+          on:click={openFeedback}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-3.5 h-3.5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M4 4v5h.582M20 20v-5h-.581m0 0A8.003 8.003 0 004.582 9m14.837 6a8.003 8.003 0 01-14.837 0"
+            />
+          </svg>
+          Regenerate
+        </button>
+      </div>
+    {:else}
+      <div in:slide={{ duration: 180 }} out:slide={{ duration: 140 }} class="border-t border-gray-100 mt-3 pt-3">
+        <p class="text-xs font-medium text-gray-500 mb-1">Feedback (optional)</p>
+        <textarea
+          rows="3"
+          bind:value={feedbackText}
+          placeholder="Describe what to improve or change in this chunk..."
+          class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 resize-none placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-200 focus:border-purple-300"
+        ></textarea>
+
+        <div class="flex items-center justify-end gap-2 mt-2">
+          <button
+            type="button"
+            class="text-xs text-gray-500 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50"
+            on:click={cancelFeedback}
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="text-xs text-white bg-purple-600 hover:bg-purple-700 px-3 py-1.5 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isRegenerating}
+            on:click={handleRegenerate}
+          >
+            {#if isRegenerating}Regenerating...{:else}Regenerate{/if}
+          </button>
+        </div>
+
+        {#if regenerateError}
+          <p class="text-xs text-rose-600 mt-2">{regenerateError}</p>
+        {/if}
+      </div>
+    {/if}
   </div>
 </div>

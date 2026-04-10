@@ -62,3 +62,11 @@ export interface GenerationDetailResponse {
   generation: Generation;
   chunks: GenerationChunk[];
 }
+
+export interface RegenerateChunkRequest {
+  feedback: string;
+}
+
+export interface CreateVideoResponse {
+  queued: boolean;
+}
