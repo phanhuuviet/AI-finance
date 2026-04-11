@@ -44,6 +44,7 @@ export interface GenerationChunk {
   narration: string;
   status: GenerationStatus;
   s3_url: string | null;
+  presigned_s3_url: string | null;
   attempt_count: number;
   regenerate_count: number;
   current_version: number;

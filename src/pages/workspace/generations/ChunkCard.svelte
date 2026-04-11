@@ -63,10 +63,10 @@
   </div>
 
   <div class="w-[40%] flex-shrink-0 bg-gray-900 flex items-center justify-center min-h-[160px]">
-    {#if chunk.s3_url}
+    {#if chunk.presigned_s3_url}
       <!-- svelte-ignore a11y-media-has-caption -->
       <video
-        src={chunk.s3_url}
+        src={chunk.presigned_s3_url}
         controls
         playsinline
         class="w-full h-full object-contain max-h-64"
