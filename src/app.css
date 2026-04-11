@@ -20,6 +20,18 @@
 		overflow-x: hidden;
 	}
 
+	button:not(:disabled),
+	a[href],
+	[role='button']:not([aria-disabled='true']),
+	summary {
+		cursor: pointer;
+	}
+
+	button:disabled,
+	[aria-disabled='true'] {
+		cursor: not-allowed;
+	}
+
 	img,
 	video,
 	canvas,

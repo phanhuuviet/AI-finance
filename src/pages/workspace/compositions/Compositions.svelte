@@ -10,6 +10,10 @@
   import StatusBadge from '$lib/components/common/StatusBadge.svelte';
   import { navigate } from '$lib/router/navigate';
   import { RENDER_JOB_STATUS } from '$lib/constants/index.js';
+  import { subService } from '$lib/services/sub.service';
+  import { showToast } from '$lib/utils/toast';
+  import ModalDialog from '$lib/components/common/ModalDialog.svelte';
+  import { isCreatingSub } from '$lib/stores/sub.store';
 
   function formatDateTime(iso: string): string {
     const dt = new Date(iso);
@@ -41,10 +45,65 @@
     video.pause();
   }
 
+  let showCreateSubConfirm = false;
+  let selectedCompositionIdForSub: string | null = null;
+  let openMenuCompositionId: string | null = null;
+
+  function toggleCompositionMenu(event: MouseEvent, compositionId: string): void {
+    event.preventDefault();
+    event.stopPropagation();
+    openMenuCompositionId = openMenuCompositionId === compositionId ? null : compositionId;
+  }
+
+  function closeCompositionMenu(): void {
+    openMenuCompositionId = null;
+  }
+
+  function openCreateSubConfirm(event: MouseEvent, compositionId: string): void {
+    event.preventDefault();
+    event.stopPropagation();
+    if ($isCreatingSub) return;
+    closeCompositionMenu();
+    selectedCompositionIdForSub = compositionId;
+    showCreateSubConfirm = true;
+  }
+
+  function closeCreateSubConfirm(): void {
+    if ($isCreatingSub) return;
+    showCreateSubConfirm = false;
+    selectedCompositionIdForSub = null;
+  }
+
+  async function confirmCreateSub(): Promise<void> {
+    if (!selectedCompositionIdForSub) return;
+    try {
+      await subService.createSubJob(selectedCompositionIdForSub);
+      showToast('Sub job created successfully.', 'success');
+      closeCreateSubConfirm();
+    } catch (err) {
+      showToast((err as Error)?.message || 'VIDEO_SUB_CREATE_FAILED', 'error');
+    }
+  }
+
+  function onCardKeydown(event: KeyboardEvent, sessionId: string, compositionId: string): void {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      openComposition(sessionId, compositionId);
+    }
+  }
+
+  function onWindowKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Escape') {
+      closeCompositionMenu();
+    }
+  }
+
   onMount(() => {
     compositionService.loadCompositions(1);
   });
 </script>
+
+<svelte:window on:click={closeCompositionMenu} on:keydown={onWindowKeydown} />
 
 <div class="h-full flex flex-col bg-[var(--color-bg-surface)] rounded-xl border border-[var(--color-border-default)] overflow-hidden">
   <div class="px-4 sm:px-5 py-4 border-b border-[var(--color-border-default)] bg-[var(--color-bg-surface)]">
@@ -64,10 +123,12 @@
         </div>
       {:else}
         {#each $compositions as composition (composition.id)}
-          <button
+          <div
             class="w-full text-left"
             on:click={() => openComposition(composition.session_id, composition.id)}
-            type="button"
+            on:keydown={(event) => onCardKeydown(event, composition.session_id, composition.id)}
+            role="button"
+            tabindex="0"
           >
             <div class="relative flex flex-col md:flex-row gap-0 md:gap-4 bg-white border rounded-xl overflow-hidden hover:border-purple-200 transition-colors duration-150 border-gray-200">
               <div class="md:w-[40%] md:flex-shrink-0 bg-gray-900 flex items-center justify-center min-h-[170px] border-b md:border-b-0 md:border-r border-gray-100">
@@ -110,7 +171,35 @@
                     </span>
                     <span class="text-xs text-gray-400 truncate">Generation #{shortId(composition.generation_id)}</span>
                   </div>
-                  <StatusBadge status={composition.status} />
+                  <div class="relative flex items-center gap-2 flex-shrink-0">
+                    <StatusBadge status={composition.status} />
+                    <button
+                      type="button"
+                      class="w-8 h-8 rounded-lg border border-gray-200 bg-white text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-center"
+                      aria-label="Composition actions"
+                      aria-expanded={openMenuCompositionId === composition.id}
+                      on:click|stopPropagation={(event) => toggleCompositionMenu(event, composition.id)}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <circle cx="12" cy="5" r="1.75" fill="currentColor"></circle>
+                        <circle cx="12" cy="12" r="1.75" fill="currentColor"></circle>
+                        <circle cx="12" cy="19" r="1.75" fill="currentColor"></circle>
+                      </svg>
+                    </button>
+
+                    {#if openMenuCompositionId === composition.id}
+                      <div class="absolute top-9 right-0 z-20 min-w-40 bg-white border border-gray-200 rounded-lg shadow-lg py-1">
+                        <button
+                          type="button"
+                          class="w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 disabled:text-gray-400 disabled:hover:bg-white"
+                          on:click|stopPropagation={(event) => openCreateSubConfirm(event, composition.id)}
+                          disabled={composition.status !== RENDER_JOB_STATUS.COMPLETED || $isCreatingSub}
+                        >
+                          Tạo sub
+                        </button>
+                      </div>
+                    {/if}
+                  </div>
                 </div>
 
                 <p class="text-sm font-semibold text-gray-800 line-clamp-1">
@@ -132,7 +221,7 @@
                 </div>
               </div>
             </div>
-          </button>
+          </div>
         {/each}
       {/if}
     </div>
@@ -156,3 +245,33 @@
     {/if}
   </div>
 </div>
+
+<ModalDialog
+  isOpen={showCreateSubConfirm}
+  title="Tạo phụ đề cho composition"
+  description="Bạn có chắc muốn tạo video-subber job cho composition này không?"
+  on:close={closeCreateSubConfirm}
+>
+  <p class="text-sm text-[var(--color-text-secondary)]">
+    Composition #{shortId(selectedCompositionIdForSub || undefined)} sẽ được gửi sang video-subber với style mặc định.
+  </p>
+
+  <svelte:fragment slot="footer">
+    <button
+      type="button"
+      class="px-3 py-2 rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-elevated)] text-[var(--color-text-secondary)] text-sm"
+      on:click={closeCreateSubConfirm}
+      disabled={$isCreatingSub}
+    >
+      Hủy
+    </button>
+    <button
+      type="button"
+      class="px-3 py-2 rounded-lg border border-transparent bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed"
+      on:click={confirmCreateSub}
+      disabled={$isCreatingSub}
+    >
+      {#if $isCreatingSub}Đang tạo...{:else}Xác nhận tạo sub{/if}
+    </button>
+  </svelte:fragment>
+</ModalDialog>
