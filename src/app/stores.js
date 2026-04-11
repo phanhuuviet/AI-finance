@@ -9,10 +9,12 @@ function toParams(pathname) {
 
   const sessionId = parts[1] || '';
   const generationId = parts[2] === 'generations' ? (parts[3] || '') : '';
+  const compositionId = parts[2] === 'compositions' ? (parts[3] || '') : '';
 
   const params = {};
   if (sessionId) params.sessionId = sessionId;
   if (generationId) params.generationId = generationId;
+  if (compositionId) params.compositionId = compositionId;
   return params;
 }
 

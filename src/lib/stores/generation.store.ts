@@ -10,7 +10,6 @@ interface GenerationState {
   activeGeneration: Generation | null;
   chunks: GenerationChunk[];
   isLoadingDetail: boolean;
-  isCreatingVideo: boolean;
   error: string | null;
 }
 
@@ -22,7 +21,6 @@ export const generationStore = writable<GenerationState>({
   activeGeneration: null,
   chunks: [],
   isLoadingDetail: false,
-  isCreatingVideo: false,
   error: null
 });
 
@@ -33,4 +31,3 @@ export const activeGeneration = derived(generationStore, ($s) => $s.activeGenera
 export const generationChunks = derived(generationStore, ($s) => $s.chunks);
 export const isLoadingList = derived(generationStore, ($s) => $s.isLoadingList);
 export const isLoadingDetail = derived(generationStore, ($s) => $s.isLoadingDetail);
-export const isCreatingVideo = derived(generationStore, ($s) => $s.isCreatingVideo);

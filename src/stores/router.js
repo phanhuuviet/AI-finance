@@ -10,6 +10,7 @@ import { tokenStorage } from '../lib/utils/token';
  *   page: Page;
  *   chatId: string | null;
  *   generationId: string | null;
+ *   compositionId: string | null;
  * }} Route
  */
 

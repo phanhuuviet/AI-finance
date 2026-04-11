@@ -13,6 +13,7 @@ export type {
 	RegisterResponse
 } from './auth.model';
 export * from './chat.model';
+export * from './composition.model';
 export * from './document.model';
 export * from './generation.model';
 export * from './studio.model';

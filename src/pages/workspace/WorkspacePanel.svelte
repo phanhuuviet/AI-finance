@@ -2,6 +2,8 @@
   import DocumentUploadV2 from "./components/document-upload/DocumentUpload.svelte";
   import StudioPanel from "./components/studio/StudioPanel.svelte";
   import Generations from "./generations/Generations.svelte";
+  import Compositions from "./compositions/Compositions.svelte";
+  import CompositionDetail from "./compositions/CompositionDetail.svelte";
   import ChatInterface from "./components/chat/ChatInterfaceSectioned.svelte";
   import ChatHistory from "./components/chat/ChatHistory.svelte";
   import ResponsiveWorkspaceLayout from "./components/layout/ResponsiveWorkspaceLayout.svelte";
@@ -25,6 +27,7 @@
     ? ($workspaceStore.activeSectionBySession?.[sessionId] ?? "chat")
     : "chat";
   $: generationId = $route.page === "workspace" ? /** @type {any} */ ($route).generationId : null;
+  $: compositionId = $route.page === "workspace" ? /** @type {any} */ ($route).compositionId : null;
 
   /** @param {WorkspaceSection} next */
   function setSection(next) {
@@ -75,6 +78,14 @@
             >
               {$t("workspace.studio")}
             </Button>
+            <Button
+              unstyled
+              className={`px-3 py-2 min-h-11 rounded-[var(--radius-sm)] text-sm whitespace-nowrap transition-all duration-200 ${section === "compositions" ? "[background:var(--gradient-accent)] text-[var(--text-on-dark)] font-semibold shadow-[0_1px_6px_rgba(99,102,241,0.3)]" : "bg-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"}`}
+              on:click={() => setSection("compositions")}
+              type="button"
+            >
+              Compositions
+            </Button>
           </div>
 
           <div class="text-xs text-[var(--text-muted)] break-all">{$t("common.session")}: {sessionId}</div>
@@ -98,12 +109,16 @@
         </div>
       {:else if generationId}
         <Generations />
+      {:else if compositionId}
+        <CompositionDetail />
       {:else if section === "documents"}
         <DocumentUploadV2 />
       {:else if section === "studio"}
         <div class="h-full" transition:fade={{ duration: 180 }}>
           <StudioPanel />
         </div>
+      {:else if section === "compositions"}
+        <Compositions />
       {:else}
         <ChatInterface {sessionId} />
       {/if}

@@ -68,17 +68,6 @@ export const generationService = {
     }
   },
 
-  async createVideo(chunkIds: string[]): Promise<void> {
-    generationStore.update((s) => ({ ...s, isCreatingVideo: true, error: null }));
-    try {
-      await generationApi.createVideo(chunkIds);
-      generationStore.update((s) => ({ ...s, isCreatingVideo: false }));
-    } catch {
-      console.warn('[createVideo] API not ready, using mock success');
-      generationStore.update((s) => ({ ...s, isCreatingVideo: false }));
-    }
-  },
-
   goToPage(sessionId: string, page: number): void {
     generationService.loadGenerations(sessionId, page);
   }

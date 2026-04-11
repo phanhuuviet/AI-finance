@@ -3,10 +3,12 @@
   import { page } from '../../../app/stores.js';
   import { goto } from '$app/navigation';
   import { generationService } from '$lib/services/generation.service';
+  import { compositionService } from '$lib/services/composition.service';
+  import { isCreatingComposition } from '$lib/stores/composition.store';
+  import type { GenerationChunk } from '$lib/models/generation.model';
   import {
     activeGeneration,
     generationChunks,
-    isCreatingVideo,
     isLoadingDetail,
     generationStore
   } from '$lib/stores/generation.store';
@@ -17,41 +19,51 @@
   $: sessionId = $page.params.sessionId;
   $: generationId = $page.params.generationId;
 
-  let selectedChunkIds = new Set<string>();
-  let showVideoSuccessToast = false;
+  let selectedChunks: GenerationChunk[] = [];
+  let showSuccessToast = false;
   let checkboxEl: HTMLInputElement;
 
-  $: allSelected =
-    $generationChunks.length > 0 && selectedChunkIds.size === $generationChunks.length;
-  $: someSelected = selectedChunkIds.size > 0 && !allSelected;
+  const isSelected = (id: string): boolean => selectedChunks.some((c) => c.id === id);
+  const selectionOrder = (id: string): number | null => {
+    const idx = selectedChunks.findIndex((c) => c.id === id);
+    return idx === -1 ? null : idx + 1;
+  };
+
+  $: allSelected = $generationChunks.length > 0 && selectedChunks.length === $generationChunks.length;
+  $: someSelected = selectedChunks.length > 0 && !allSelected;
   $: if (checkboxEl) checkboxEl.indeterminate = someSelected;
 
-  function toggleChunk(id: string) {
-    if (selectedChunkIds.has(id)) {
-      selectedChunkIds.delete(id);
+  function toggleChunk(chunk: GenerationChunk) {
+    const idx = selectedChunks.findIndex((c) => c.id === chunk.id);
+    if (idx === -1) {
+      selectedChunks = [...selectedChunks, chunk];
     } else {
-      selectedChunkIds.add(id);
+      selectedChunks = selectedChunks.filter((c) => c.id !== chunk.id);
     }
-    selectedChunkIds = selectedChunkIds;
   }
 
   function toggleAll() {
     if (allSelected) {
-      selectedChunkIds = new Set();
+      selectedChunks = [];
     } else {
-      selectedChunkIds = new Set($generationChunks.map((c) => c.id));
+      const alreadySelected = new Set(selectedChunks.map((c) => c.id));
+      const newOnes = $generationChunks.filter((c) => !alreadySelected.has(c.id));
+      selectedChunks = [...selectedChunks, ...newOnes];
     }
   }
 
-  async function handleCreateVideo() {
-    if (selectedChunkIds.size === 0) return;
-    const ids = Array.from(selectedChunkIds);
-    await generationService.createVideo(ids);
-    showVideoSuccessToast = true;
-    selectedChunkIds = new Set();
-    setTimeout(() => {
-      showVideoSuccessToast = false;
-    }, 3000);
+  async function handleCreateComposition() {
+    if (selectedChunks.length === 0 || !$activeGeneration) return;
+    try {
+      await compositionService.createComposition($activeGeneration.id, selectedChunks);
+      showSuccessToast = true;
+      selectedChunks = [];
+      setTimeout(() => {
+        showSuccessToast = false;
+      }, 3000);
+    } catch {
+      // error state is handled by store
+    }
   }
 
   onMount(() => {
@@ -116,8 +128,8 @@
         class="w-4 h-4 rounded accent-purple-600 cursor-pointer"
       />
       <span class="text-sm text-gray-600">
-        {#if selectedChunkIds.size > 0}
-          {selectedChunkIds.size} / {$generationChunks.length} selected
+        {#if selectedChunks.length > 0}
+          {selectedChunks.length} / {$generationChunks.length} selected (in order)
         {:else}
           Select all
         {/if}
@@ -127,10 +139,10 @@
     <button
       class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
       style="background: var(--gradient-accent, linear-gradient(135deg, #6366F1, #8B5CF6));"
-      disabled={selectedChunkIds.size === 0 || $isCreatingVideo}
-      on:click={handleCreateVideo}
+      disabled={selectedChunks.length === 0 || $isCreatingComposition}
+      on:click={handleCreateComposition}
     >
-      {#if $isCreatingVideo}
+      {#if $isCreatingComposition}
         <span
           class="animate-spin inline-block w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full"
         ></span>
@@ -160,7 +172,7 @@
       <ChunkCard
         {...({
           chunk,
-          selected: selectedChunkIds.has(chunk.id),
+          selectionOrder: selectionOrder(chunk.id),
           onToggle: toggleChunk
         } as any)}
       />
@@ -170,7 +182,7 @@
   <div class="px-6 py-8 text-sm text-rose-600">{$generationStore.error}</div>
 {/if}
 
-{#if showVideoSuccessToast}
+{#if showSuccessToast}
   <div
     class="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-green-600 text-white px-4 py-3 rounded-xl shadow-lg animate-in fade-in slide-in-from-bottom-4 duration-200"
   >
@@ -184,6 +196,6 @@
     >
       <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
     </svg>
-    <span class="text-sm font-medium">Video creation started successfully!</span>
+    <span class="text-sm font-medium">Composition creation started successfully!</span>
   </div>
 {/if}

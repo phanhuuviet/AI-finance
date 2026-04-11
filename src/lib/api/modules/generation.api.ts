@@ -1,9 +1,5 @@
 import { http } from '../base/http';
-import type {
-  GenerationListResponse,
-  GenerationDetailResponse,
-  CreateVideoResponse
-} from '$lib/models/generation.model';
+import type { GenerationDetailResponse, GenerationListResponse } from '$lib/models/generation.model';
 
 export const generationApi = {
   getGenerations: (sessionId: string, page: number = 1) => {
@@ -14,9 +10,7 @@ export const generationApi = {
   },
 
   getGenerationDetail: (generationId: string) =>
-    http<GenerationDetailResponse>(
-      `/video-script-generator/generations/${generationId}`
-    ),
+    http<GenerationDetailResponse>(`/video-script-generator/generations/${generationId}`),
 
   regenerateChunk: (generationId: string, chunkId: string, feedback: string) =>
     http<unknown>(
@@ -25,11 +19,5 @@ export const generationApi = {
         method: 'POST',
         body: JSON.stringify({ feedback })
       }
-    ),
-
-  createVideo: (chunkIds: string[]) =>
-    http<CreateVideoResponse>('/video-script-generator/videos', {
-      method: 'POST',
-      body: JSON.stringify(chunkIds)
-    })
+    )
 };

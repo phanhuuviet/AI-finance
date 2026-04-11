@@ -5,6 +5,7 @@
  *   page: Page;
  *   chatId: string | null;
  *   generationId: string | null;
+ *   compositionId: string | null;
  * }} Route
  * @typedef {{
  *   name: Page;
@@ -19,17 +20,31 @@ import { ROUTES } from '$lib/constants/index.js';
 const workspaceRoute = /** @type {RouteDefinition} */ ({
   name: 'workspace',
   requiresAuth: true,
-  pattern: /^\/workspace(?:\/([^/]+)(?:\/generations\/([^/]+))?)?$/,
+  pattern: /^\/workspace(?:\/([^/]+)(?:\/(generations|compositions)\/([^/]+))?)?$/,
   build: (match) => {
     const chatId = match?.[1] ?? null;
-    const generationId = match?.[2] ?? null;
+    const detailType = match?.[2] ?? null;
+    const detailId = match?.[3] ?? null;
+    const generationId = detailType === 'generations' ? detailId : null;
+    const compositionId = detailType === 'compositions' ? detailId : null;
+
+    /** @type {string} */
+    let pathname = ROUTES.WORKSPACE;
+    if (chatId) {
+      pathname = `${ROUTES.WORKSPACE}/${chatId}`;
+      if (generationId) {
+        pathname = `${pathname}/generations/${generationId}`;
+      } else if (compositionId) {
+        pathname = `${pathname}/compositions/${compositionId}`;
+      }
+    }
+
     return {
-      pathname: generationId
-        ? `${ROUTES.WORKSPACE}/${chatId}/generations/${generationId}`
-        : (chatId ? `${ROUTES.WORKSPACE}/${chatId}` : ROUTES.WORKSPACE),
+      pathname,
       page: 'workspace',
       chatId,
-      generationId
+      generationId,
+      compositionId
     };
   }
 });
@@ -42,7 +57,8 @@ const analyticsRoute = /** @type {RouteDefinition} */ ({
     pathname: ROUTES.ANALYTICS,
     page: 'analytics',
     chatId: null,
-    generationId: null
+    generationId: null,
+    compositionId: null
   })
 });
 
@@ -54,7 +70,8 @@ const settingsRoute = /** @type {RouteDefinition} */ ({
     pathname: ROUTES.SETTINGS,
     page: 'settings',
     chatId: null,
-    generationId: null
+    generationId: null,
+    compositionId: null
   })
 });
 
@@ -66,7 +83,8 @@ const loginRoute = /** @type {RouteDefinition} */ ({
     pathname: ROUTES.LOGIN,
     page: 'login',
     chatId: null,
-    generationId: null
+    generationId: null,
+    compositionId: null
   })
 });
 
@@ -78,7 +96,8 @@ const notFoundRoute = /** @type {RouteDefinition} */ ({
     pathname: ROUTES.NOT_FOUND,
     page: 'not-found',
     chatId: null,
-    generationId: null
+    generationId: null,
+    compositionId: null
   })
 });
 

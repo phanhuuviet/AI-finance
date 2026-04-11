@@ -6,8 +6,8 @@
   import { slide } from 'svelte/transition';
 
   export let chunk: GenerationChunk;
-  export let selected = false;
-  export let onToggle = (_id: string): void => {};
+  export let selectionOrder: number | null = null;
+  export let onToggle = (_chunk: GenerationChunk): void => {};
 
   let showFeedback = false;
   let feedbackText = '';
@@ -49,17 +49,28 @@
 
 <div
   class="relative flex gap-4 bg-white border rounded-xl overflow-hidden hover:border-purple-200 transition-colors duration-150"
-  class:border-purple-400={selected}
-  class:bg-purple-50={selected}
-  class:border-gray-200={!selected}
+  class:border-purple-400={selectionOrder !== null}
+  class:bg-purple-50={selectionOrder !== null}
+  class:border-gray-200={selectionOrder === null}
 >
   <div class="absolute top-3 left-3 z-10">
-    <input
-      type="checkbox"
-      checked={selected}
-      on:change={() => onToggle(chunk.id)}
-      class="w-4 h-4 rounded accent-purple-600 cursor-pointer shadow-sm bg-white border border-gray-300"
-    />
+    {#if selectionOrder !== null}
+      <button
+        class="w-6 h-6 rounded-full bg-purple-600 text-white text-xs font-bold flex items-center justify-center shadow-sm hover:bg-purple-700 transition-colors"
+        on:click={() => onToggle(chunk)}
+        aria-label={`Deselect chunk ${chunk.chunk_id}`}
+        type="button"
+      >
+        {selectionOrder}
+      </button>
+    {:else}
+      <button
+        class="w-6 h-6 rounded-full border-2 border-gray-300 bg-white hover:border-purple-400 hover:bg-purple-50 transition-colors"
+        on:click={() => onToggle(chunk)}
+        aria-label={`Select chunk ${chunk.chunk_id}`}
+        type="button"
+      ></button>
+    {/if}
   </div>
 
   <div class="w-[40%] flex-shrink-0 bg-gray-900 flex items-center justify-center min-h-[160px]">

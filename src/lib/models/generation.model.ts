@@ -67,7 +67,3 @@ export interface GenerationDetailResponse {
 export interface RegenerateChunkRequest {
   feedback: string;
 }
-
-export interface CreateVideoResponse {
-  queued: boolean;
-}
