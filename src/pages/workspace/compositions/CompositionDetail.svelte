@@ -11,6 +11,11 @@
   } from '$lib/stores/composition.store';
   import { workspaceStore } from '../../../stores/workspace.js';
   import StatusBadge from '$lib/components/common/StatusBadge.svelte';
+  import ModalDialog from '$lib/components/common/ModalDialog.svelte';
+  import { showToast } from '$lib/utils/toast';
+  import { subService } from '$lib/services/sub.service';
+  import { isCreatingSub } from '$lib/stores/sub.store';
+  import { RENDER_JOB_STATUS } from '$lib/constants/index.js';
 
   function shortId(value: string | undefined): string {
     if (!value) return '';
@@ -38,6 +43,7 @@
 
   let previewUrl: string | null = null;
   let previewChunkLabel = '';
+  let showCreateSubConfirm = false;
 
   function goBack(): void {
     workspaceStore.setActiveSectionForCurrentSession('compositions');
@@ -52,6 +58,25 @@
   function closeChunkPreview(): void {
     previewUrl = null;
     previewChunkLabel = '';
+  }
+
+  function openCreateSubConfirm(): void {
+    showCreateSubConfirm = true;
+  }
+
+  function closeCreateSubConfirm(): void {
+    showCreateSubConfirm = false;
+  }
+
+  async function confirmCreateSub(): Promise<void> {
+    if (!$activeComposition) return;
+    try {
+      await subService.createSubJob($activeComposition.id);
+      showToast('Sub job created successfully.', 'success');
+      closeCreateSubConfirm();
+    } catch (err) {
+      showToast((err as Error)?.message || 'VIDEO_SUB_CREATE_FAILED', 'error');
+    }
   }
 
   onMount(() => {
@@ -83,7 +108,18 @@
         </h1>
         <p class="text-sm text-gray-500 mt-0.5">Generation #{shortId($activeComposition.generation_id)}</p>
       </div>
-      <StatusBadge status={$activeComposition.status} />
+      <div class="flex items-center gap-2">
+        <StatusBadge status={$activeComposition.status} />
+        {#if $activeComposition.status === RENDER_JOB_STATUS.COMPLETED}
+          <button
+            type="button"
+            class="px-3 py-1.5 text-xs rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors font-medium"
+            on:click={openCreateSubConfirm}
+          >
+            Tạo sub
+          </button>
+        {/if}
+      </div>
     </div>
 
     <div class="flex flex-wrap gap-2 mt-3">
@@ -112,12 +148,9 @@
           ></video>
         {:else}
           <div class="flex flex-col items-center gap-3 text-gray-400 py-16 px-4 text-center">
-            {#if $activeComposition.status === 'pending'}
+            {#if $activeComposition.status === RENDER_JOB_STATUS.PENDING}
               <p class="text-sm">Composition is queued for processing</p>
-            {:else if $activeComposition.status === 'processing'}
-              <div class="animate-spin w-8 h-8 border-2 border-purple-400 border-t-transparent rounded-full"></div>
-              <p class="text-sm text-amber-400">Processing composition...</p>
-            {:else if $activeComposition.status === 'failed'}
+            {:else if $activeComposition.status === RENDER_JOB_STATUS.FAILED}
               <p class="text-sm text-rose-400">Composition failed</p>
               {#if $activeComposition.error_message}
                 <p class="text-xs text-rose-300">{$activeComposition.error_message}</p>
@@ -178,6 +211,36 @@
 {:else if $compositionStore.error}
   <div class="px-6 py-8 text-sm text-rose-600">{$compositionStore.error}</div>
 {/if}
+
+<ModalDialog
+  isOpen={showCreateSubConfirm}
+  title="Tạo phụ đề cho composition"
+  description="Bạn có chắc muốn tạo video-subber job cho composition này không?"
+  on:close={closeCreateSubConfirm}
+>
+  <p class="text-sm text-[var(--color-text-secondary)]">
+    Composition #{shortId($activeComposition?.id)} sẽ được gửi sang video-subber với style mặc định.
+  </p>
+
+  <svelte:fragment slot="footer">
+    <button
+      type="button"
+      class="px-3 py-2 rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-elevated)] text-[var(--color-text-secondary)] text-sm"
+      on:click={closeCreateSubConfirm}
+      disabled={$isCreatingSub}
+    >
+      Hủy
+    </button>
+    <button
+      type="button"
+      class="px-3 py-2 rounded-lg border border-transparent bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed"
+      on:click={confirmCreateSub}
+      disabled={$isCreatingSub}
+    >
+      {#if $isCreatingSub}Đang tạo...{:else}Xác nhận tạo sub{/if}
+    </button>
+  </svelte:fragment>
+</ModalDialog>
 
 {#if previewUrl}
   <div class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">

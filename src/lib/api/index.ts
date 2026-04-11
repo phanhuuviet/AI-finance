@@ -11,3 +11,4 @@ export { dashboardApi } from './modules/dashboard.api';
 export { generationApi } from './modules/generation.api';
 export { compositionApi } from './modules/composition.api';
 export { sessionApi } from './modules/session.api';
+export { subApi } from './modules/sub.api';

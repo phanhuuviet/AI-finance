@@ -3,6 +3,7 @@
   import StudioPanel from "./components/studio/StudioPanel.svelte";
   import Generations from "./generations/Generations.svelte";
   import Compositions from "./compositions/Compositions.svelte";
+  import Subs from "./subs/Subs.svelte";
   import CompositionDetail from "./compositions/CompositionDetail.svelte";
   import ChatInterface from "./components/chat/ChatInterfaceSectioned.svelte";
   import ChatHistory from "./components/chat/ChatHistory.svelte";
@@ -90,6 +91,14 @@
             >
               Compositions
             </Button>
+            <Button
+              unstyled
+              className={`px-3 py-2 min-h-11 rounded-[var(--radius-sm)] text-sm whitespace-nowrap transition-all duration-200 ${section === "subs" ? "[background:var(--gradient-accent)] text-[var(--text-on-dark)] font-semibold shadow-[0_1px_6px_rgba(99,102,241,0.3)]" : "bg-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"}`}
+              on:click={() => setSection("subs")}
+              type="button"
+            >
+              {$t("workspace.subs")}
+            </Button>
           </div>
 
           <div class="text-xs text-[var(--text-muted)] break-all">{$t("common.session")}: {sessionId}</div>
@@ -123,6 +132,8 @@
         </div>
       {:else if section === "compositions"}
         <Compositions />
+      {:else if section === "subs"}
+        <Subs />
       {:else}
         <ChatInterface {sessionId} />
       {/if}

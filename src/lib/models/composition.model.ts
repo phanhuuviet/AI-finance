@@ -1,4 +1,7 @@
-export type CompositionStatus = 'pending' | 'processing' | 'completed' | 'failed';
+import type { ValueOf } from '$lib/constants';
+import { RENDER_JOB_STATUS } from '$lib/constants';
+
+export type CompositionStatus = ValueOf<typeof RENDER_JOB_STATUS>;
 
 export interface CompositionChunkInput {
   chunk_id: string;

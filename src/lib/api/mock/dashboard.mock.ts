@@ -77,7 +77,7 @@ function createStudioOutput(payload: Record<string, unknown>): StudioOutput {
     id: `studio_${Date.now()}`,
     session_id: sessionId,
     type,
-    status: GEN_STATUS.PROCESSING,
+    status: GEN_STATUS.PENDING,
     created_at: new Date().toISOString(),
     payload: payload.payload,
     title: `Generated ${type}`

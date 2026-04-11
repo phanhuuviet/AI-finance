@@ -9,6 +9,7 @@
   } from '$lib/stores/composition.store';
   import StatusBadge from '$lib/components/common/StatusBadge.svelte';
   import { navigate } from '$lib/router/navigate';
+  import { RENDER_JOB_STATUS } from '$lib/constants/index.js';
 
   function formatDateTime(iso: string): string {
     const dt = new Date(iso);
@@ -68,17 +69,13 @@
               ></video>
             {:else}
               <div class="w-full min-h-36 px-4 py-6 flex flex-col items-center justify-center gap-2 text-center
-                {composition.status === 'pending' ? 'bg-gray-50 text-gray-600' : ''}
-                {composition.status === 'processing' ? 'bg-amber-50 text-amber-700' : ''}
-                {composition.status === 'completed' ? 'bg-green-50 text-green-700' : ''}
-                {composition.status === 'failed' ? 'bg-rose-50 text-rose-700' : ''}
+                {composition.status === RENDER_JOB_STATUS.PENDING ? 'bg-gray-50 text-gray-600' : ''}
+                {composition.status === RENDER_JOB_STATUS.COMPLETED ? 'bg-green-50 text-green-700' : ''}
+                {composition.status === RENDER_JOB_STATUS.FAILED ? 'bg-rose-50 text-rose-700' : ''}
               ">
-                {#if composition.status === 'pending'}
+                {#if composition.status === RENDER_JOB_STATUS.PENDING}
                   <p class="text-sm">Waiting to process</p>
-                {:else if composition.status === 'processing'}
-                  <div class="animate-spin w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full"></div>
-                  <p class="text-sm">Processing...</p>
-                {:else if composition.status === 'completed'}
+                {:else if composition.status === RENDER_JOB_STATUS.COMPLETED}
                   <p class="text-sm">Ready</p>
                   <p class="text-xs">No preview URL available yet</p>
                 {:else}

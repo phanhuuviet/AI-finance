@@ -46,7 +46,8 @@
     "selectConversationHint": "Select a conversation first, then the Documents / Chat / Studio UI will appear.",
     "documents": "Documents",
     "chat": "Chat",
-    "studio": "Studio"
+    "studio": "Studio",
+    "subs": "Subs"
   },
   "chat": {
     "session": "Chat Session",

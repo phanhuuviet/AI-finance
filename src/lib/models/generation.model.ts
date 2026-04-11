@@ -1,12 +1,11 @@
 import type { ValueOf } from '$lib/constants';
-import { CHUNK_SECTION, GEN_STATUS } from '$lib/constants';
+import { CHUNK_SECTION, RENDER_JOB_STATUS } from '$lib/constants';
 
-export type GenerationStatus = ValueOf<typeof GEN_STATUS>;
+export type GenerationStatus = ValueOf<typeof RENDER_JOB_STATUS>;
 export type ChunkSection = ValueOf<typeof CHUNK_SECTION> | string;
 
 export interface GenerationSummary {
   pending: number;
-  processing: number;
   completed: number;
   failed: number;
 }

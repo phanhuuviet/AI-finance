@@ -46,7 +46,8 @@
     "selectConversationHint": "Bạn cần chọn một cuộc trò chuyện trước, sau đó mới hiển thị giao diện Documents / Chat / Studio.",
     "documents": "Tài liệu",
     "chat": "Chat",
-    "studio": "Studio"
+    "studio": "Studio",
+    "subs": "Phụ đề"
   },
   "chat": {
     "session": "Phiên chat",

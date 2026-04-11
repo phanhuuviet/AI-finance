@@ -47,11 +47,14 @@ export const DOC_STATUS = {
   ERROR: 'error'
 } as const;
 
-export const GEN_STATUS = {
+export const RENDER_JOB_STATUS = {
   PENDING: 'pending',
-  PROCESSING: 'processing',
   COMPLETED: 'completed',
   FAILED: 'failed'
+} as const;
+
+export const GEN_STATUS = {
+  ...RENDER_JOB_STATUS
 } as const;
 
 export const CHUNK_SECTION = {
