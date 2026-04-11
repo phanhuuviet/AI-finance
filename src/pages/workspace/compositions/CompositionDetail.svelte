@@ -36,9 +36,22 @@
   $: sessionId = $page.params.sessionId;
   $: compositionId = $page.params.compositionId;
 
+  let previewUrl: string | null = null;
+  let previewChunkLabel = '';
+
   function goBack(): void {
     workspaceStore.setActiveSectionForCurrentSession('compositions');
     navigate(`/workspace/${sessionId}`);
+  }
+
+  function openChunkPreview(url: string, chunkId: string): void {
+    previewUrl = url;
+    previewChunkLabel = chunkId;
+  }
+
+  function closeChunkPreview(): void {
+    previewUrl = null;
+    previewChunkLabel = '';
   }
 
   onMount(() => {
@@ -129,17 +142,25 @@
               {chunk.sequence}
             </div>
 
-            <div class="flex-shrink-0 w-20 h-14 bg-gray-900 rounded-lg overflow-hidden">
+            <div class="group relative flex-shrink-0 w-20 h-14 bg-gray-900 rounded-lg overflow-hidden">
               {#if chunk.presigned_s3_url}
-                <!-- svelte-ignore a11y-media-has-caption -->
-                <video
-                  src={chunk.presigned_s3_url}
-                  playsinline
-                  muted
-                  loop
-                  autoplay
-                  class="w-full h-full object-contain"
-                ></video>
+                <button
+                  type="button"
+                  class="w-full h-full block"
+                  on:click={() => openChunkPreview(chunk.presigned_s3_url, chunk.chunk_id)}
+                >
+                  <!-- svelte-ignore a11y-media-has-caption -->
+                  <video
+                    src={chunk.presigned_s3_url}
+                    muted
+                    class="w-full h-full object-contain"
+                  ></video>
+                  <div
+                    class="absolute inset-0 bg-black/45 text-white text-[10px] font-semibold uppercase tracking-wide flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    Preview
+                  </div>
+                </button>
               {:else}
                 <div class="w-full h-full flex items-center justify-center text-gray-600 text-xs">No video</div>
               {/if}
@@ -156,4 +177,33 @@
   </div>
 {:else if $compositionStore.error}
   <div class="px-6 py-8 text-sm text-rose-600">{$compositionStore.error}</div>
+{/if}
+
+{#if previewUrl}
+  <div class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <button
+      type="button"
+      class="absolute inset-0"
+      aria-label="Close preview"
+      on:click={closeChunkPreview}
+    ></button>
+
+    <div class="relative z-10 w-full max-w-6xl max-h-[92vh] bg-black rounded-xl overflow-hidden border border-white/20 shadow-2xl">
+      <div class="flex items-center justify-between px-4 py-3 bg-black/80 text-white">
+        <p class="text-sm font-medium">Chunk preview: {previewChunkLabel}</p>
+        <button
+          type="button"
+          class="px-3 py-1.5 text-xs rounded-lg border border-white/30 hover:bg-white/10 transition-colors"
+          on:click={closeChunkPreview}
+        >
+          Close
+        </button>
+      </div>
+
+      <div class="w-full h-[80vh] flex items-center justify-center bg-black">
+        <!-- svelte-ignore a11y-media-has-caption -->
+        <video src={previewUrl} controls playsinline class="w-full h-full object-contain"></video>
+      </div>
+    </div>
+  </div>
 {/if}

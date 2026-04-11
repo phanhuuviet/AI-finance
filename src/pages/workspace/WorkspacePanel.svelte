@@ -8,7 +8,7 @@
   import ChatHistory from "./components/chat/ChatHistory.svelte";
   import ResponsiveWorkspaceLayout from "./components/layout/ResponsiveWorkspaceLayout.svelte";
   import Button from "$lib/components/common/Button.svelte";
-  import { route } from "../../stores/router.js";
+  import { route, navigate } from "../../stores/router.js";
 
   import { fade } from "svelte/transition";
   import { t } from "../../lib/i18n";
@@ -33,6 +33,10 @@
   function setSection(next) {
     if (!sessionId) return;
     workspaceStore.setActiveSectionForCurrentSession(next);
+
+    if (generationId || compositionId) {
+      navigate(`/workspace/${sessionId}`);
+    }
   }
 </script>
 
