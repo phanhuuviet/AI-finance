@@ -55,6 +55,11 @@
     previewChunkLabel = chunkId;
   }
 
+  function preventAutoplay(event: Event): void {
+    const video = event.currentTarget as HTMLVideoElement;
+    video.pause();
+  }
+
   function closeChunkPreview(): void {
     previewUrl = null;
     previewChunkLabel = '';
@@ -144,6 +149,8 @@
             src={$activeComposition.presigned_s3_url}
             controls
             playsinline
+            preload="metadata"
+            on:loadedmetadata={preventAutoplay}
             class="w-full h-full object-contain"
           ></video>
         {:else}
@@ -186,6 +193,8 @@
                   <video
                     src={chunk.presigned_s3_url}
                     muted
+                    preload="metadata"
+                    on:loadedmetadata={preventAutoplay}
                     class="w-full h-full object-contain"
                   ></video>
                   <div
@@ -265,7 +274,14 @@
 
       <div class="w-full h-[80vh] flex items-center justify-center bg-black">
         <!-- svelte-ignore a11y-media-has-caption -->
-        <video src={previewUrl} controls playsinline class="w-full h-full object-contain"></video>
+        <video
+          src={previewUrl}
+          controls
+          playsinline
+          preload="metadata"
+          on:loadedmetadata={preventAutoplay}
+          class="w-full h-full object-contain"
+        ></video>
       </div>
     </div>
   </div>

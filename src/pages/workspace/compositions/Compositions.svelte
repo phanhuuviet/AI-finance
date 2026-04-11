@@ -31,6 +31,16 @@
     navigate(`/workspace/${sessionId}/compositions/${compositionId}`);
   }
 
+  function shortId(value: string | undefined): string {
+    if (!value) return '--';
+    return value.slice(-8);
+  }
+
+  function preventAutoplay(event: Event): void {
+    const video = event.currentTarget as HTMLVideoElement;
+    video.pause();
+  }
+
   onMount(() => {
     compositionService.loadCompositions(1);
   });
@@ -55,47 +65,70 @@
       {:else}
         {#each $compositions as composition (composition.id)}
           <button
-            class="w-full text-left bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-purple-300 hover:shadow-sm transition-all duration-150 cursor-pointer"
+            class="w-full text-left"
             on:click={() => openComposition(composition.session_id, composition.id)}
             type="button"
           >
-            {#if composition.presigned_s3_url}
-              <!-- svelte-ignore a11y-media-has-caption -->
-              <video
-                src={composition.presigned_s3_url}
-                controls
-                playsinline
-                class="w-full rounded-t-xl max-h-48 bg-black object-contain"
-              ></video>
-            {:else}
-              <div class="w-full min-h-36 px-4 py-6 flex flex-col items-center justify-center gap-2 text-center
-                {composition.status === RENDER_JOB_STATUS.PENDING ? 'bg-gray-50 text-gray-600' : ''}
-                {composition.status === RENDER_JOB_STATUS.COMPLETED ? 'bg-green-50 text-green-700' : ''}
-                {composition.status === RENDER_JOB_STATUS.FAILED ? 'bg-rose-50 text-rose-700' : ''}
-              ">
-                {#if composition.status === RENDER_JOB_STATUS.PENDING}
-                  <p class="text-sm">Waiting to process</p>
-                {:else if composition.status === RENDER_JOB_STATUS.COMPLETED}
-                  <p class="text-sm">Ready</p>
-                  <p class="text-xs">No preview URL available yet</p>
+            <div class="relative flex flex-col md:flex-row gap-0 md:gap-4 bg-white border rounded-xl overflow-hidden hover:border-purple-200 transition-colors duration-150 border-gray-200">
+              <div class="md:w-[40%] md:flex-shrink-0 bg-gray-900 flex items-center justify-center min-h-[170px] border-b md:border-b-0 md:border-r border-gray-100">
+                {#if composition.presigned_s3_url}
+                  <!-- svelte-ignore a11y-media-has-caption -->
+                  <video
+                    src={composition.presigned_s3_url}
+                    controls
+                    playsinline
+                    preload="metadata"
+                    on:loadedmetadata={preventAutoplay}
+                    class="w-full h-56 md:h-full object-contain max-h-64"
+                  ></video>
                 {:else}
-                  <p class="text-sm">Failed</p>
-                  {#if composition.error_message}
-                    <p class="text-xs">{composition.error_message}</p>
-                  {/if}
+                  <div class="w-full h-56 md:h-full px-4 py-6 flex flex-col items-center justify-center gap-2 text-center
+                    {composition.status === RENDER_JOB_STATUS.PENDING ? 'bg-gray-50 text-gray-600' : ''}
+                    {composition.status === RENDER_JOB_STATUS.COMPLETED ? 'bg-green-50 text-green-700' : ''}
+                    {composition.status === RENDER_JOB_STATUS.FAILED ? 'bg-rose-50 text-rose-700' : ''}
+                  ">
+                    {#if composition.status === RENDER_JOB_STATUS.PENDING}
+                      <p class="text-sm">Waiting to process</p>
+                    {:else if composition.status === RENDER_JOB_STATUS.COMPLETED}
+                      <p class="text-sm">Ready</p>
+                      <p class="text-xs">No preview URL available yet</p>
+                    {:else}
+                      <p class="text-sm">Failed</p>
+                      {#if composition.error_message}
+                        <p class="text-xs">{composition.error_message}</p>
+                      {/if}
+                    {/if}
+                  </div>
                 {/if}
               </div>
-            {/if}
 
-            <div class="p-3 flex items-center justify-between gap-2">
-              <div class="min-w-0">
-                <p class="text-sm font-semibold text-gray-800 truncate">Composition #{composition.id.slice(-8)}</p>
-                <div class="flex items-center gap-2 mt-1 text-xs text-gray-500 flex-wrap">
+              <div class="flex-1 min-w-0 p-4 flex flex-col gap-3">
+                <div class="flex items-center justify-between gap-2">
+                  <div class="flex items-center gap-2 min-w-0">
+                    <span class="text-xs font-mono font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded truncate">
+                      {shortId(composition.id)}
+                    </span>
+                    <span class="text-xs text-gray-400 truncate">Generation #{shortId(composition.generation_id)}</span>
+                  </div>
                   <StatusBadge status={composition.status} />
-                  <span>•</span>
+                </div>
+
+                <p class="text-sm font-semibold text-gray-800 line-clamp-1">
+                  Composition #{shortId(composition.id)}
+                </p>
+
+                <div class="flex items-center gap-1 text-xs text-gray-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <circle cx="12" cy="12" r="10" stroke-width="1.5"></circle>
+                    <path stroke-linecap="round" stroke-width="1.5" d="M12 6v6l4 2"></path>
+                  </svg>
+                  <span>Created: <strong class="text-gray-700">{formatDateTime(composition.created_at)}</strong></span>
+                </div>
+
+                <div class="flex items-center gap-3 text-[11px] text-gray-400 mt-auto pt-2 border-t border-gray-50">
                   <span>{composition.chunk_count} chunk(s)</span>
-                  <span>•</span>
-                  <span>{formatDateTime(composition.created_at)}</span>
+                  <span>Session #{shortId(composition.session_id)}</span>
+                  <span>ID #{shortId(composition.id)}</span>
                 </div>
               </div>
             </div>
