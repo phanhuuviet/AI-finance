@@ -72,6 +72,16 @@ export const compositionService = {
     }
   },
 
+  async retryComposition(compositionId: string): Promise<void> {
+    try {
+      await compositionApi.retryComposition(compositionId);
+    } catch (err) {
+      const message = err instanceof ApiError ? err.message : 'COMPOSITION_RETRY_FAILED';
+      compositionStore.update((s) => ({ ...s, error: message }));
+      throw err;
+    }
+  },
+
   goToPage(page: number): void {
     compositionService.loadCompositions(page);
   }

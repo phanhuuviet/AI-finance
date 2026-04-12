@@ -53,6 +53,18 @@ export const subService = {
     }
   },
 
+  async retrySubJob(videoSubberId: string): Promise<void> {
+    subStore.update((s) => ({ ...s, error: null }));
+
+    try {
+      await subApi.retrySubJob(videoSubberId);
+    } catch (err) {
+      const message = err instanceof ApiError ? err.message : 'VIDEO_SUB_RETRY_FAILED';
+      subStore.update((s) => ({ ...s, error: message }));
+      throw err;
+    }
+  },
+
   goToPage(page: number): void {
     subService.loadSubJobs(page);
   }

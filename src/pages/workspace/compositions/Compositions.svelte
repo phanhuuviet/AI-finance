@@ -47,7 +47,10 @@
 
   let showCreateSubConfirm = false;
   let selectedCompositionIdForSub: string | null = null;
+  let showRetryCompositionConfirm = false;
+  let selectedCompositionIdForRetry: string | null = null;
   let openMenuCompositionId: string | null = null;
+  let retryingCompositionId: string | null = null;
 
   function toggleCompositionMenu(event: MouseEvent, compositionId: string): void {
     event.preventDefault();
@@ -72,6 +75,37 @@
     if ($isCreatingSub) return;
     showCreateSubConfirm = false;
     selectedCompositionIdForSub = null;
+  }
+
+  function openRetryCompositionConfirm(event: MouseEvent, compositionId: string): void {
+    event.preventDefault();
+    event.stopPropagation();
+    if (retryingCompositionId) return;
+    closeCompositionMenu();
+    selectedCompositionIdForRetry = compositionId;
+    showRetryCompositionConfirm = true;
+  }
+
+  function closeRetryCompositionConfirm(): void {
+    if (retryingCompositionId) return;
+    showRetryCompositionConfirm = false;
+    selectedCompositionIdForRetry = null;
+  }
+
+  async function confirmRetryComposition(): Promise<void> {
+    if (!selectedCompositionIdForRetry || retryingCompositionId) return;
+
+    retryingCompositionId = selectedCompositionIdForRetry;
+    try {
+      await compositionService.retryComposition(selectedCompositionIdForRetry);
+      showToast('Composition retry started.', 'success');
+      closeRetryCompositionConfirm();
+      await compositionService.loadCompositions($compositionCurrentPage);
+    } catch (err) {
+      showToast((err as Error)?.message || 'COMPOSITION_RETRY_FAILED', 'error');
+    } finally {
+      retryingCompositionId = null;
+    }
   }
 
   async function confirmCreateSub(): Promise<void> {
@@ -189,6 +223,16 @@
 
                     {#if openMenuCompositionId === composition.id}
                       <div class="absolute top-9 right-0 z-20 min-w-40 bg-white border border-gray-200 rounded-lg shadow-lg py-1">
+                        {#if composition.status === RENDER_JOB_STATUS.FAILED}
+                          <button
+                            type="button"
+                            class="w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 disabled:text-gray-400 disabled:hover:bg-white"
+                            on:click|stopPropagation={(event) => openRetryCompositionConfirm(event, composition.id)}
+                            disabled={retryingCompositionId === composition.id}
+                          >
+                            {#if retryingCompositionId === composition.id}Retrying...{:else}Retry{/if}
+                          </button>
+                        {/if}
                         <button
                           type="button"
                           class="w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 disabled:text-gray-400 disabled:hover:bg-white"
@@ -272,6 +316,36 @@
       disabled={$isCreatingSub}
     >
       {#if $isCreatingSub}Đang tạo...{:else}Xác nhận tạo sub{/if}
+    </button>
+  </svelte:fragment>
+</ModalDialog>
+
+<ModalDialog
+  isOpen={showRetryCompositionConfirm}
+  title="Retry composition"
+  description="Bạn có chắc muốn retry composition này không?"
+  on:close={closeRetryCompositionConfirm}
+>
+  <p class="text-sm text-[var(--color-text-secondary)]">
+    Composition #{shortId(selectedCompositionIdForRetry || undefined)} sẽ được gửi retry lại.
+  </p>
+
+  <svelte:fragment slot="footer">
+    <button
+      type="button"
+      class="px-3 py-2 rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-elevated)] text-[var(--color-text-secondary)] text-sm"
+      on:click={closeRetryCompositionConfirm}
+      disabled={!!retryingCompositionId}
+    >
+      Hủy
+    </button>
+    <button
+      type="button"
+      class="px-3 py-2 rounded-lg border border-transparent bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed"
+      on:click={confirmRetryComposition}
+      disabled={!!retryingCompositionId}
+    >
+      {#if !!retryingCompositionId}Retrying...{:else}Xác nhận retry{/if}
     </button>
   </svelte:fragment>
 </ModalDialog>

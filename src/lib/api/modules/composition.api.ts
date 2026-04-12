@@ -19,5 +19,10 @@ export const compositionApi = {
   },
 
   getCompositionDetail: (compositionId: string) =>
-    http<CompositionDetailResponse>(`/video-maker/compositions/${compositionId}`)
+    http<CompositionDetailResponse>(`/video-maker/compositions/${compositionId}`),
+
+  retryComposition: (compositionId: string) =>
+    http<unknown>(`/video-maker/compositions/${compositionId}/retry`, {
+      method: 'POST'
+    })
 };

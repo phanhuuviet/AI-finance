@@ -13,5 +13,10 @@ export const subApi = {
     }),
 
   getSubJobs: (page: number = 1, limit: number = 20) =>
-    http<VideoSubJobListResponse>(`/video-subber/jobs?page=${page}&limit=${limit}`)
+    http<VideoSubJobListResponse>(`/video-subber/jobs?page=${page}&limit=${limit}`),
+
+  retrySubJob: (videoSubberId: string) =>
+    http<unknown>(`/video-subber/jobs/${videoSubberId}/retry`, {
+      method: 'POST'
+    })
 };
