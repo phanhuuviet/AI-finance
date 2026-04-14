@@ -6,6 +6,7 @@ export type ChunkSection = ValueOf<typeof CHUNK_SECTION> | string;
 
 export interface GenerationSummary {
   pending: number;
+  processing: number;
   completed: number;
   failed: number;
 }

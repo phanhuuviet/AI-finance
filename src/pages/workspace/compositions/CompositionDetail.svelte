@@ -89,7 +89,7 @@
   });
 </script>
 
-<div class="px-6 pt-6 pb-2">
+<div class="px-3 sm:px-6 pt-4 sm:pt-6 pb-2">
   <button
     class="flex items-center gap-1.5 text-sm text-gray-500 hover:text-purple-600 transition-colors"
     on:click={goBack}
@@ -100,12 +100,12 @@
 </div>
 
 {#if $isLoadingCompositionDetail}
-  <div class="px-6 space-y-4">
+  <div class="px-3 sm:px-6 space-y-4">
     <div class="h-8 w-1/2 bg-purple-50 rounded-lg animate-pulse"></div>
     <div class="h-80 bg-gray-50 rounded-xl animate-pulse"></div>
   </div>
 {:else if $activeComposition}
-  <div class="px-6 py-4 border-b border-gray-100">
+  <div class="px-3 sm:px-6 py-4 border-b border-gray-100">
     <div class="flex items-start justify-between gap-4">
       <div>
         <h1 class="text-lg font-semibold text-gray-800">
@@ -140,7 +140,7 @@
     </div>
   </div>
 
-  <div class="px-6 py-4 grid grid-cols-1 lg:grid-cols-5 gap-4">
+  <div class="px-3 sm:px-6 py-4 grid grid-cols-1 lg:grid-cols-5 gap-4">
     <div class="lg:col-span-3">
       <div class="bg-gray-900 rounded-xl overflow-hidden aspect-video flex items-center justify-center">
         {#if $activeComposition.presigned_s3_url}
@@ -155,7 +155,7 @@
           ></video>
         {:else}
           <div class="flex flex-col items-center gap-3 text-gray-400 py-16 px-4 text-center">
-            {#if $activeComposition.status === RENDER_JOB_STATUS.PENDING}
+            {#if $activeComposition.status === RENDER_JOB_STATUS.PENDING || $activeComposition.status === RENDER_JOB_STATUS.PROCESSING}
               <p class="text-sm">Composition is queued for processing</p>
             {:else if $activeComposition.status === RENDER_JOB_STATUS.FAILED}
               <p class="text-sm text-rose-400">Composition failed</p>
@@ -218,7 +218,7 @@
     </div>
   </div>
 {:else if $compositionStore.error}
-  <div class="px-6 py-8 text-sm text-rose-600">{$compositionStore.error}</div>
+  <div class="px-3 sm:px-6 py-8 text-sm text-rose-600">{$compositionStore.error}</div>
 {/if}
 
 <ModalDialog

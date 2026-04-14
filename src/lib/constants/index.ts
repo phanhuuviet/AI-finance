@@ -49,6 +49,7 @@ export const DOC_STATUS = {
 
 export const RENDER_JOB_STATUS = {
   PENDING: 'pending',
+  PROCESSING: 'processing',
   COMPLETED: 'completed',
   FAILED: 'failed'
 } as const;

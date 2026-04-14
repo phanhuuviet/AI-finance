@@ -71,7 +71,7 @@
   });
 </script>
 
-<div class="px-6 pt-6 pb-2">
+<div class="px-3 sm:px-6 pt-4 sm:pt-6 pb-2">
   <button
     class="flex items-center gap-1.5 text-sm text-gray-500 hover:text-purple-600 transition-colors"
     on:click={() => goto(`/workspace/${sessionId}`)}
@@ -82,14 +82,14 @@
 </div>
 
 {#if $isLoadingDetail}
-  <div class="px-6 space-y-4">
+  <div class="px-3 sm:px-6 space-y-4">
     <div class="h-8 w-1/2 bg-purple-50 rounded-lg animate-pulse"></div>
     {#each Array(4) as _}
       <div class="h-40 bg-gray-50 rounded-xl animate-pulse"></div>
     {/each}
   </div>
 {:else if $activeGeneration}
-  <div class="px-6 py-4 border-b border-gray-100">
+  <div class="px-3 sm:px-6 py-4 border-b border-gray-100">
     <div class="flex items-start justify-between gap-4">
       <div>
         <h1 class="text-lg font-semibold text-gray-800">
@@ -117,7 +117,7 @@
   </div>
 
   <div
-    class="sticky top-0 z-10 bg-white/95 backdrop-blur border-b border-gray-100 px-6 py-3 flex items-center justify-between gap-4"
+    class="sticky top-0 z-10 bg-white/95 backdrop-blur border-b border-gray-100 px-3 sm:px-6 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4"
   >
     <label class="flex items-center gap-2 cursor-pointer select-none">
       <input
@@ -167,7 +167,7 @@
     </button>
   </div>
 
-  <div class="px-6 py-4 space-y-4">
+  <div class="px-3 sm:px-6 py-4 space-y-4">
     {#each $generationChunks as chunk (chunk.id)}
       <ChunkCard
         {...({
@@ -179,7 +179,7 @@
     {/each}
   </div>
 {:else if $generationStore.error}
-  <div class="px-6 py-8 text-sm text-rose-600">{$generationStore.error}</div>
+  <div class="px-3 sm:px-6 py-8 text-sm text-rose-600">{$generationStore.error}</div>
 {/if}
 
 {#if showSuccessToast}

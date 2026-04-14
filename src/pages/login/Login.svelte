@@ -50,6 +50,7 @@
   }
 
   function toggleAuthMode() {
+    if ($authLoading) return;
     isLogin = !isLogin;
   }
 
@@ -91,6 +92,7 @@
             placeholder={$t('auth.username')}
             bind:value={username}
             required
+            disabled={$authLoading}
           />
 
           {#if !isLogin}
@@ -101,6 +103,7 @@
               placeholder={$t('auth.email')}
               bind:value={email}
               required
+              disabled={$authLoading}
             />
           {/if}
 
@@ -111,6 +114,7 @@
             placeholder={$t('auth.password')}
             bind:value={password}
             required
+            disabled={$authLoading}
           />
 
           <div class="flex flex-col gap-4 mt-4">
@@ -129,6 +133,7 @@
               href="/login"
               on:click|preventDefault={toggleAuthMode}
               on:keydown={handleToggleKeydown}
+              aria-disabled={$authLoading}
             >
               {isLogin ? $t('auth.needAccount') : $t('auth.alreadyHaveAccount')}
             </a>

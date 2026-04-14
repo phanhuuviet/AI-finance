@@ -35,6 +35,9 @@ through 2025 and beyond.`;
 
   $: documentsState = $dashboardStore.documents;
   $: documentState = $documentStore;
+  $: isUploadSubmitting = documentsState.loading && activeInputMethod === "upload";
+  $: isCrawlSubmitting = documentsState.loading && activeInputMethod === "crawl";
+  $: isPasteSubmitting = $isCreatingDoc;
 
   onMount(() => {
     documentService.loadDocuments(1);
@@ -193,6 +196,7 @@ through 2025 and beyond.`;
           unstyled
           type="file"
           bind:files={file}
+          disabled={isUploadSubmitting}
           inputClass="block w-full text-sm text-[var(--color-text-secondary)] file:mr-4 file:py-2 file:px-4 file:rounded-md file:border file:border-[var(--color-border-accent)] file:text-sm file:font-semibold file:bg-[var(--color-accent-light)] file:text-[var(--color-accent-text)] hover:file:bg-[var(--color-bg-active)] mb-4"
         />
 
@@ -218,6 +222,7 @@ through 2025 and beyond.`;
           hideLabel={true}
           placeholder={$t("documents.crawlPlaceholder")}
           bind:value={url}
+          disabled={isCrawlSubmitting}
           containerClass="mb-4"
         />
 
@@ -242,6 +247,7 @@ through 2025 and beyond.`;
           label="Title"
           placeholder="Enter document title..."
           required
+          disabled={isPasteSubmitting}
           containerClass="mb-4"
         />
 
@@ -250,6 +256,7 @@ through 2025 and beyond.`;
           label=" "
           hideLabel={true}
           bind:value={pastedText}
+          disabled={isPasteSubmitting}
           rows={8}
           placeholder="Paste or type your content here..."
           textareaClass="mb-4 min-h-[160px] resize-y"

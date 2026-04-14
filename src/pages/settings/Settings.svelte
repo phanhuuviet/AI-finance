@@ -76,8 +76,8 @@
       <h3 class="text-lg font-medium text-gray-900 mb-4">{$t('settings.profileInformation')}</h3>
       
       <div class="grid grid-cols-1 gap-4">
-        <TextField id="username" label={$t('auth.username')} bind:value={username} />
-        <TextField id="email" type="email" label={$t('auth.email')} bind:value={email} />
+        <TextField id="username" label={$t('auth.username')} bind:value={username} disabled={profileState.updating} />
+        <TextField id="email" type="email" label={$t('auth.email')} bind:value={email} disabled={profileState.updating} />
         <p class="text-xs text-gray-500">{$t('settings.apiLayerNote')}</p>
       </div>
     </div>
@@ -92,6 +92,7 @@
           label={$t('settings.defaultModel')}
           bind:value={preferences.model}
           options={modelOptions}
+          disabled={profileState.updating}
         />
         <p class="mt-2 text-sm text-gray-500">{$t('settings.modelHint')}</p>
       </div>

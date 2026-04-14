@@ -86,12 +86,14 @@
     label={$t("common.language")}
     bind:value={commonLanguage}
     options={languageOptions}
+    disabled={isCreating}
   />
 
   <TextareaField
     id="selected_script"
     label={$t("studio.video.selectedScript")}
     bind:value={selectedScript}
+    disabled={isCreating}
     rows={8}
     textareaClass="min-h-[180px]"
   />
@@ -102,6 +104,7 @@
       label={$t("studio.video.targetPlatform")}
       bind:value={targetPlatform}
       options={platformOptions}
+      disabled={isCreating}
     />
 
     <SelectField
@@ -109,6 +112,7 @@
       label={$t("studio.video.aspectRatio")}
       bind:value={aspectRatio}
       options={aspectRatioOptions}
+      disabled={isCreating}
     />
   </div>
 
@@ -116,6 +120,7 @@
     id="video_visual_style"
     label={$t("studio.video.visualStyle")}
     bind:value={visualStyle}
+    disabled={isCreating}
     rows={3}
     textareaClass="min-h-[96px]"
   />
@@ -124,6 +129,7 @@
     id="video_duration_seconds"
     label={$t("studio.video.durationSeconds")}
     bind:value={videoDurationSeconds}
+    disabled={isCreating}
     min={40}
     max={480}
     step={10}

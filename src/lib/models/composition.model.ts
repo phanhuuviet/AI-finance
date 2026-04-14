@@ -23,6 +23,8 @@ export interface Composition {
   chunk_count: number;
   status: CompositionStatus;
   attempt_count: number;
+  claimed_by?: string | null;
+  claimed_at?: string | null;
   output_s3_url: string | null;
   presigned_s3_url: string | null;
   error_message: string | null;

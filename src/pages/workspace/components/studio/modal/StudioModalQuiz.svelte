@@ -54,12 +54,14 @@
     label={$t("common.language")}
     bind:value={commonLanguage}
     options={languageOptions}
+    disabled={isCreating}
   />
 
   <TextareaField
     id="studio_requirements_quiz"
     label={$t("studio.requirementLabel")}
     bind:value={commonRequirements}
+    disabled={isCreating}
     rows={6}
     textareaClass="min-h-[160px]"
   />

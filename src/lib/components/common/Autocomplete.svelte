@@ -12,6 +12,7 @@
   export let loading: boolean = false;
   export let placeholder: string = 'Select an option...';
   export let loadOptions: ((query: string) => Promise<AutocompleteOption[]>) | null = null;
+  export let disabled: boolean = false;
 
   let isOpen = false;
   let query = '';
@@ -44,6 +45,7 @@
   }
 
   function toggle(): void {
+    if (disabled) return;
     isOpen = !isOpen;
     if (isOpen && loadOptions) {
       fetchAsyncOptions(query);
@@ -54,12 +56,14 @@
   }
 
   function select(id: string): void {
+    if (disabled) return;
     value = id;
     isOpen = false;
     query = '';
   }
 
   function handleInput(event: Event): void {
+    if (disabled) return;
     const target = event.currentTarget as HTMLInputElement;
     query = target.value;
     if (loadOptions) {
@@ -71,6 +75,10 @@
     if (event.key === 'Escape') {
       isOpen = false;
     }
+  }
+
+  $: if (disabled && isOpen) {
+    isOpen = false;
   }
 
   function handleClickOutside(event: MouseEvent): void {
@@ -122,9 +130,12 @@
     class:border-[var(--purple-400)]={isOpen}
     class:ring-2={isOpen}
     class:ring-[var(--purple-50)]={isOpen}
+    class:cursor-not-allowed={disabled}
+    class:opacity-60={disabled}
     on:click={toggle}
     aria-haspopup="listbox"
     aria-expanded={isOpen}
+    disabled={disabled}
   >
     {#if loading || isFetching}
       <span class="text-[var(--text-muted)]">Loading options...</span>
@@ -164,6 +175,7 @@
           on:input={handleInput}
           placeholder="Search..."
           class="w-full px-3 py-2 text-sm border border-[var(--border-default)] rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--purple-50)]"
+          disabled={disabled}
         />
       </div>
 

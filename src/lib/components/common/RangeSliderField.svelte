@@ -9,6 +9,7 @@
   export let minLabel = "";
   export let maxLabel = "";
   export let containerClass = "";
+  export let disabled = false;
 </script>
 
 <div class={`rounded-xl border border-[var(--color-border-default)] bg-[var(--color-bg-app)] p-4 ${containerClass}`.trim()}>
@@ -25,6 +26,7 @@
       {max}
       {step}
       bind:value
+      {disabled}
       class="range-slider"
     />
 

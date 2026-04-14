@@ -80,7 +80,7 @@
     </div>
 
     <div class="p-5 sm:p-6 space-y-4 overflow-y-auto max-h-[calc(90dvh-154px)]">
-      <TextField bind:value={title} label="Chat Title" placeholder="Enter chat title..." required />
+      <TextField bind:value={title} label="Chat Title" placeholder="Enter chat title..." required disabled={$isCreating} />
 
       <div class="mb-4">
         <div class="block text-sm font-medium text-[var(--text-secondary)] mb-1.5">
@@ -94,6 +94,7 @@
           loading={$sessionStore.isLoadingConcepts}
           placeholder="Select a video concept..."
           loadOptions={fetchConceptOptions}
+          disabled={$isCreating}
         />
       </div>
 
@@ -105,6 +106,7 @@
               label={input.label}
               placeholder={input.description}
               required={input.required}
+              disabled={$isCreating}
             />
           {/each}
         </div>

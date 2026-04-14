@@ -13,6 +13,7 @@
   let feedbackText = '';
   let isRegenerating = false;
   let regenerateError = '';
+  $: canRegenerate = chunk.status === RENDER_JOB_STATUS.COMPLETED;
 
   const sectionLabel: Record<string, string> = {
     [CHUNK_SECTION.HOOK]: 'Hook',
@@ -22,6 +23,7 @@
   };
 
   function openFeedback() {
+    if (!canRegenerate) return;
     showFeedback = true;
     regenerateError = '';
   }
@@ -48,7 +50,7 @@
 </script>
 
 <div
-  class="relative flex gap-4 bg-white border rounded-xl overflow-hidden hover:border-purple-200 transition-colors duration-150"
+  class="relative flex flex-col md:flex-row gap-0 md:gap-4 bg-white border rounded-xl overflow-hidden hover:border-purple-200 transition-colors duration-150"
   class:border-purple-400={selectionOrder !== null}
   class:bg-purple-50={selectionOrder !== null}
   class:border-gray-200={selectionOrder === null}
@@ -73,7 +75,7 @@
     {/if}
   </div>
 
-  <div class="w-[40%] flex-shrink-0 bg-gray-900 flex items-center justify-center min-h-[160px]">
+  <div class="w-full md:w-[40%] md:flex-shrink-0 bg-gray-900 flex items-center justify-center min-h-[160px] border-b md:border-b-0 md:border-r border-gray-100">
     {#if chunk.presigned_s3_url}
       <!-- svelte-ignore a11y-media-has-caption -->
       <video
@@ -89,6 +91,8 @@
         </svg>
         <span class="text-xs text-gray-400">
           {#if chunk.status === RENDER_JOB_STATUS.PENDING}Pending render{/if}
+          {#if chunk.status === RENDER_JOB_STATUS.PROCESSING}Rendering{/if}
+          {#if chunk.status === RENDER_JOB_STATUS.COMPLETED}Rendered{/if}
           {#if chunk.status === RENDER_JOB_STATUS.FAILED}Render failed{/if}
         </span>
       </div>
@@ -134,7 +138,7 @@
       {/if}
     </div>
 
-    {#if !showFeedback}
+    {#if canRegenerate && !showFeedback}
       <div class="flex justify-end mt-3">
         <button
           type="button"
@@ -158,7 +162,7 @@
           Regenerate
         </button>
       </div>
-    {:else}
+    {:else if canRegenerate}
       <div in:slide={{ duration: 180 }} out:slide={{ duration: 140 }} class="border-t border-gray-100 mt-3 pt-3">
         <p class="text-xs font-medium text-gray-500 mb-1">Feedback (optional)</p>
         <textarea

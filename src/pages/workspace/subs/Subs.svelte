@@ -12,6 +12,9 @@
     subPagination,
     subStore
   } from '$lib/stores/sub.store';
+  import type { VideoSubJob } from '$lib/models/sub.model';
+
+  const PROCESSING_RETRY_TIMEOUT_MS = 10 * 60 * 1000;
 
   function formatDateTime(iso: string): string {
     const dt = new Date(iso);
@@ -37,6 +40,21 @@
   function preventAutoplay(event: Event): void {
     const video = event.currentTarget as HTMLVideoElement;
     video.pause();
+  }
+
+  function isProcessingTimeoutExceeded(claimedAt: string | null | undefined): boolean {
+    if (!claimedAt) return false;
+    const claimedTime = new Date(claimedAt).getTime();
+    if (Number.isNaN(claimedTime)) return false;
+    return Date.now() - claimedTime > PROCESSING_RETRY_TIMEOUT_MS;
+  }
+
+  function canRetrySub(job: VideoSubJob): boolean {
+    if (job.status === RENDER_JOB_STATUS.FAILED) return true;
+    if (job.status === RENDER_JOB_STATUS.PROCESSING) {
+      return isProcessingTimeoutExceeded(job.claimed_at);
+    }
+    return false;
   }
 
   let openMenuSubId: string | null = null;
@@ -132,11 +150,14 @@
                 {:else}
                   <div class="w-full h-56 md:h-full px-4 py-6 flex flex-col items-center justify-center gap-2 text-center
                     {job.status === RENDER_JOB_STATUS.PENDING ? 'bg-gray-50 text-gray-600' : ''}
+                    {job.status === RENDER_JOB_STATUS.PROCESSING ? 'bg-amber-50 text-amber-700' : ''}
                     {job.status === RENDER_JOB_STATUS.COMPLETED ? 'bg-green-50 text-green-700' : ''}
                     {job.status === RENDER_JOB_STATUS.FAILED ? 'bg-rose-50 text-rose-700' : ''}
                   ">
                     {#if job.status === RENDER_JOB_STATUS.PENDING}
                       <p class="text-sm">Waiting to process</p>
+                    {:else if job.status === RENDER_JOB_STATUS.PROCESSING}
+                      <p class="text-sm">Processing</p>
                     {:else if job.status === RENDER_JOB_STATUS.COMPLETED}
                       <p class="text-sm">Ready</p>
                       <p class="text-xs">No preview URL available yet</p>
@@ -160,23 +181,25 @@
                   </div>
                   <div class="relative flex items-center gap-2 flex-shrink-0">
                     <StatusBadge status={job.status} />
-                    <button
-                      type="button"
-                      class="w-8 h-8 rounded-lg border border-gray-200 bg-white text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-center"
-                      aria-label="Video sub actions"
-                      aria-expanded={openMenuSubId === job.id}
-                      on:click|stopPropagation={(event) => toggleSubMenu(event, job.id)}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <circle cx="12" cy="5" r="1.75" fill="currentColor"></circle>
-                        <circle cx="12" cy="12" r="1.75" fill="currentColor"></circle>
-                        <circle cx="12" cy="19" r="1.75" fill="currentColor"></circle>
-                      </svg>
-                    </button>
+                    {#if canRetrySub(job)}
+                      <button
+                        type="button"
+                        class="w-8 h-8 rounded-lg border border-gray-200 bg-white text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-center"
+                        aria-label="Video sub actions"
+                        aria-expanded={openMenuSubId === job.id}
+                        on:click|stopPropagation={(event) => toggleSubMenu(event, job.id)}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <circle cx="12" cy="5" r="1.75" fill="currentColor"></circle>
+                          <circle cx="12" cy="12" r="1.75" fill="currentColor"></circle>
+                          <circle cx="12" cy="19" r="1.75" fill="currentColor"></circle>
+                        </svg>
+                      </button>
+                    {/if}
 
-                    {#if openMenuSubId === job.id}
+                    {#if canRetrySub(job) && openMenuSubId === job.id}
                       <div class="absolute top-9 right-0 z-20 min-w-40 bg-white border border-gray-200 rounded-lg shadow-lg py-1">
-                        {#if job.status === RENDER_JOB_STATUS.FAILED}
+                        {#if canRetrySub(job)}
                           <button
                             type="button"
                             class="w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 disabled:text-gray-400 disabled:hover:bg-white"
