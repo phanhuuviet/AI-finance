@@ -29,6 +29,16 @@ export interface VideoConcept {
   prompt_inputs: PromptInput[];
 }
 
+export interface ChatModel {
+  provider: string;
+  model: string;
+  integration_type: string;
+  endpoint: string;
+  display_name: string;
+  supports_thinking: boolean;
+  is_default: boolean;
+}
+
 export interface CreateSessionRequest {
   document_ids: string[];
   materials: Array<{
@@ -39,5 +49,6 @@ export interface CreateSessionRequest {
   metadata: { source: string };
   title: string;
   video_concept_id: string;
+  model: string;
   prompt_input_values: Record<string, string>;
 }

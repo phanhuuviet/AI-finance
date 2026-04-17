@@ -2,6 +2,7 @@ import { http } from '../base/http';
 import type {
   Session,
   VideoConcept,
+  ChatModel,
   CreateSessionRequest,
   SessionListResponse,
 } from '$lib/models/session.model';
@@ -18,6 +19,9 @@ export const sessionApi = {
 
   getVideoConcepts: () =>
     http<{ video_concepts: VideoConcept[] }>('/session-init/video-concepts'),
+
+  getChatModels: () =>
+    http<{ models: ChatModel[] }>('/session-init/chat-models'),
 
   createSession: (body: CreateSessionRequest) =>
     http<Session>('/session-init', {

@@ -63,9 +63,25 @@ export const sessionService = {
     }
   },
 
+  async loadChatModels(): Promise<void> {
+    sessionStore.update((s) => ({ ...s, isLoadingChatModels: true }));
+    try {
+      const { data } = await sessionApi.getChatModels();
+      sessionStore.update((s) => ({
+        ...s,
+        chatModels: data?.models ?? [],
+        isLoadingChatModels: false,
+      }));
+    } catch (err) {
+      const message = err instanceof ApiError ? err.message : 'CHAT_MODELS_LOAD_FAILED';
+      sessionStore.update((s) => ({ ...s, error: message, isLoadingChatModels: false }));
+    }
+  },
+
   async createSession(
     title: string,
     videoConcept_id: string,
+    model: string,
     promptInputValues: Record<string, string>
   ): Promise<void> {
     sessionStore.update((s) => ({ ...s, isCreating: true, error: null }));
@@ -76,6 +92,7 @@ export const sessionService = {
         metadata: { source: 'web-app' },
         title,
         video_concept_id: videoConcept_id,
+        model,
         prompt_input_values: promptInputValues,
       };
 

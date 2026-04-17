@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { sessionService } from '$lib/services/session.service';
   import type { VideoConcept } from '$lib/models/session.model';
-  import { sessionStore, videoConcepts, isCreating } from '$lib/stores/session.store';
+  import { sessionStore, videoConcepts, chatModels, isCreating } from '$lib/stores/session.store';
   import Autocomplete from '$lib/components/common/Autocomplete.svelte';
   import TextField from '$lib/components/common/TextField.svelte';
   import Button from '$lib/components/common/Button.svelte';
@@ -12,6 +12,7 @@
 
   let title = '';
   let selectedConceptId = '';
+  let selectedModel = '';
   let promptValues: Record<string, string> = {};
   let previousConceptId = '';
 
@@ -27,10 +28,17 @@
   $: isSubmitDisabled =
     !title.trim() ||
     !selectedConceptId ||
+    !selectedModel ||
     (selectedConcept?.prompt_inputs ?? [])
       .filter((p) => p.required)
       .some((p) => !promptValues[p.key]?.trim()) ||
     $isCreating;
+
+  $: chatModelOptions = ($chatModels ?? []).map((item) => ({
+    id: item.model,
+    name: item.display_name || item.model,
+    description: item.provider,
+  }));
 
   async function fetchConceptOptions(query: string): Promise<VideoConcept[]> {
     const keyword = query.trim().toLowerCase();
@@ -41,20 +49,33 @@
     );
   }
 
+  async function fetchChatModelOptions(
+    query: string
+  ): Promise<Array<{ id: string; name: string; description?: string }>> {
+    const keyword = query.trim().toLowerCase();
+    const all = chatModelOptions;
+    if (!keyword) return all;
+    return all.filter((model) =>
+      `${model.name} ${model.description ?? ''}`.toLowerCase().includes(keyword)
+    );
+  }
+
   onMount(() => {
     sessionService.loadVideoConcepts();
+    sessionService.loadChatModels();
   });
 
   function resetForm(): void {
     title = '';
     selectedConceptId = '';
+    selectedModel = '';
     promptValues = {};
     sessionStore.update((s) => ({ ...s, error: null }));
   }
 
   async function handleSubmit(): Promise<void> {
     try {
-      await sessionService.createSession(title, selectedConceptId, promptValues);
+      await sessionService.createSession(title, selectedConceptId, selectedModel, promptValues);
       showToast('Chat created successfully.', 'success');
       resetForm();
       onClose();
@@ -94,6 +115,22 @@
           loading={$sessionStore.isLoadingConcepts}
           placeholder="Select a video concept..."
           loadOptions={fetchConceptOptions}
+          disabled={$isCreating}
+        />
+      </div>
+
+      <div class="mb-4">
+        <div class="block text-sm font-medium text-[var(--text-secondary)] mb-1.5">
+          Chat Model
+          <span class="text-[var(--rose-500,#F43F5E)] ml-0.5">*</span>
+        </div>
+
+        <Autocomplete
+          options={chatModelOptions}
+          bind:value={selectedModel}
+          loading={$sessionStore.isLoadingChatModels}
+          placeholder="Select a chat model..."
+          loadOptions={fetchChatModelOptions}
           disabled={$isCreating}
         />
       </div>
