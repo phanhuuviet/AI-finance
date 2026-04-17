@@ -165,7 +165,7 @@
   {#if isOpen}
     <div
       bind:this={panelEl}
-      class="bg-white border border-[var(--border-default)] rounded-xl shadow-lg overflow-hidden"
+      class="bg-white border border-[var(--border-default)] rounded-xl overflow-hidden [box-shadow:-8px_0_16px_-14px_rgba(15,23,42,0.35),8px_0_16px_-14px_rgba(15,23,42,0.35),0_12px_20px_-12px_rgba(15,23,42,0.4)]"
       style={panelStyle}
     >
       <div class="p-2 border-b border-[var(--border-subtle)]">
