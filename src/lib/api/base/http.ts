@@ -34,6 +34,21 @@ export class ApiError extends Error {
 
   static fromUnknown(error: unknown): ApiError {
     if (error instanceof ApiError) return error;
+    if (error && typeof error === 'object') {
+      const candidate = error as {
+        statusCode?: number;
+        message?: string;
+        data?: unknown;
+      };
+      const detail = extractErrorDetail(candidate.data);
+      if (typeof candidate.statusCode === 'number' || detail || candidate.message) {
+        return new ApiError(
+          candidate.statusCode ?? 500,
+          detail || candidate.message || 'INTERNAL_SERVER_ERROR',
+          candidate.data
+        );
+      }
+    }
     if (error instanceof Error) {
       return new ApiError(500, error.message || 'INTERNAL_SERVER_ERROR', error);
     }
@@ -108,6 +123,12 @@ function toEnvelope<T>(payload: unknown, response: Response): ApiResponse<T> {
     message: response.ok ? 'SUCCESS' : 'REQUEST_FAILED',
     data: payload as T
   };
+}
+
+function extractErrorDetail(data: unknown): string | null {
+  if (!data || typeof data !== 'object') return null;
+  const detail = (data as { detail?: unknown }).detail;
+  return typeof detail === 'string' && detail.trim() ? detail : null;
 }
 
 export async function http<T>(
@@ -195,9 +216,11 @@ export async function http<T>(
     }
 
     if (!response.ok || envelope.statusCode >= 400) {
+      const preferredMessage =
+        extractErrorDetail(envelope.data) || envelope.message || 'REQUEST_FAILED';
       throw new ApiError(
         envelope.statusCode || response.status,
-        envelope.message || 'REQUEST_FAILED',
+        preferredMessage,
         envelope.data
       );
     }
