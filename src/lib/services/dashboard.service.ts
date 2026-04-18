@@ -5,7 +5,8 @@ import type {
   Id,
   PaginationMeta,
   StudioOutput,
-  TokenUsageAnalytics
+  TokenUsageAnalytics,
+  VideoModel
 } from '../models';
 
 export const dashboardService = {
@@ -65,6 +66,15 @@ export const dashboardService = {
     }
   },
 
+  async getVideoModels(): Promise<VideoModel[]> {
+    try {
+      const data = await dashboardApi.getVideoModels();
+      return data?.models ?? [];
+    } catch (error) {
+      throw ApiError.fromUnknown(error);
+    }
+  },
+
   async createStudioOutput(sessionId: Id, type: string, payload: unknown): Promise<StudioOutput> {
     try {
       return await dashboardApi.createStudioOutput(sessionId, type, payload);
@@ -80,6 +90,7 @@ export const dashboardService = {
     video_prompt_input_values: {
       aspect_ratio: string;
       target_platform: string;
+      video_model: string;
       visual_style: string;
     };
   }): Promise<unknown> {

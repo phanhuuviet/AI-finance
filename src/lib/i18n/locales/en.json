@@ -171,9 +171,13 @@
       "focus": "What should AI focus on?",
       "selectedScript": "Selected script",
       "targetPlatform": "Target platform",
+      "videoModel": "Video model",
+      "videoModelPlaceholder": "Select a video model...",
+      "videoModelRequired": "Please select a video model.",
       "visualStyle": "Visual style",
       "durationSeconds": "Video duration",
       "chunkCount": "Chunk count",
+      "loadModelsFailed": "Failed to load video models.",
       "generateSuccess": "Video prompts generated successfully."
     },
     "scriptPicker": {

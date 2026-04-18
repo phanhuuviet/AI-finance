@@ -171,9 +171,13 @@
       "focus": "AI nên tập trung vào điều gì?",
       "selectedScript": "Kịch bản đã chọn",
       "targetPlatform": "Nền tảng mục tiêu",
+      "videoModel": "Video model",
+      "videoModelPlaceholder": "Chọn video model...",
+      "videoModelRequired": "Vui lòng chọn video model.",
       "visualStyle": "Phong cách hình ảnh",
       "durationSeconds": "Thời lượng video",
       "chunkCount": "Số đoạn (chunk)",
+      "loadModelsFailed": "Tải danh sách video model thất bại.",
       "generateSuccess": "Đã tạo prompt video thành công."
     },
     "scriptPicker": {

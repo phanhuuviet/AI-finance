@@ -4,7 +4,8 @@ import type {
   PaginationMeta,
   StudioOutput,
   StudioOutputListResponse,
-  TokenUsageAnalytics
+  TokenUsageAnalytics,
+  VideoModel
 } from '../../models';
 import { http } from '../base/http';
 
@@ -51,6 +52,11 @@ export const dashboardApi = {
     return { data, pagination };
   },
 
+  async getVideoModels(): Promise<{ models: VideoModel[] }> {
+    const { data } = await http<{ models: VideoModel[] }>('/session-init/video-models');
+    return data;
+  },
+
   async createStudioOutput(sessionId: Id, type: string, payload: unknown): Promise<StudioOutput> {
     const { data } = await http<StudioOutput>('/studio/outputs', {
       method: 'POST',
@@ -70,6 +76,7 @@ export const dashboardApi = {
     video_prompt_input_values: {
       aspect_ratio: string;
       target_platform: string;
+      video_model: string;
       visual_style: string;
     };
   }): Promise<unknown> {

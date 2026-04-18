@@ -170,13 +170,20 @@
     modalTool = null;
   }
 
-  async function createSelectedOutput() {
+  async function createSelectedOutput(event) {
     if (!sessionId || !modalTool || isCreatingOutput) return;
 
     isCreatingOutput = true;
 
     try {
       if (modalTool === MODAL_TOOL.VIDEO_OVERVIEW) {
+        const selectedVideoModel = String(event?.detail?.videoModel || "").trim();
+
+        if (!selectedVideoModel) {
+          showToast($t("studio.video.videoModelRequired"), "warning");
+          return;
+        }
+
         await dashboardStore.generateVideoScriptPrompts({
           chunk_count: durationToChunkCount(videoDurationSeconds),
           script: selectedScript,
@@ -184,6 +191,7 @@
           video_prompt_input_values: {
             aspect_ratio: aspectRatio,
             target_platform: targetPlatform,
+            video_model: selectedVideoModel,
             visual_style: visualStyle
           }
         });

@@ -39,6 +39,14 @@ export interface ChatModel {
   is_default: boolean;
 }
 
+export interface VideoModel {
+  model: string;
+  integration_type: string;
+  endpoint: string | null;
+  display_name: string;
+  is_default: boolean;
+}
+
 export interface CreateSessionRequest {
   document_ids: string[];
   materials: Array<{

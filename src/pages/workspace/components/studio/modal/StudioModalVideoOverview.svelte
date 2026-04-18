@@ -1,42 +1,78 @@
-<script>
+<script lang="ts">
   import { createEventDispatcher } from "svelte";
   import ModalDialog from "$lib/components/common/ModalDialog.svelte";
   import Button from "$lib/components/common/Button.svelte";
+  import Autocomplete from "$lib/components/common/Autocomplete.svelte";
+  import { dashboardService } from "$lib/services/dashboard.service";
   import SelectField from "$lib/components/common/SelectField.svelte";
   import TextareaField from "$lib/components/common/TextareaField.svelte";
   import RangeSliderField from "$lib/components/common/RangeSliderField.svelte";
+  import { showToast } from "$lib/utils/toast";
   import { t } from "../../../../../lib/i18n";
 
   const dispatch = createEventDispatcher();
 
-  /** @type {string} */
   export let title = "";
 
-  /** @type {boolean} */
   export let isOpen = false;
 
-  /** @type {string | null} */
   export let sessionId = null;
 
-  /** @type {boolean} */
   export let isCreating = false;
 
-  /** @type {string} */
   export let commonLanguage = "vi";
 
-  /** @type {string} */
   export let selectedScript = "";
 
-  /** @type {string} */
   export let aspectRatio = "9:16";
 
-  /** @type {string} */
   export let targetPlatform = "tiktok";
 
-  /** @type {string} */
   export let visualStyle = "cinematic realistic";
 
+  type VideoModelOption = {
+    id: string;
+    name: string;
+    description?: string;
+  };
+
+  let videoModel = "";
+  let videoModelOptions: VideoModelOption[] = [];
+  let isLoadingVideoModels = false;
+
   export let videoDurationSeconds = 40;
+
+  async function loadVideoModels(): Promise<void> {
+    if (isLoadingVideoModels) return;
+
+    isLoadingVideoModels = true;
+    try {
+      const models = await dashboardService.getVideoModels();
+      videoModelOptions = (models || []).map((item) => ({
+        id: item.model,
+        name: item.display_name || item.model,
+        description: item.integration_type
+      }));
+
+      const defaultModel = (models || []).find((item) => item.is_default)?.model;
+      if (!videoModel && defaultModel) {
+        videoModel = defaultModel;
+      }
+    } catch (error) {
+      showToast((error as Error)?.message || $t("studio.video.loadModelsFailed"), "error");
+    } finally {
+      isLoadingVideoModels = false;
+    }
+  }
+
+  async function fetchVideoModelOptions(query: string): Promise<VideoModelOption[]> {
+    const keyword = String(query || "").trim().toLowerCase();
+    if (!keyword) return videoModelOptions;
+
+    return videoModelOptions.filter((item) =>
+      `${item.name} ${item.description ?? ""}`.toLowerCase().includes(keyword)
+    );
+  }
 
   $: languageOptions = [
     { value: "vi", label: $t("studio.languageVietnamese") },
@@ -63,6 +99,10 @@
       ? `${videoDurationSeconds}s (${estimatedChunks} chunks)`
       : `${Math.floor(videoDurationSeconds / 60)}m ${videoDurationSeconds % 60}s (${estimatedChunks} chunks)`;
 
+  $: if (isOpen && videoModelOptions.length === 0) {
+    loadVideoModels();
+  }
+
   function close() {
     if (isCreating) return;
     dispatch("close");
@@ -70,7 +110,7 @@
 
   function create() {
     if (isCreating) return;
-    dispatch("create");
+    dispatch("create", { videoModel });
   }
 </script>
 
@@ -116,6 +156,22 @@
     />
   </div>
 
+  <div>
+    <div class="block text-sm font-medium text-[var(--text-secondary)] mb-1.5">
+      {$t("studio.video.videoModel")}
+      <span class="text-[var(--rose-500,#F43F5E)] ml-0.5">*</span>
+    </div>
+
+    <Autocomplete
+      options={videoModelOptions}
+      bind:value={videoModel}
+      loading={isLoadingVideoModels}
+      placeholder={$t("studio.video.videoModelPlaceholder")}
+      loadOptions={fetchVideoModelOptions}
+      disabled={isCreating}
+    />
+  </div>
+
   <TextareaField
     id="video_visual_style"
     label={$t("studio.video.visualStyle")}
@@ -151,7 +207,7 @@
     <Button
       rounded="rounded-xl"
       on:click={create}
-      disabled={isCreating || !sessionId || !selectedScript.trim()}
+      disabled={isCreating || !sessionId || !selectedScript.trim() || !videoModel.trim()}
       type="button"
     >
       {isCreating ? $t("common.processing") : $t("common.create")}
