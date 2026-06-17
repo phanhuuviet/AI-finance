@@ -48,7 +48,7 @@
 
       showToast($t('settings.saved'), 'success');
     } catch (err) {
-      showToast(err?.message || $t('settings.saveFailed'), 'error');
+      showToast((err instanceof Error && err.message) || $t('settings.saveFailed'), 'error');
     }
   }
 </script>

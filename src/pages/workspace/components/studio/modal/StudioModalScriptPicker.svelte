@@ -9,7 +9,9 @@
   export let isOpen = false;
   export let title = "";
   export let toolLabel = "";
+  /** @type {{ id: string; content: string; index: number }[]} */
   export let scripts = [];
+  /** @type {string | null} */
   export let selectedScriptId = null;
 
   $: hasSelection = scripts.some((item) => item.id === selectedScriptId);
@@ -22,10 +24,12 @@
     dispatch("confirm");
   }
 
+  /** @param {string} id */
   function pickScript(id) {
     selectedScriptId = id;
   }
 
+  /** @param {string} text */
   function truncateText(text) {
     const plain = String(text || "").replace(/\s+/g, " ").trim();
     if (!plain) return "";

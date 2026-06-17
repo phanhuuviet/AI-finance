@@ -154,21 +154,25 @@ function createDashboardStore() {
       }
     },
 
+    /** @param {File} file */
     async uploadDocument(file) {
       await dashboardService.uploadDocument(file);
       return this.fetchDocuments();
     },
 
+    /** @param {string} url */
     async crawlWebsite(url) {
       await dashboardService.crawlWebsite(url);
       return this.fetchDocuments();
     },
 
+    /** @param {string} id */
     async deleteDocument(id) {
       await dashboardService.deleteDocument(id);
       return this.fetchDocuments();
     },
 
+    /** @param {number} days */
     async fetchTokenUsage(days) {
       const requestId = ++tokenUsageRequestId;
       tokenUsageGate.start();
@@ -219,6 +223,7 @@ function createDashboardStore() {
       }
     },
 
+    /** @param {string} sessionId */
     async fetchStudioOutputs(sessionId) {
       ensureStudioState(sessionId);
       const requestId = (studioRequestIds[sessionId] || 0) + 1;
@@ -289,30 +294,47 @@ function createDashboardStore() {
       }
     },
 
+    /**
+     * @param {string} sessionId
+     * @param {string} type
+     * @param {any} payload
+     */
     async createStudioOutput(sessionId, type, payload) {
       const created = await dashboardService.createStudioOutput(sessionId, type, payload);
       await this.fetchStudioOutputs(sessionId);
       return created;
     },
 
+    /** @param {any} payload */
     async generateVideoScriptPrompts(payload) {
       return dashboardService.generateVideoScriptPrompts(payload);
     },
 
+    /**
+     * @param {string} sessionId
+     * @param {string} outputId
+     * @param {string} title
+     */
     async renameStudioOutput(sessionId, outputId, title) {
       await dashboardService.renameStudioOutput(outputId, title);
       await this.fetchStudioOutputs(sessionId);
     },
 
+    /**
+     * @param {string} sessionId
+     * @param {string} outputId
+     */
     async deleteStudioOutput(sessionId, outputId) {
       await dashboardService.deleteStudioOutput(outputId);
       await this.fetchStudioOutputs(sessionId);
     },
 
+    /** @param {string} outputId */
     shareStudioOutput(outputId) {
       return dashboardService.shareStudioOutput(outputId);
     },
 
+    /** @param {string} outputId */
     downloadStudioOutput(outputId) {
       return dashboardService.downloadStudioOutput(outputId);
     }

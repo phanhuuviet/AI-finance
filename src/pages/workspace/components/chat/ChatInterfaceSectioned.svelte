@@ -101,12 +101,12 @@
       {#if $isConnecting}
         <span class="inline-flex items-center gap-1.5 rounded-full bg-[var(--amber-50)] px-2.5 py-1 text-xs font-medium text-[var(--amber-600)]">
           <span class="h-1.5 w-1.5 rounded-full bg-[var(--amber-500)] [animation:blink_1s_step-end_infinite]"></span>
-          Connecting...
+          {$t('chat.connecting')}
         </span>
       {:else if $activeSessionId}
         <span class="inline-flex items-center gap-1.5 rounded-full bg-[var(--green-50)] px-2.5 py-1 text-xs font-medium text-[var(--green-600)]">
           <span class="h-1.5 w-1.5 rounded-full bg-[var(--green-500)]"></span>
-          Live
+          {$t('chat.live')}
         </span>
       {/if}
 
@@ -138,7 +138,7 @@
       />
     {:else if messages.length === 0}
       <div class="h-full flex items-center justify-center text-[var(--color-text-muted)]">
-        No messages yet. Start a conversation.
+        {$t('chat.noMessages')}
       </div>
     {:else}
       <div transition:fade={{ duration: 180 }}>
@@ -152,7 +152,7 @@
               </div>
               <div class="min-w-0 max-w-[88%] sm:max-w-[78%]">
                 <span class="mb-1 ml-0.5 block text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--purple-700)]">
-                  Assistant
+                  {$t('chat.assistant')}
                 </span>
                 <div class="rounded-2xl rounded-tl-md border border-[var(--border-default)] bg-[var(--bg-card)] p-3.5 text-sm leading-relaxed text-[var(--text-primary)] shadow-[var(--shadow-soft)]">
                   <div class="markdown-body [&>p]:m-0 [&>p+p]:mt-2 [&_ul]:mt-1 [&_ul]:ml-4 [&_ol]:mt-1 [&_ol]:ml-4 [&_code]:rounded [&_code]:bg-[rgba(99,102,241,0.12)] [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-[0.85em]">{@html renderMarkdown(msg.content)}</div>
@@ -196,7 +196,7 @@
               </svg>
             </div>
             <div class="min-w-0 max-w-[88%] sm:max-w-[78%]">
-              <span class="mb-1 ml-0.5 block text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--purple-700)]">Assistant</span>
+              <span class="mb-1 ml-0.5 block text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--purple-700)]">{$t('chat.assistant')}</span>
               <div class="rounded-2xl rounded-tl-md border border-[var(--border-default)] bg-[var(--bg-card)] p-3.5 text-sm leading-relaxed text-[var(--text-primary)] shadow-[var(--shadow-soft)]">
                 <div class="markdown-body inline [&>p]:m-0 [&>p+p]:mt-2 [&_ul]:mt-1 [&_ul]:ml-4 [&_ol]:mt-1 [&_ol]:ml-4 [&_code]:rounded [&_code]:bg-[rgba(99,102,241,0.12)] [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-[0.85em]">{@html renderMarkdown($streamingContent)}</div><span class="inline-block ml-0.5 text-[var(--purple-400)] [animation:blink_1s_step-end_infinite]">|</span>
               </div>
@@ -215,7 +215,7 @@
       bind:value={inputValue}
       maxHeight={160}
       rows={1}
-      placeholder="Type your message... (Enter to send, Shift+Enter for new line)"
+      placeholder={$t('chat.typeMessageHint')}
       disabled={$isGenerating || $isTyping || !sessionId || $isConnecting}
       onkeydown={handleKeydown}
       textareaClass="chat-textarea w-full resize-none overflow-y-auto px-3 sm:px-4 py-2.5 min-h-11 rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)] leading-relaxed placeholder:text-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-border-accent)] focus:[box-shadow:0_0_0_3px_rgba(91,79,207,0.12)]"
@@ -225,21 +225,21 @@
       <button
         class="shrink-0 flex items-center gap-1.5 px-5 py-2.5 rounded-[var(--radius-md)] border-[1.5px] border-[var(--rose-400)] bg-[var(--rose-50)] text-[var(--rose-600)] font-semibold text-sm whitespace-nowrap hover:bg-[var(--rose-100)]"
         on:click={handleStop}
-        aria-label="Stop generation"
+        aria-label={$t('chat.stopGeneration')}
         type="button"
       >
         <span class="text-[10px]">■</span>
-        Stop
+        {$t('chat.stop')}
       </button>
     {:else}
       <button
         class="press shrink-0 px-5 py-2.5 rounded-[var(--radius-md)] border-0 [background:var(--gradient-accent)] text-white font-semibold text-sm whitespace-nowrap shadow-[0_2px_10px_rgba(99,102,241,0.3)] hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
         disabled={!canSend}
         on:click={handleSend}
-        aria-label="Send message"
+        aria-label={$t('chat.sendMessage')}
         type="button"
       >
-        Send
+        {$t('chat.send')}
       </button>
     {/if}
   </div>

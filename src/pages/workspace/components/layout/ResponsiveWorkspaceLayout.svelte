@@ -3,6 +3,7 @@
   import Button from "$lib/components/common/Button.svelte";
   import { t } from "../../../../lib/i18n";
 
+  /** @type {string | null} */
   export let sessionId = null;
 
   const dispatch = createEventDispatcher();
@@ -10,6 +11,7 @@
   let viewportWidth = 0;
   let activeMobileView = "list";
   let tabletListOpen = true;
+  /** @type {string | null} */
   let previousSessionId = null;
   let previousLayoutMode = "desktop";
 

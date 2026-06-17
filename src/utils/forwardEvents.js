@@ -47,7 +47,7 @@ export function forwardEventsBuilder(events = defaultEvents) {
   const bubble = createBubbler();
   const eventsToBind = Array.from(new Set(events));
 
-  return (node) => {
+  return (/** @type {HTMLElement} */ node) => {
     const removers = eventsToBind.map((eventName) => {
       const handler = bubble(eventName);
       node.addEventListener(eventName, handler);

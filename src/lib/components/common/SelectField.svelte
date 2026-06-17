@@ -3,7 +3,9 @@
 
   export let id = "";
   export let label = "";
+  /** @type {string | number | undefined} */
   export let value = undefined;
+  /** @type {{ value: string | number; label: string; disabled?: boolean }[]} */
   export let options = [];
   export let placeholder = "";
   export let required = false;
@@ -20,10 +22,12 @@
 
   const dispatch = createEventDispatcher();
 
+  /** @param {Event} event */
   function handleInput(event) {
     dispatch("input", event);
   }
 
+  /** @param {Event} event */
   function handleChange(event) {
     dispatch("change", event);
   }

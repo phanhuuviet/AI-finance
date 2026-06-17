@@ -4,6 +4,7 @@
   import { generationService } from '$lib/services/generation.service';
   import { CHUNK_SECTION, RENDER_JOB_STATUS } from '$lib/constants/index.js';
   import { slide } from 'svelte/transition';
+  import { t } from '$lib/i18n';
 
   export let chunk: GenerationChunk;
   export let selectionOrder: number | null = null;
@@ -15,11 +16,11 @@
   let regenerateError = '';
   $: canRegenerate = chunk.status === RENDER_JOB_STATUS.COMPLETED;
 
-  const sectionLabel: Record<string, string> = {
-    [CHUNK_SECTION.HOOK]: 'Hook',
-    [CHUNK_SECTION.BODY]: 'Body',
-    [CHUNK_SECTION.PROOF]: 'Proof',
-    [CHUNK_SECTION.CTA]: 'Call to Action'
+  const sectionLabelKey: Record<string, string> = {
+    [CHUNK_SECTION.HOOK]: 'generations.sectionHook',
+    [CHUNK_SECTION.BODY]: 'generations.sectionBody',
+    [CHUNK_SECTION.PROOF]: 'generations.sectionProof',
+    [CHUNK_SECTION.CTA]: 'generations.sectionCta'
   };
 
   function openFeedback() {
@@ -92,10 +93,10 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
           </svg>
           <span class="text-xs text-white/60">
-            {#if chunk.status === RENDER_JOB_STATUS.PENDING}Pending render{/if}
-            {#if chunk.status === RENDER_JOB_STATUS.PROCESSING}Rendering{/if}
-            {#if chunk.status === RENDER_JOB_STATUS.COMPLETED}Rendered{/if}
-            {#if chunk.status === RENDER_JOB_STATUS.FAILED}Render failed{/if}
+            {#if chunk.status === RENDER_JOB_STATUS.PENDING}{$t('generations.renderPending')}{/if}
+            {#if chunk.status === RENDER_JOB_STATUS.PROCESSING}{$t('generations.renderProcessing')}{/if}
+            {#if chunk.status === RENDER_JOB_STATUS.COMPLETED}{$t('generations.renderCompleted')}{/if}
+            {#if chunk.status === RENDER_JOB_STATUS.FAILED}{$t('generations.renderFailed')}{/if}
           </span>
         </div>
       {/if}
@@ -109,7 +110,7 @@
           {chunk.chunk_id}
         </span>
         <span class="text-xs text-gray-400 capitalize">
-          {sectionLabel[chunk.section] ?? chunk.section}
+          {sectionLabelKey[chunk.section] ? $t(sectionLabelKey[chunk.section]) : chunk.section}
         </span>
       </div>
       <StatusBadge status={chunk.status} />
@@ -120,12 +121,12 @@
         <circle cx="12" cy="12" r="10" stroke-width="1.5"/>
         <path stroke-linecap="round" stroke-width="1.5" d="M12 6v6l4 2"/>
       </svg>
-      <span>Target: <strong class="text-gray-700">{chunk.target_seconds}s</strong></span>
-      <span class="ml-2 text-gray-400">~{chunk.estimated_syllables} syllables</span>
+      <span>{$t('generations.targetLabel')}: <strong class="text-gray-700">{chunk.target_seconds}s</strong></span>
+      <span class="ml-2 text-gray-400">{$t('generations.syllables', { count: chunk.estimated_syllables })}</span>
     </div>
 
     <div>
-      <p class="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-1">Narration</p>
+      <p class="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-1">{$t('generations.narration')}</p>
       <p class="text-sm text-gray-700 leading-relaxed line-clamp-3">{chunk.narration}</p>
     </div>
 
@@ -135,9 +136,9 @@
 
     <div class="flex items-center gap-3 text-[10px] text-gray-400 mt-auto pt-2 border-t border-gray-50">
       <span>v{chunk.current_version}</span>
-      <span>{chunk.attempt_count} attempt(s)</span>
+      <span>{$t('generations.attempts', { count: chunk.attempt_count })}</span>
       {#if chunk.regenerate_count > 0}
-        <span>{chunk.regenerate_count} regen(s)</span>
+        <span>{$t('generations.regens', { count: chunk.regenerate_count })}</span>
       {/if}
     </div>
 
@@ -162,16 +163,16 @@
               d="M4 4v5h.582M20 20v-5h-.581m0 0A8.003 8.003 0 004.582 9m14.837 6a8.003 8.003 0 01-14.837 0"
             />
           </svg>
-          Regenerate
+          {$t('generations.regenerate')}
         </button>
       </div>
     {:else if canRegenerate}
       <div in:slide={{ duration: 180 }} out:slide={{ duration: 140 }} class="border-t border-gray-100 mt-3 pt-3">
-        <p class="text-xs font-medium text-gray-500 mb-1">Feedback (optional)</p>
+        <p class="text-xs font-medium text-gray-500 mb-1">{$t('generations.feedbackOptional')}</p>
         <textarea
           rows="3"
           bind:value={feedbackText}
-          placeholder="Describe what to improve or change in this chunk..."
+          placeholder={$t('generations.feedbackPlaceholder')}
           class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 resize-none placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-200 focus:border-purple-300"
         ></textarea>
 
@@ -181,7 +182,7 @@
             class="text-xs text-gray-500 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50"
             on:click={cancelFeedback}
           >
-            Cancel
+            {$t('common.cancel')}
           </button>
           <button
             type="button"
@@ -189,7 +190,7 @@
             disabled={isRegenerating}
             on:click={handleRegenerate}
           >
-            {#if isRegenerating}Regenerating...{:else}Regenerate{/if}
+            {#if isRegenerating}{$t('generations.regenerating')}{:else}{$t('generations.regenerate')}{/if}
           </button>
         </div>
 

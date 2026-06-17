@@ -15,6 +15,7 @@
   import ModalDialog from '$lib/components/common/ModalDialog.svelte';
   import { isCreatingSub } from '$lib/stores/sub.store';
   import type { Composition } from '$lib/models/composition.model';
+  import { t } from '$lib/i18n';
 
   const PROCESSING_RETRY_TIMEOUT_MS = 10 * 60 * 1000;
 
@@ -124,7 +125,7 @@
     retryingCompositionId = selectedCompositionIdForRetry;
     try {
       await compositionService.retryComposition(selectedCompositionIdForRetry);
-      showToast('Composition retry started.', 'success');
+      showToast($t('compositions.retryStarted'), 'success');
       closeRetryCompositionConfirm();
       await compositionService.loadCompositions($compositionCurrentPage);
     } catch (err) {
@@ -138,7 +139,7 @@
     if (!selectedCompositionIdForSub) return;
     try {
       await subService.createSubJob(selectedCompositionIdForSub);
-      showToast('Sub job created successfully.', 'success');
+      showToast($t('compositions.subCreated'), 'success');
       closeCreateSubConfirm();
     } catch (err) {
       showToast((err as Error)?.message || 'VIDEO_SUB_CREATE_FAILED', 'error');
@@ -167,7 +168,7 @@
 
 <div class="h-full flex flex-col bg-[var(--color-bg-surface)] rounded-xl border border-[var(--color-border-default)] overflow-hidden">
   <div class="px-4 sm:px-5 py-4 border-b border-[var(--color-border-default)] bg-[var(--color-bg-surface)]">
-    <h2 class="text-base font-semibold text-[var(--color-text-primary)]">Compositions</h2>
+    <h2 class="text-base font-semibold text-[var(--color-text-primary)]">{$t('compositions.title')}</h2>
   </div>
 
   <div class="p-4 sm:p-5 overflow-y-auto flex-1 min-h-0">
@@ -178,8 +179,8 @@
         {/each}
       {:else if $compositions.length === 0}
         <div class="text-center py-12 text-gray-400">
-          <p class="text-sm">No compositions yet.</p>
-          <p class="text-xs mt-1">Select chunks on a generation and click 'Tạo Video'.</p>
+          <p class="text-sm">{$t('compositions.empty')}</p>
+          <p class="text-xs mt-1">{$t('compositions.emptyHint')}</p>
         </div>
       {:else}
         {#each $compositions as composition, i (composition.id)}
@@ -212,14 +213,14 @@
                       {composition.status === RENDER_JOB_STATUS.FAILED ? 'bg-rose-50 text-rose-700' : ''}
                     ">
                       {#if composition.status === RENDER_JOB_STATUS.PENDING}
-                        <p class="text-sm">Waiting to process</p>
+                        <p class="text-sm">{$t('status.waiting')}</p>
                       {:else if composition.status === RENDER_JOB_STATUS.PROCESSING}
-                        <p class="text-sm">Processing</p>
+                        <p class="text-sm">{$t('status.processing')}</p>
                       {:else if composition.status === RENDER_JOB_STATUS.COMPLETED}
-                        <p class="text-sm">Ready</p>
-                        <p class="text-xs">No preview URL available yet</p>
+                        <p class="text-sm">{$t('status.ready')}</p>
+                        <p class="text-xs">{$t('status.noPreviewUrl')}</p>
                       {:else}
-                        <p class="text-sm">Failed</p>
+                        <p class="text-sm">{$t('status.failed')}</p>
                         {#if composition.error_message}
                           <p class="text-xs line-clamp-3">{composition.error_message}</p>
                         {/if}
@@ -235,7 +236,7 @@
                     <span class="text-xs font-mono font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded truncate">
                       {shortId(composition.id)}
                     </span>
-                    <span class="text-xs text-gray-400 truncate">Generation #{shortId(composition.generation_id)}</span>
+                    <span class="text-xs text-gray-400 truncate">{$t('common.generationShort', { id: shortId(composition.generation_id) })}</span>
                   </div>
                   <div class="relative flex items-center gap-2 flex-shrink-0">
                     <StatusBadge status={composition.status} />
@@ -243,7 +244,7 @@
                       <button
                         type="button"
                         class="w-8 h-8 rounded-lg border border-gray-200 bg-white text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-center"
-                        aria-label="Composition actions"
+                        aria-label={$t('compositions.actions')}
                         aria-expanded={openMenuCompositionId === composition.id}
                         on:click|stopPropagation={(event) => toggleCompositionMenu(event, composition.id)}
                       >
@@ -264,7 +265,7 @@
                             on:click|stopPropagation={(event) => openRetryCompositionConfirm(event, composition.id)}
                             disabled={retryingCompositionId === composition.id}
                           >
-                            {#if retryingCompositionId === composition.id}Retrying...{:else}Retry{/if}
+                            {#if retryingCompositionId === composition.id}{$t('common.retrying')}{:else}{$t('common.retry')}{/if}
                           </button>
                         {/if}
                         {#if canCreateSub(composition)}
@@ -274,7 +275,7 @@
                             on:click|stopPropagation={(event) => openCreateSubConfirm(event, composition.id)}
                             disabled={$isCreatingSub}
                           >
-                            Tạo sub
+                            {$t('compositions.createSub')}
                           </button>
                         {/if}
                       </div>
@@ -283,7 +284,7 @@
                 </div>
 
                 <p class="text-sm font-semibold text-gray-800 line-clamp-1">
-                  Composition #{shortId(composition.id)}
+                  {$t('common.compositionShort', { id: shortId(composition.id) })}
                 </p>
 
                 <div class="flex items-center gap-1 text-xs text-gray-500">
@@ -291,13 +292,13 @@
                     <circle cx="12" cy="12" r="10" stroke-width="1.5"></circle>
                     <path stroke-linecap="round" stroke-width="1.5" d="M12 6v6l4 2"></path>
                   </svg>
-                  <span>Created: <strong class="text-gray-700">{formatDateTime(composition.created_at)}</strong></span>
+                  <span>{$t('common.created')}: <strong class="text-gray-700">{formatDateTime(composition.created_at)}</strong></span>
                 </div>
 
                 <div class="flex items-center gap-3 text-[11px] text-gray-400 mt-auto pt-2 border-t border-gray-50">
-                  <span>{composition.chunk_count} chunk(s)</span>
-                  <span>Session #{shortId(composition.session_id)}</span>
-                  <span>ID #{shortId(composition.id)}</span>
+                  <span>{$t('compositions.chunkCountShort', { count: composition.chunk_count })}</span>
+                  <span>{$t('common.sessionShort', { id: shortId(composition.session_id) })}</span>
+                  <span>{$t('common.idShort', { id: shortId(composition.id) })}</span>
                 </div>
               </div>
             </div>
@@ -313,14 +314,14 @@
           disabled={$compositionCurrentPage === 1}
           on:click={() => compositionService.goToPage($compositionCurrentPage - 1)}
           type="button"
-        >← Prev</button>
+        >← {$t('common.prev')}</button>
         <span>{$compositionCurrentPage} / {$compositionPagination.totalPages}</span>
         <button
           class="px-2 py-1 rounded hover:bg-purple-50 disabled:opacity-40 disabled:cursor-not-allowed"
           disabled={$compositionCurrentPage === $compositionPagination.totalPages}
           on:click={() => compositionService.goToPage($compositionCurrentPage + 1)}
           type="button"
-        >Next →</button>
+        >{$t('common.next')} →</button>
       </div>
     {/if}
   </div>
@@ -328,12 +329,12 @@
 
 <ModalDialog
   isOpen={showCreateSubConfirm}
-  title="Tạo phụ đề cho composition"
-  description="Bạn có chắc muốn tạo video-subber job cho composition này không?"
+  title={$t('compositions.createSubTitle')}
+  description={$t('compositions.createSubConfirm')}
   on:close={closeCreateSubConfirm}
 >
   <p class="text-sm text-[var(--color-text-secondary)]">
-    Composition #{shortId(selectedCompositionIdForSub || undefined)} sẽ được gửi sang video-subber với style mặc định.
+    {$t('compositions.createSubBody', { id: shortId(selectedCompositionIdForSub || undefined) })}
   </p>
 
   <svelte:fragment slot="footer">
@@ -343,7 +344,7 @@
       on:click={closeCreateSubConfirm}
       disabled={$isCreatingSub}
     >
-      Hủy
+      {$t('common.cancel')}
     </button>
     <button
       type="button"
@@ -351,19 +352,19 @@
       on:click={confirmCreateSub}
       disabled={$isCreatingSub}
     >
-      {#if $isCreatingSub}Đang tạo...{:else}Xác nhận tạo sub{/if}
+      {#if $isCreatingSub}{$t('common.creating')}{:else}{$t('compositions.confirmCreateSub')}{/if}
     </button>
   </svelte:fragment>
 </ModalDialog>
 
 <ModalDialog
   isOpen={showRetryCompositionConfirm}
-  title="Retry composition"
-  description="Bạn có chắc muốn retry composition này không?"
+  title={$t('compositions.retryTitle')}
+  description={$t('compositions.retryConfirm')}
   on:close={closeRetryCompositionConfirm}
 >
   <p class="text-sm text-[var(--color-text-secondary)]">
-    Composition #{shortId(selectedCompositionIdForRetry || undefined)} sẽ được gửi retry lại.
+    {$t('compositions.retryBody', { id: shortId(selectedCompositionIdForRetry || undefined) })}
   </p>
 
   <svelte:fragment slot="footer">
@@ -373,7 +374,7 @@
       on:click={closeRetryCompositionConfirm}
       disabled={!!retryingCompositionId}
     >
-      Hủy
+      {$t('common.cancel')}
     </button>
     <button
       type="button"
@@ -381,7 +382,7 @@
       on:click={confirmRetryComposition}
       disabled={!!retryingCompositionId}
     >
-      {#if !!retryingCompositionId}Retrying...{:else}Xác nhận retry{/if}
+      {#if !!retryingCompositionId}{$t('common.retrying')}{:else}{$t('common.confirmRetry')}{/if}
     </button>
   </svelte:fragment>
 </ModalDialog>

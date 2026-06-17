@@ -29,6 +29,7 @@ From healthcare diagnostics to financial forecasting, AI systems are
 enabling faster, more accurate decision-making. This document explores
 key trends, challenges, and opportunities in enterprise AI adoption
 through 2025 and beyond.`;
+  /** @type {import('$lib/models/document.model').Document | null} */
   let documentToDelete = null;
   let showDeleteConfirm = false;
   let isDeleting = false;
@@ -55,7 +56,7 @@ through 2025 and beyond.`;
       showToast($t("documents.uploadedSuccess"), "success");
       file = null;
     } catch (err) {
-      showToast(err?.message || "Failed to upload document.", "error");
+      showToast((err instanceof Error && err.message) || "Failed to upload document.", "error");
     }
   }
 
@@ -67,7 +68,7 @@ through 2025 and beyond.`;
       showToast($t("documents.crawlStarted"), "success");
       url = "";
     } catch (err) {
-      showToast(err?.message || "Failed to crawl website.", "error");
+      showToast((err instanceof Error && err.message) || "Failed to crawl website.", "error");
     }
   }
 
@@ -75,19 +76,21 @@ through 2025 and beyond.`;
     if (!title.trim() || !pastedText.trim()) return;
     try {
       await documentService.createDocument(title.trim(), pastedText.trim());
-      showToast("Document added successfully.", "success");
+      showToast($t("documents.addedSuccess"), "success");
       title = "";
       pastedText = "";
     } catch (err) {
-      showToast(err?.message || documentState.error || "DOCUMENT_CREATE_FAILED", "error");
+      showToast((err instanceof Error && err.message) || documentState.error || "DOCUMENT_CREATE_FAILED", "error");
     }
   }
 
+  /** @param {string} content */
   function truncateContent(content) {
     if (!content) return "";
     return content.length > 80 ? `${content.slice(0, 80)}...` : content;
   }
 
+  /** @param {string | number | Date} value */
   function formatDateTime(value) {
     const date = new Date(value);
     const dd = String(date.getDate()).padStart(2, "0");
@@ -98,24 +101,28 @@ through 2025 and beyond.`;
     return `${dd}/${mm}/${yyyy} ${hh}:${min}`;
   }
 
+  /** @param {string} status */
   function statusLabel(status) {
     if (status === DOC_STATUS.PROCESSED) return "Ready";
     if (status === DOC_STATUS.PROCESSING) return "Processing";
     return "Error";
   }
 
+  /** @param {string} status */
   function statusDotClass(status) {
     if (status === DOC_STATUS.PROCESSED) return "bg-[var(--green-500,#10B981)]";
     if (status === DOC_STATUS.PROCESSING) return "bg-[var(--amber-500,#F59E0B)] animate-pulse";
     return "bg-[var(--rose-500,#F43F5E)]";
   }
 
+  /** @param {string} sourceType */
   function sourceTypeClass(sourceType) {
     if (sourceType === DOC_SOURCE_TYPE.RAW) return "bg-[var(--teal-50,#F0FDFA)] text-[var(--teal-600,#0D9488)]";
     if (sourceType === DOC_SOURCE_TYPE.URL) return "bg-[var(--blue-50,#EFF6FF)] text-[var(--blue-600,#2563EB)]";
     return "bg-[var(--amber-50,#FFFBEB)] text-[var(--amber-600,#D97706)]";
   }
 
+  /** @param {import('$lib/models/document.model').Document} doc */
   function openDeleteConfirm(doc) {
     documentToDelete = doc;
     showDeleteConfirm = true;
@@ -131,10 +138,10 @@ through 2025 and beyond.`;
     isDeleting = true;
     try {
       await documentService.deleteDocument(documentToDelete.id);
-      showToast("Document deleted successfully.", "success");
+      showToast($t("documents.deletedSuccess"), "success");
       closeDeleteConfirm();
     } catch (err) {
-      showToast(err?.message || documentState.error || "DOCUMENT_DELETE_FAILED", "error");
+      showToast((err instanceof Error && err.message) || documentState.error || "DOCUMENT_DELETE_FAILED", "error");
     } finally {
       isDeleting = false;
     }
@@ -180,7 +187,7 @@ through 2025 and beyond.`;
         }`}
         on:click={() => (activeInputMethod = "paste")}
       >
-        Paste Text
+        {$t("documents.pasteText")}
       </Button>
     </div>
 
@@ -237,15 +244,15 @@ through 2025 and beyond.`;
       </div>
     {:else}
       <div class="border border-[var(--color-border-default)] rounded-xl p-3 sm:p-4 bg-[var(--color-bg-surface)]">
-        <h3 class="font-medium mb-3 text-[var(--color-text-primary)]">Paste Text</h3>
+        <h3 class="font-medium mb-3 text-[var(--color-text-primary)]">{$t("documents.pasteText")}</h3>
         <p class="text-xs text-[var(--color-text-secondary)] mb-4">
-          Paste or type raw content directly into the workspace.
+          {$t("documents.pasteHint")}
         </p>
 
         <TextField
           bind:value={title}
-          label="Title"
-          placeholder="Enter document title..."
+          label={$t("documents.title")}
+          placeholder={$t("documents.titlePlaceholder")}
           required
           disabled={isPasteSubmitting}
           containerClass="mb-4"
@@ -258,7 +265,7 @@ through 2025 and beyond.`;
           bind:value={pastedText}
           disabled={isPasteSubmitting}
           rows={8}
-          placeholder="Paste or type your content here..."
+          placeholder={$t("documents.contentPlaceholder")}
           textareaClass="mb-4 min-h-[160px] resize-y"
         />
 
@@ -268,7 +275,7 @@ through 2025 and beyond.`;
           disabled={!title.trim() || !pastedText.trim() || $isCreatingDoc}
           rounded="rounded-md"
         >
-          {$isCreatingDoc ? "Saving..." : "Add Text"}
+          {$isCreatingDoc ? $t("common.saving") : $t("documents.addText")}
         </Button>
 
         {#if documentState.error}
@@ -312,12 +319,12 @@ through 2025 and beyond.`;
         <table class="w-full min-w-[680px] text-sm text-left text-[var(--color-text-secondary)]">
           <thead class="text-xs uppercase bg-[var(--color-bg-app)] text-[var(--color-text-muted)] border-b border-[var(--color-border-default)] tracking-[0.06em]">
             <tr>
-              <th scope="col" class="px-3 sm:px-4 py-3">Title</th>
-              <th scope="col" class="px-3 sm:px-4 py-3">Content</th>
-              <th scope="col" class="px-3 sm:px-4 py-3">Source Type</th>
-              <th scope="col" class="px-3 sm:px-4 py-3">Status</th>
-              <th scope="col" class="px-3 sm:px-4 py-3">Created At</th>
-              <th scope="col" class="px-3 sm:px-4 py-3 text-right">Actions</th>
+              <th scope="col" class="px-3 sm:px-4 py-3">{$t("documents.title")}</th>
+              <th scope="col" class="px-3 sm:px-4 py-3">{$t("documents.colContent")}</th>
+              <th scope="col" class="px-3 sm:px-4 py-3">{$t("documents.colSourceType")}</th>
+              <th scope="col" class="px-3 sm:px-4 py-3">{$t("common.status")}</th>
+              <th scope="col" class="px-3 sm:px-4 py-3">{$t("documents.colCreatedAt")}</th>
+              <th scope="col" class="px-3 sm:px-4 py-3 text-right">{$t("common.actions")}</th>
             </tr>
           </thead>
           <tbody>
@@ -366,10 +373,10 @@ through 2025 and beyond.`;
                   <button
                     class="px-3 py-1 rounded-[var(--radius-sm,6px)] border border-[var(--border-rose,#FECDD3)] bg-[var(--rose-50,#FFF1F2)] text-[var(--rose-600,#E11D48)] text-[13px] font-medium cursor-pointer transition-all duration-150 ease-in-out hover:bg-[var(--rose-100,#FFE4E6)] hover:border-[var(--rose-400,#FB7185)]"
                     on:click={() => openDeleteConfirm(document)}
-                    aria-label={`Delete ${document.title}`}
+                    aria-label={$t("documents.deleteAria", { title: document.title })}
                     type="button"
                   >
-                    Delete
+                    {$t("common.delete")}
                   </button>
                 </td>
               </tr>
@@ -380,7 +387,7 @@ through 2025 and beyond.`;
         {#if $documentPagination && $documentPagination.totalPages > 1}
           <div class="flex items-center justify-between py-3 border-t border-[var(--border-subtle)]">
             <span class="text-[13px] text-[var(--text-secondary)]">
-              Showing {($currentPage - 1) * 20 + 1}-{Math.min($currentPage * 20, $documentPagination.total)} of {$documentPagination.total}
+              {$t("documents.showingRange", { from: ($currentPage - 1) * 20 + 1, to: Math.min($currentPage * 20, $documentPagination.total), total: $documentPagination.total })}
             </span>
             <div class="flex gap-1">
               <button
@@ -388,7 +395,7 @@ through 2025 and beyond.`;
                 disabled={$currentPage === 1}
                 on:click={() => documentService.goToPage($currentPage - 1)}
               >
-                &larr; Prev
+                &larr; {$t("common.prev")}
               </button>
 
               {#each Array($documentPagination.totalPages) as _, i}
@@ -405,7 +412,7 @@ through 2025 and beyond.`;
                 disabled={$currentPage === $documentPagination.totalPages}
                 on:click={() => documentService.goToPage($currentPage + 1)}
               >
-                Next &rarr;
+                {$t("common.next")} &rarr;
               </button>
             </div>
           </div>
@@ -417,18 +424,17 @@ through 2025 and beyond.`;
       <div class="absolute inset-0 bg-[rgba(30,27,75,0.45)] [border-radius:inherit] z-10" on:click={closeDeleteConfirm} role="presentation"></div>
 
       <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[11] bg-[var(--bg-card,#FFFFFF)] border border-[var(--border-default,#E5E7EB)] rounded-[var(--radius-lg,12px)] p-6 w-[400px] max-w-[90%]" role="dialog" aria-modal="true">
-        <h3 class="text-base font-semibold text-[var(--text-primary)] mb-2">Delete Document</h3>
+        <h3 class="text-base font-semibold text-[var(--text-primary)] mb-2">{$t("documents.deleteTitle")}</h3>
         <p class="text-sm text-[var(--text-secondary)] mb-5 leading-relaxed">
-          Are you sure you want to delete
-          <strong>"{documentToDelete?.title}"</strong>?
-          This action cannot be undone.
+          {$t("documents.deleteConfirmPrefix")}
+          <strong>"{documentToDelete?.title}"</strong>{$t("documents.deleteConfirmSuffix")}
         </p>
         <div class="flex gap-2 justify-end">
           <button class="px-4 py-2 rounded-[var(--radius-md,8px)] border border-[var(--border-default)] bg-[var(--bg-card)] text-[var(--text-secondary)] text-sm cursor-pointer hover:bg-[var(--bg-card-hover)]" on:click={closeDeleteConfirm} disabled={isDeleting} type="button">
-            Cancel
+            {$t("common.cancel")}
           </button>
           <button class="px-4 py-2 rounded-[var(--radius-md,8px)] border-0 bg-[var(--rose-600,#E11D48)] text-white text-sm font-semibold cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed enabled:hover:bg-[var(--rose-800,#9F1239)]" on:click={confirmDelete} disabled={isDeleting} type="button">
-            {isDeleting ? 'Deleting...' : 'Delete'}
+            {isDeleting ? $t("documents.deleting") : $t("common.delete")}
           </button>
         </div>
       </div>

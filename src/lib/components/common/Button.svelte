@@ -43,8 +43,8 @@
       : variant === "danger"
         ? "focus-visible:ring-[var(--color-danger)]"
         : "focus-visible:ring-[var(--color-accent)]",
-    unstyled ? "" : variantClasses[variant] ?? variantClasses.primary,
-    unstyled ? "" : sizeClasses[size] ?? sizeClasses.md,
+    unstyled ? "" : variantClasses[/** @type {keyof typeof variantClasses} */ (variant)] ?? variantClasses.primary,
+    unstyled ? "" : sizeClasses[/** @type {keyof typeof sizeClasses} */ (size)] ?? sizeClasses.md,
     block ? "w-full" : "",
     className
   ]

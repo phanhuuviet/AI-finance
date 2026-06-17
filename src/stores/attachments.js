@@ -42,9 +42,10 @@ export const attachmentsStore = {
    * @returns {string[]}
    */
   getSelectedIds(sessionId) {
+    /** @type {string[]} */
     let ids = [];
     selectedBySession.update((m) => {
-      ids = toArray(m[sessionId]);
+      ids = toArray(sessionId ? m[sessionId] : undefined);
       return m;
     });
     return ids;

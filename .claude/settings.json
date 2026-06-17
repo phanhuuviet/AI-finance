@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(sed -E 's/^[0-9]+ ERROR /ERR /; s/\\\\\\\\n.*//')",
+      "Read(//tmp/**)"
+    ]
+  }
+}

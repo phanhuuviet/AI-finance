@@ -45,7 +45,7 @@
         });
         resetForm();
         isLogin = true;
-        showToast('Register successful. Please sign in.', 'success');
+        showToast($t('auth.registerSuccess'), 'success');
       }
     } catch {
       // Error state comes from authError store.
@@ -82,20 +82,20 @@
   </div>
 
   <div class="login-layout">
-    <section class="brand-pane" aria-label="Brand">
+    <section class="brand-pane" aria-label={$t('auth.brandAria')}>
       <div class="brand-content">
-        <p class="brand-kicker">AI Finance Studio</p>
-        <h1 class="brand-title">Analyze smarter. Trade with confidence.</h1>
-        <p class="brand-subtitle">Một workspace duy nhất để theo dõi thị trường, chat với AI và tối ưu chiến lược tài chính của bạn.</p>
+        <p class="brand-kicker">{$t('auth.brandKicker')}</p>
+        <h1 class="brand-title">{$t('auth.brandTitle')}</h1>
+        <p class="brand-subtitle">{$t('auth.brandSubtitle')}</p>
 
         <div class="brand-pills">
-          <span>Real-time insights</span>
-          <span>AI assistant</span>
-          <span>Portfolio automation</span>
+          <span>{$t('auth.brandPill1')}</span>
+          <span>{$t('auth.brandPill2')}</span>
+          <span>{$t('auth.brandPill3')}</span>
         </div>
 
         <div class="brand-preview">
-          <img src={heroImage} alt="AI Finance preview" />
+          <img src={heroImage} alt={$t('auth.brandImageAlt')} />
         </div>
       </div>
     </section>
@@ -103,9 +103,9 @@
     <section class="form-pane">
       <div class="login-card">
         <div class="card-glow" aria-hidden="true"></div>
-        <p class="card-overline">Welcome back</p>
+        <p class="card-overline">{$t('auth.welcomeBack')}</p>
         <h2>{isLogin ? $t('auth.loginTitle') : $t('auth.registerTitle')}</h2>
-        <p class="card-caption">{isLogin ? 'Đăng nhập để tiếp tục với không gian làm việc của bạn.' : 'Tạo tài khoản mới để bắt đầu sử dụng AI Finance.'}</p>
+        <p class="card-caption">{isLogin ? $t('auth.loginCaption') : $t('auth.registerCaption')}</p>
 
         {#if $authError}
           <div class="auth-error">

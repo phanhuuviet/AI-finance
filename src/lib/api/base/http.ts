@@ -62,7 +62,7 @@ export interface HttpResult<T> {
   pagination?: PaginationMeta;
 }
 
-function rejectRefreshQueue(error: ApiError): void {
+function rejectRefreshQueue(error: ApiError): never {
   const pending = [...refreshQueue];
   refreshQueue = [];
   for (const resolve of pending) {

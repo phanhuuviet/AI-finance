@@ -15,6 +15,7 @@
   import StatusBadge from '$lib/components/common/StatusBadge.svelte';
   import ChunkCard from './ChunkCard.svelte';
   import { formatDuration, formatRelativeDate } from '$lib/utils/format';
+  import { t } from '$lib/i18n';
 
   $: sessionId = $page.params.sessionId;
   $: generationId = $page.params.generationId;
@@ -77,7 +78,7 @@
     on:click={() => goto(`/workspace/${sessionId}`)}
     type="button"
   >
-    ← Back to generations
+    ← {$t('generations.backToList')}
   </button>
 </div>
 
@@ -93,7 +94,7 @@
     <div class="flex items-start justify-between gap-4">
       <div>
         <h1 class="text-lg font-semibold text-gray-800">
-          {$activeGeneration.resolved_prompt_values?.title ?? 'Untitled Generation'}
+          {$activeGeneration.resolved_prompt_values?.title ?? $t('generations.untitled')}
         </h1>
         <p class="text-sm text-gray-500 mt-0.5">{$activeGeneration.video_concept}</p>
       </div>
@@ -102,7 +103,7 @@
 
     <div class="flex flex-wrap gap-2 mt-3">
       <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md">
-        {$activeGeneration.total_chunks} chunks
+        {$t('common.chunksCount', { count: $activeGeneration.total_chunks })}
       </span>
       <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md">
         ~{formatDuration($activeGeneration.estimated_total_duration_seconds)}
@@ -129,9 +130,9 @@
       />
       <span class="text-sm text-gray-600">
         {#if selectedChunks.length > 0}
-          {selectedChunks.length} / {$generationChunks.length} selected (in order)
+          {$t('generations.selectedInOrder', { count: selectedChunks.length, total: $generationChunks.length })}
         {:else}
-          Select all
+          {$t('generations.selectAll')}
         {/if}
       </span>
     </label>
@@ -146,7 +147,7 @@
         <span
           class="animate-spin inline-block w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full"
         ></span>
-        Đang tạo...
+        {$t('common.creating')}
       {:else}
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -162,7 +163,7 @@
             d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14 M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"
           />
         </svg>
-        Tạo Video
+        {$t('generations.createVideo')}
       {/if}
     </button>
   </div>
@@ -198,6 +199,6 @@
     >
       <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
     </svg>
-    <span class="text-sm font-medium">Composition creation started successfully!</span>
+    <span class="text-sm font-medium">{$t('generations.compositionStarted')}</span>
   </div>
 {/if}

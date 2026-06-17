@@ -16,6 +16,7 @@
   import { subService } from '$lib/services/sub.service';
   import { isCreatingSub } from '$lib/stores/sub.store';
   import { RENDER_JOB_STATUS } from '$lib/constants/index.js';
+  import { t } from '$lib/i18n';
 
   function shortId(value: string | undefined): string {
     if (!value) return '';
@@ -50,7 +51,8 @@
     navigate(`/workspace/${sessionId}`);
   }
 
-  function openChunkPreview(url: string, chunkId: string): void {
+  function openChunkPreview(url: string | null, chunkId: string): void {
+    if (!url) return;
     previewUrl = url;
     previewChunkLabel = chunkId;
   }
@@ -77,7 +79,7 @@
     if (!$activeComposition) return;
     try {
       await subService.createSubJob($activeComposition.id);
-      showToast('Sub job created successfully.', 'success');
+      showToast($t('compositions.subCreated'), 'success');
       closeCreateSubConfirm();
     } catch (err) {
       showToast((err as Error)?.message || 'VIDEO_SUB_CREATE_FAILED', 'error');
@@ -98,7 +100,7 @@
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4 transition-transform duration-200 group-hover:-translate-x-0.5">
       <path fill-rule="evenodd" d="M15.53 4.47a.75.75 0 010 1.06L9.06 12l6.47 6.47a.75.75 0 11-1.06 1.06l-7-7a.75.75 0 010-1.06l7-7a.75.75 0 011.06 0z" clip-rule="evenodd" />
     </svg>
-    Back to compositions
+    {$t('compositions.backToList')}
   </button>
 </div>
 
@@ -129,9 +131,9 @@
           </div>
           <div class="min-w-0">
             <h1 class="truncate text-lg sm:text-xl font-bold text-[var(--text-primary)]">
-              Composition <span class="gradient-text">#{shortId($activeComposition.id)}</span>
+              {$t('compositions.composition')} <span class="gradient-text">#{shortId($activeComposition.id)}</span>
             </h1>
-            <p class="mt-0.5 text-sm text-[var(--text-muted)]">Rendered from generation #{shortId($activeComposition.generation_id)}</p>
+            <p class="mt-0.5 text-sm text-[var(--text-muted)]">{$t('compositions.renderedFrom', { id: shortId($activeComposition.generation_id) })}</p>
           </div>
         </div>
 
@@ -146,7 +148,7 @@
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
                 <path d="M3.75 4.5A2.25 2.25 0 016 2.25h12A2.25 2.25 0 0120.25 4.5v15a.75.75 0 01-1.2.6L12 14.69 4.95 20.1a.75.75 0 01-1.2-.6v-15z" />
               </svg>
-              Tạo sub
+              {$t('compositions.createSub')}
             </button>
           {/if}
         </div>
@@ -155,14 +157,14 @@
       <div class="relative mt-4 flex flex-wrap gap-2">
         <span class="inline-flex items-center gap-1.5 rounded-full border border-[var(--border-default)] bg-[var(--bg-app)] px-2.5 py-1 text-xs font-medium text-[var(--text-secondary)]">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-3.5 w-3.5 text-[var(--purple-500)]"><path d="M3.75 6A2.25 2.25 0 016 3.75h3A2.25 2.25 0 0111.25 6v3A2.25 2.25 0 019 11.25H6A2.25 2.25 0 013.75 9V6zm9 0A2.25 2.25 0 0115 3.75h3A2.25 2.25 0 0120.25 6v3A2.25 2.25 0 0118 11.25h-3A2.25 2.25 0 0112.75 9V6zm-9 9A2.25 2.25 0 016 12.75h3A2.25 2.25 0 0111.25 15v3A2.25 2.25 0 019 20.25H6A2.25 2.25 0 013.75 18v-3zm9 0A2.25 2.25 0 0115 12.75h3A2.25 2.25 0 0120.25 15v3A2.25 2.25 0 0118 20.25h-3A2.25 2.25 0 0112.75 18v-3z" /></svg>
-          {$activeComposition.chunk_count} chunks
+          {$t('common.chunksCount', { count: $activeComposition.chunk_count })}
         </span>
         <span class="inline-flex items-center gap-1.5 rounded-full border border-[var(--border-default)] bg-[var(--bg-app)] px-2.5 py-1 text-xs font-medium text-[var(--text-secondary)]">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-3.5 w-3.5 text-[var(--purple-500)]"><path fill-rule="evenodd" d="M6.75 2.25A.75.75 0 017.5 3v1.5h9V3a.75.75 0 011.5 0v1.5h.75a3 3 0 013 3v11.25a3 3 0 01-3 3H5.25a3 3 0 01-3-3V7.5a3 3 0 013-3H6V3a.75.75 0 01.75-.75zM4.5 11.25v8.25a1.5 1.5 0 001.5 1.5h12a1.5 1.5 0 001.5-1.5v-8.25H4.5z" clip-rule="evenodd" /></svg>
           {formatDateTime($activeComposition.created_at)}
         </span>
         <span class="inline-flex items-center gap-1.5 rounded-full border border-[var(--border-purple)] bg-[var(--purple-50)] px-2.5 py-1 text-xs font-medium text-[var(--purple-700)]">
-          Gen #{shortId($activeComposition.generation_id)}
+          {$t('common.genShort', { id: shortId($activeComposition.generation_id) })}
         </span>
       </div>
     </div>
@@ -188,13 +190,13 @@
                 <span class="absolute inset-0 rounded-full border-2 border-[var(--purple-400)]/40 border-t-[var(--purple-400)] animate-spin"></span>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-6 w-6 text-[var(--purple-200)]"><path d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653z" /></svg>
               </span>
-              <p class="text-sm font-medium text-white/90">Composition is rendering…</p>
-              <p class="text-xs text-white/50">This view updates once the video is ready.</p>
+              <p class="text-sm font-medium text-white/90">{$t('compositions.rendering')}</p>
+              <p class="text-xs text-white/50">{$t('compositions.renderingHint')}</p>
             {:else if $activeComposition.status === RENDER_JOB_STATUS.FAILED}
               <span class="grid h-14 w-14 place-items-center rounded-full bg-[var(--rose-500)]/15">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-7 w-7 text-[var(--rose-400)]"><path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.9.9 0 100-1.8.9.9 0 000 1.8z" clip-rule="evenodd" /></svg>
               </span>
-              <p class="text-sm font-semibold text-[var(--rose-400)]">Composition failed</p>
+              <p class="text-sm font-semibold text-[var(--rose-400)]">{$t('compositions.failed')}</p>
               {#if $activeComposition.error_message}
                 <p class="max-w-md text-xs text-white/50">{$activeComposition.error_message}</p>
               {/if}
@@ -202,7 +204,7 @@
               <span class="grid h-14 w-14 place-items-center rounded-full bg-white/10">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-7 w-7 text-white/60"><path d="M4.5 5.25A2.25 2.25 0 016.75 3h7.5a2.25 2.25 0 012.25 2.25v.69l3.06-1.53A.75.75 0 0120.75 5v14a.75.75 0 01-1.19.61L16.5 18.06v.69A2.25 2.25 0 0114.25 21h-7.5A2.25 2.25 0 014.5 18.75V5.25z" /></svg>
               </span>
-              <p class="text-sm text-white/70">Video not yet available</p>
+              <p class="text-sm text-white/70">{$t('compositions.videoUnavailable')}</p>
             {/if}
           </div>
         {/if}
@@ -211,7 +213,7 @@
 
     <div class="lg:col-span-2 animate-fade-in-up" style="animation-delay:160ms">
       <div class="mb-3 flex items-center justify-between">
-        <h2 class="text-sm font-bold uppercase tracking-[0.05em] text-[var(--text-secondary)]">Chunks</h2>
+        <h2 class="text-sm font-bold uppercase tracking-[0.05em] text-[var(--text-secondary)]">{$t('compositions.chunks')}</h2>
         <span class="inline-flex items-center rounded-full bg-[var(--purple-100)] px-2 py-0.5 text-xs font-semibold text-[var(--purple-700)]">
           {$activeCompositionChunks.length}
         </span>
@@ -249,7 +251,7 @@
                   </div>
                 </button>
               {:else}
-                <div class="flex h-full w-full items-center justify-center text-[10px] text-white/50">No video</div>
+                <div class="flex h-full w-full items-center justify-center text-[10px] text-white/50">{$t('compositions.noVideo')}</div>
               {/if}
             </div>
 
@@ -276,12 +278,12 @@
 
 <ModalDialog
   isOpen={showCreateSubConfirm}
-  title="Tạo phụ đề cho composition"
-  description="Bạn có chắc muốn tạo video-subber job cho composition này không?"
+  title={$t('compositions.createSubTitle')}
+  description={$t('compositions.createSubConfirm')}
   on:close={closeCreateSubConfirm}
 >
   <p class="text-sm text-[var(--color-text-secondary)]">
-    Composition #{shortId($activeComposition?.id)} sẽ được gửi sang video-subber với style mặc định.
+    {$t('compositions.createSubBody', { id: shortId($activeComposition?.id) })}
   </p>
 
   <svelte:fragment slot="footer">
@@ -291,7 +293,7 @@
       on:click={closeCreateSubConfirm}
       disabled={$isCreatingSub}
     >
-      Hủy
+      {$t('common.cancel')}
     </button>
     <button
       type="button"
@@ -299,7 +301,7 @@
       on:click={confirmCreateSub}
       disabled={$isCreatingSub}
     >
-      {#if $isCreatingSub}Đang tạo...{:else}Xác nhận tạo sub{/if}
+      {#if $isCreatingSub}{$t('common.creating')}{:else}{$t('compositions.confirmCreateSub')}{/if}
     </button>
   </svelte:fragment>
 </ModalDialog>
@@ -309,7 +311,7 @@
     <button
       type="button"
       class="absolute inset-0"
-      aria-label="Close preview"
+      aria-label={$t('common.close')}
       on:click={closeChunkPreview}
     ></button>
 
@@ -317,7 +319,7 @@
       <div class="flex items-center justify-between px-4 py-3 text-white [background:linear-gradient(90deg,rgba(99,102,241,0.25),rgba(139,92,246,0.18))]">
         <p class="inline-flex items-center gap-2 text-sm font-medium">
           <span class="h-1.5 w-1.5 rounded-full bg-[var(--purple-400)]"></span>
-          Chunk preview: {previewChunkLabel}
+          {$t('compositions.chunkPreview', { label: previewChunkLabel })}
         </p>
         <button
           type="button"
@@ -325,7 +327,7 @@
           on:click={closeChunkPreview}
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-3.5 w-3.5"><path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 011.06 0L12 10.94l5.47-5.47a.75.75 0 111.06 1.06L13.06 12l5.47 5.47a.75.75 0 11-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 01-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 010-1.06z" clip-rule="evenodd" /></svg>
-          Close
+          {$t('common.close')}
         </button>
       </div>
 

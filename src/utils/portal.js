@@ -1,3 +1,4 @@
+/** @param {HTMLElement | SVGElement | string} target */
 const getTargetNode = (target) => {
   if (typeof document === "undefined") {
     return null;
@@ -17,6 +18,10 @@ const getTargetNode = (target) => {
   return document.body;
 };
 
+/**
+ * @param {HTMLElement} node
+ * @param {HTMLElement | SVGElement | string} [target]
+ */
 export function portal(node, target = "body") {
   let currentTarget = getTargetNode(target);
 
@@ -25,6 +30,7 @@ export function portal(node, target = "body") {
   }
 
   return {
+    /** @param {HTMLElement | SVGElement | string} newTarget */
     update(newTarget) {
       const nextTarget = getTargetNode(newTarget);
       if (!nextTarget || nextTarget === currentTarget) {

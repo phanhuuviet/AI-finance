@@ -6,8 +6,10 @@
   export let type = "text";
   export let value = "";
   export let checked = false;
+  /** @type {string | string[] | undefined} */
   export let group = undefined;
-  export let files = undefined;
+  /** @type {FileList | null} */
+  export let files = null;
   export let placeholder = "";
   export let required = false;
   export let disabled = false;
@@ -23,6 +25,7 @@
 
   const dispatch = createEventDispatcher();
 
+  /** @param {Event} event */
   function handleInput(event) {
     const target = /** @type {HTMLInputElement} */ (event.currentTarget);
     if (type === "file") {
@@ -35,6 +38,7 @@
     dispatch("input", event);
   }
 
+  /** @param {Event} event */
   function handleChange(event) {
     dispatch("change", event);
   }

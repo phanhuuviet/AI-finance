@@ -34,6 +34,7 @@
 
   const dispatch = createEventDispatcher();
 
+  /** @param {Event} [event] */
   function handleClose(event) {
     event?.stopPropagation?.();
     dispatch("close");

@@ -16,6 +16,7 @@
 
   export let isOpen = false;
 
+  /** @type {string | null} */
   export let sessionId = null;
 
   export let isCreating = false;
@@ -96,8 +97,8 @@
 
   $: formattedDuration =
     videoDurationSeconds < 60
-      ? `${videoDurationSeconds}s (${estimatedChunks} chunks)`
-      : `${Math.floor(videoDurationSeconds / 60)}m ${videoDurationSeconds % 60}s (${estimatedChunks} chunks)`;
+      ? `${videoDurationSeconds}s (${$t("common.chunksCount", { count: estimatedChunks })})`
+      : `${Math.floor(videoDurationSeconds / 60)}m ${videoDurationSeconds % 60}s (${$t("common.chunksCount", { count: estimatedChunks })})`;
 
   $: if (isOpen && videoModelOptions.length === 0) {
     loadVideoModels();

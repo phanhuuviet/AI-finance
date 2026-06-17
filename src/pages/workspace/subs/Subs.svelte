@@ -13,6 +13,7 @@
     subStore
   } from '$lib/stores/sub.store';
   import type { VideoSubJob } from '$lib/models/sub.model';
+  import { t } from '$lib/i18n';
 
   const PROCESSING_RETRY_TIMEOUT_MS = 10 * 60 * 1000;
 
@@ -93,7 +94,7 @@
     retryingSubId = selectedSubIdForRetry;
     try {
       await subService.retrySubJob(selectedSubIdForRetry);
-      showToast('Video sub retry started.', 'success');
+      showToast($t('subs.retryStarted'), 'success');
       closeRetrySubConfirm();
       await subService.loadSubJobs($subCurrentPage);
     } catch (err) {
@@ -118,7 +119,7 @@
 
 <div class="h-full flex flex-col bg-[var(--color-bg-surface)] rounded-xl border border-[var(--color-border-default)] overflow-hidden">
   <div class="px-4 sm:px-5 py-4 border-b border-[var(--color-border-default)] bg-[var(--color-bg-surface)]">
-    <h2 class="text-base font-semibold text-[var(--color-text-primary)]">Video Subs</h2>
+    <h2 class="text-base font-semibold text-[var(--color-text-primary)]">{$t('subs.title')}</h2>
   </div>
 
   <div class="p-4 sm:p-5 overflow-y-auto flex-1 min-h-0">
@@ -129,8 +130,8 @@
         {/each}
       {:else if $subJobs.length === 0}
         <div class="text-center py-12 text-gray-400">
-          <p class="text-sm">No subtitle jobs yet.</p>
-          <p class="text-xs mt-1">Use "Tạo sub" from a completed composition to create one.</p>
+          <p class="text-sm">{$t('subs.empty')}</p>
+          <p class="text-xs mt-1">{$t('subs.emptyHint')}</p>
         </div>
       {:else}
         {#each $subJobs as job, i (job.id)}
@@ -156,14 +157,14 @@
                       {job.status === RENDER_JOB_STATUS.FAILED ? 'bg-rose-50 text-rose-700' : ''}
                     ">
                       {#if job.status === RENDER_JOB_STATUS.PENDING}
-                        <p class="text-sm">Waiting to process</p>
+                        <p class="text-sm">{$t('status.waiting')}</p>
                       {:else if job.status === RENDER_JOB_STATUS.PROCESSING}
-                        <p class="text-sm">Processing</p>
+                        <p class="text-sm">{$t('status.processing')}</p>
                       {:else if job.status === RENDER_JOB_STATUS.COMPLETED}
-                        <p class="text-sm">Ready</p>
-                        <p class="text-xs">No preview URL available yet</p>
+                        <p class="text-sm">{$t('status.ready')}</p>
+                        <p class="text-xs">{$t('status.noPreviewUrl')}</p>
                       {:else}
-                        <p class="text-sm">Failed</p>
+                        <p class="text-sm">{$t('status.failed')}</p>
                         {#if job.error_message}
                           <p class="text-xs line-clamp-3">{job.error_message}</p>
                         {/if}
@@ -179,7 +180,7 @@
                     <span class="text-xs font-mono font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded truncate">
                       {shortId(job.id)}
                     </span>
-                    <span class="text-xs text-gray-400 truncate">Generation #{shortId(job.generation_id)}</span>
+                    <span class="text-xs text-gray-400 truncate">{$t('common.generationShort', { id: shortId(job.generation_id) })}</span>
                   </div>
                   <div class="relative flex items-center gap-2 flex-shrink-0">
                     <StatusBadge status={job.status} />
@@ -187,7 +188,7 @@
                       <button
                         type="button"
                         class="w-8 h-8 rounded-lg border border-gray-200 bg-white text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-center"
-                        aria-label="Video sub actions"
+                        aria-label={$t('subs.actions')}
                         aria-expanded={openMenuSubId === job.id}
                         on:click|stopPropagation={(event) => toggleSubMenu(event, job.id)}
                       >
@@ -208,7 +209,7 @@
                             on:click|stopPropagation={(event) => openRetrySubConfirm(event, job.id)}
                             disabled={retryingSubId === job.id}
                           >
-                            {#if retryingSubId === job.id}Retrying...{:else}Retry{/if}
+                            {#if retryingSubId === job.id}{$t('common.retrying')}{:else}{$t('common.retry')}{/if}
                           </button>
                         {/if}
                       </div>
@@ -217,7 +218,7 @@
                 </div>
 
                 <p class="text-sm font-semibold text-gray-800 line-clamp-1">
-                  Sub Job #{shortId(job.id)}
+                  {$t('subs.jobNumber', { id: shortId(job.id) })}
                 </p>
 
                 <div class="flex items-center gap-1 text-xs text-gray-500">
@@ -225,13 +226,13 @@
                     <circle cx="12" cy="12" r="10" stroke-width="1.5"></circle>
                     <path stroke-linecap="round" stroke-width="1.5" d="M12 6v6l4 2"></path>
                   </svg>
-                  <span>Created: <strong class="text-gray-700">{formatDateTime(job.created_at)}</strong></span>
+                  <span>{$t('common.created')}: <strong class="text-gray-700">{formatDateTime(job.created_at)}</strong></span>
                 </div>
 
                 <div class="flex items-center gap-3 text-[11px] text-gray-400 mt-auto pt-2 border-t border-gray-50">
-                  <span>Attempts {job.attempt_count}</span>
-                  <span>Composition #{shortId(job.composition_id)}</span>
-                  <span>ID #{shortId(job.id)}</span>
+                  <span>{$t('subs.attempts', { count: job.attempt_count })}</span>
+                  <span>{$t('common.compositionShort', { id: shortId(job.composition_id) })}</span>
+                  <span>{$t('common.idShort', { id: shortId(job.id) })}</span>
                 </div>
               </div>
             </div>
@@ -247,14 +248,14 @@
           disabled={$subCurrentPage === 1}
           on:click={() => subService.goToPage($subCurrentPage - 1)}
           type="button"
-        >← Prev</button>
+        >← {$t('common.prev')}</button>
         <span>{$subCurrentPage} / {$subPagination.totalPages}</span>
         <button
           class="px-2 py-1 rounded hover:bg-purple-50 disabled:opacity-40 disabled:cursor-not-allowed"
           disabled={$subCurrentPage === $subPagination.totalPages}
           on:click={() => subService.goToPage($subCurrentPage + 1)}
           type="button"
-        >Next →</button>
+        >{$t('common.next')} →</button>
       </div>
     {/if}
 
@@ -266,12 +267,12 @@
 
 <ModalDialog
   isOpen={showRetrySubConfirm}
-  title="Retry video sub"
-  description="Bạn có chắc muốn retry video sub job này không?"
+  title={$t('subs.retryTitle')}
+  description={$t('subs.retryConfirm')}
   on:close={closeRetrySubConfirm}
 >
   <p class="text-sm text-[var(--color-text-secondary)]">
-    Video sub job #{shortId(selectedSubIdForRetry || undefined)} sẽ được gửi retry lại.
+    {$t('subs.retryBody', { id: shortId(selectedSubIdForRetry || undefined) })}
   </p>
 
   <svelte:fragment slot="footer">
@@ -281,7 +282,7 @@
       on:click={closeRetrySubConfirm}
       disabled={!!retryingSubId}
     >
-      Hủy
+      {$t('common.cancel')}
     </button>
     <button
       type="button"
@@ -289,7 +290,7 @@
       on:click={confirmRetrySubJob}
       disabled={!!retryingSubId}
     >
-      {#if !!retryingSubId}Retrying...{:else}Xác nhận retry{/if}
+      {#if !!retryingSubId}{$t('common.retrying')}{:else}{$t('common.confirmRetry')}{/if}
     </button>
   </svelte:fragment>
 </ModalDialog>

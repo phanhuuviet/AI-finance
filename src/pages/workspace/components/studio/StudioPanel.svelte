@@ -29,6 +29,7 @@
   import { CHAT_ROLE, MODAL_TOOL } from "$lib/constants/index.js";
   import { t } from "../../../../lib/i18n";
 
+  /** @type {string | null} */
   let sessionId = null;
   $: sessionId = $workspaceStore.currentSessionId;
 
@@ -71,7 +72,9 @@
     }
   ]);
 
+  /** @type {string | null} */
   let modalTool = null;
+  /** @type {string | null} */
   let pendingTool = null;
   let isCreatingOutput = false;
   let creatingModalProps = {};
@@ -88,9 +91,12 @@
   let visualStyle = "cinematic realistic";
   let videoDurationSeconds = 40;
 
+  /** @type {{ id: string; content: string; index: number }[]} */
   let selectableScripts = [];
+  /** @type {string | null} */
   let selectedScriptId = null;
   let selectedScript = "";
+  /** @type {string | null} */
   let loadedGenerationSessionId = null;
 
   $: currentSessionMessages =
@@ -129,14 +135,17 @@
     }));
   }
 
+  /** @param {number} seconds */
   function durationToChunkCount(seconds) {
     return Math.max(1, Math.round(Number(seconds || 0) / 5));
   }
 
+  /** @param {string} key */
   function toolTitleKey(key) {
     return tools.find((item) => item.key === key)?.titleKey ?? "studio.title";
   }
 
+  /** @param {string} toolKey */
   function openToolModal(toolKey) {
     if (!sessionId) {
       showToast($t("studio.selectSessionHint"), "warning");
@@ -170,6 +179,7 @@
     modalTool = null;
   }
 
+  /** @param {CustomEvent<{ videoModel?: string }>} [event] */
   async function createSelectedOutput(event) {
     if (!sessionId || !modalTool || isCreatingOutput) return;
 
@@ -207,12 +217,13 @@
 
       closeModal();
     } catch (e) {
-      showToast(e?.message || $t("studio.createFailed"), "error");
+      showToast((e instanceof Error && e.message) || $t("studio.createFailed"), "error");
     } finally {
       isCreatingOutput = false;
     }
   }
 
+  /** @param {{ session_id: string; id: string }} generation */
   function goToDetail(generation) {
     goto(`/workspace/${generation.session_id}/generations/${generation.id}`);
   }
@@ -278,7 +289,7 @@
               <div class="flex items-start justify-between gap-3 mb-3">
                 <div class="flex-1 min-w-0">
                   <h3 class="text-sm font-semibold text-gray-800 truncate">
-                    {generation.resolved_prompt_values?.title ?? "Untitled"}
+                    {generation.resolved_prompt_values?.title ?? $t("studio.untitled")}
                   </h3>
                   <p class="text-xs text-gray-500 mt-0.5">{generation.video_concept}</p>
                 </div>
@@ -286,7 +297,7 @@
               </div>
 
               <div class="flex items-center gap-4 text-xs text-gray-500 mb-3">
-                <span class="flex items-center gap-1">🎬 {generation.total_chunks} chunks</span>
+                <span class="flex items-center gap-1">🎬 {$t("common.chunksCount", { count: generation.total_chunks })}</span>
                 <span class="flex items-center gap-1">⏱ {formatDuration(generation.estimated_total_duration_seconds)}</span>
                 <span class="flex items-center gap-1">🤖 {generation.model}</span>
               </div>
@@ -296,7 +307,7 @@
               <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
                 <span class="text-xs text-gray-400">{formatRelativeDate(generation.created_at)}</span>
                 <span class="text-xs text-purple-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                  View details →
+                  {$t("studio.viewDetails")} →
                 </span>
               </div>
             </button>
@@ -307,8 +318,8 @@
               {/each}
             {:else}
               <div class="text-center py-12 text-gray-400">
-                <p class="text-sm">No generations yet.</p>
-                <p class="text-xs mt-1">Generate a script from the chat to see outputs here.</p>
+                <p class="text-sm">{$t("studio.noGenerations")}</p>
+                <p class="text-xs mt-1">{$t("studio.noGenerationsHint")}</p>
               </div>
             {/if}
           {/each}
@@ -321,14 +332,14 @@
               disabled={$generationCurrentPage === 1}
               on:click={() => generationService.goToPage(sessionId, $generationCurrentPage - 1)}
               type="button"
-            >← Prev</button>
+            >← {$t("common.prev")}</button>
             <span>{$generationCurrentPage} / {$generationPagination.totalPages}</span>
             <button
               class="px-2 py-1 rounded hover:bg-purple-50 disabled:opacity-40 disabled:cursor-not-allowed"
               disabled={$generationCurrentPage === $generationPagination.totalPages}
               on:click={() => generationService.goToPage(sessionId, $generationCurrentPage + 1)}
               type="button"
-            >Next →</button>
+            >{$t("common.next")} →</button>
           </div>
         {/if}
       {/if}

@@ -20,6 +20,7 @@
   const dispatch = createEventDispatcher();
 
   let searchValue = "";
+  /** @type {ReturnType<typeof setTimeout> | undefined} */
   let debounceTimer;
 
   $: selectedSessionId = $workspaceStore.currentSessionId;
@@ -92,8 +93,8 @@
         </div>
       {:else}
         <div class="flex flex-col items-center justify-center py-10 text-center px-4">
-          <p class="text-sm text-gray-400">No conversations yet.</p>
-          <p class="text-xs text-gray-300 mt-1">Click "+ New Chat" to get started.</p>
+          <p class="text-sm text-gray-400">{$t("chat.noConversations")}</p>
+          <p class="text-xs text-gray-300 mt-1">{$t("chat.noConversationsHint")}</p>
         </div>
       {/if}
     {/each}

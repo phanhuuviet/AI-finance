@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte';
+  import { t } from '$lib/i18n';
 
   interface AutocompleteOption {
     id: string;
@@ -138,7 +139,7 @@
     disabled={disabled}
   >
     {#if loading || isFetching}
-      <span class="text-[var(--text-muted)]">Loading options...</span>
+      <span class="text-[var(--text-muted)]">{$t('common.loadingOptions')}</span>
     {:else if selectedOption}
       <span class="text-[var(--text-primary)] font-medium">{selectedOption.name}</span>
     {:else}
@@ -173,7 +174,7 @@
           type="text"
           value={query}
           on:input={handleInput}
-          placeholder="Search..."
+          placeholder={`${$t('common.search')}...`}
           class="w-full px-3 py-2 text-sm border border-[var(--border-default)] rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--purple-50)]"
           disabled={disabled}
         />
@@ -181,9 +182,9 @@
 
       <ul class="overflow-y-auto max-h-64 py-1 list-none m-0 p-0" role="listbox">
         {#if loading || isFetching}
-          <li class="px-3.5 py-3 text-xs text-[var(--text-muted)]">Loading options...</li>
+          <li class="px-3.5 py-3 text-xs text-[var(--text-muted)]">{$t('common.loadingOptions')}</li>
         {:else if filteredOptions.length === 0}
-          <li class="px-3.5 py-3 text-xs text-[var(--text-muted)]">No options found.</li>
+          <li class="px-3.5 py-3 text-xs text-[var(--text-muted)]">{$t('common.noOptions')}</li>
         {:else}
           {#each filteredOptions as option (option.id)}
             <li

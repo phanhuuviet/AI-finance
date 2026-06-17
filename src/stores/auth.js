@@ -5,9 +5,12 @@ import { authStore } from '../lib/stores/auth.store';
 import { userApi } from '../lib/api/modules/user.api';
 
 /** @typedef {import('../lib/models/auth.model').User} User */
+/** @typedef {{ data: User | null; loading: boolean; showLoading: boolean; updating: boolean; error: string | null }} AuthAsyncState */
 
 /** @type {import('svelte/store').Readable<User | null>} */
 export const user = derived(authStore, ($s) => /** @type {User | null} */ ($s.user));
+
+/** @type {AuthAsyncState} */
 const initialAsync = {
   data: null,
   loading: false,
@@ -35,7 +38,7 @@ export const login = async (username, password) => {
     const me = get(authStore).user;
     authState.update((state) => ({ ...state, data: me, error: null }));
   } catch (error) {
-    authState.update((state) => ({ ...state, error: error?.message || 'Login failed.' }));
+    authState.update((state) => ({ ...state, error: (error instanceof Error && error.message) || 'Login failed.' }));
     throw error;
   } finally {
     authLoadingGate.stop();
@@ -55,7 +58,7 @@ export const register = async (username, email, password) => {
   try {
     await authService.register({ email, full_name: username, password });
   } catch (error) {
-    authState.update((state) => ({ ...state, error: error?.message || 'Register failed.' }));
+    authState.update((state) => ({ ...state, error: (error instanceof Error && error.message) || 'Register failed.' }));
     throw error;
   } finally {
     authLoadingGate.stop();
@@ -64,7 +67,7 @@ export const register = async (username, email, password) => {
 };
 
 /**
- * @returns {Promise<User>}
+ * @returns {Promise<User | null>}
  */
 export const fetchUser = async () => {
   authLoadingGate.start();
@@ -75,7 +78,7 @@ export const fetchUser = async () => {
     authState.update((state) => ({ ...state, data: me, error: null }));
     return me;
   } catch (error) {
-    authState.update((state) => ({ ...state, error: error?.message || 'Failed to fetch user.' }));
+    authState.update((state) => ({ ...state, error: (error instanceof Error && error.message) || 'Failed to fetch user.' }));
     throw error;
   } finally {
     authLoadingGate.stop();
@@ -96,7 +99,7 @@ export const updateProfile = async (payload) => {
     authState.update((state) => ({ ...state, data: me, error: null }));
     return me;
   } catch (error) {
-    authState.update((state) => ({ ...state, error: error?.message || 'Failed to update profile.' }));
+    authState.update((state) => ({ ...state, error: (error instanceof Error && error.message) || 'Failed to update profile.' }));
     throw error;
   } finally {
     authState.update((state) => ({ ...state, updating: false }));
