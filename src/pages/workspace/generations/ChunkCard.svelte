@@ -50,7 +50,7 @@
 </script>
 
 <div
-  class="relative flex flex-col md:flex-row gap-0 md:gap-4 bg-white border rounded-xl overflow-hidden hover:border-purple-200 transition-colors duration-150"
+  class="hover-lift relative flex flex-col md:flex-row gap-0 md:gap-4 bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl overflow-hidden shadow-[var(--shadow-soft)] hover:border-[var(--border-purple)]"
   class:border-purple-400={selectionOrder !== null}
   class:bg-purple-50={selectionOrder !== null}
   class:border-gray-200={selectionOrder === null}
@@ -75,28 +75,31 @@
     {/if}
   </div>
 
-  <div class="w-full md:w-[40%] md:flex-shrink-0 bg-gray-900 flex items-center justify-center min-h-[160px] border-b md:border-b-0 md:border-r border-gray-100">
-    {#if chunk.presigned_s3_url}
-      <!-- svelte-ignore a11y-media-has-caption -->
-      <video
-        src={chunk.presigned_s3_url}
-        controls
-        playsinline
-        class="w-full h-full object-contain max-h-64"
-      ></video>
-    {:else}
-      <div class="flex flex-col items-center justify-center gap-2 text-gray-500 py-8">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
-        </svg>
-        <span class="text-xs text-gray-400">
-          {#if chunk.status === RENDER_JOB_STATUS.PENDING}Pending render{/if}
-          {#if chunk.status === RENDER_JOB_STATUS.PROCESSING}Rendering{/if}
-          {#if chunk.status === RENDER_JOB_STATUS.COMPLETED}Rendered{/if}
-          {#if chunk.status === RENDER_JOB_STATUS.FAILED}Render failed{/if}
-        </span>
-      </div>
-    {/if}
+  <div class="w-full md:w-[40%] md:flex-shrink-0 border-b md:border-b-0 md:border-r border-[var(--border-subtle)]">
+    <div class="relative w-full aspect-video bg-[#0b0b0f]">
+      {#if chunk.presigned_s3_url}
+        <!-- svelte-ignore a11y-media-has-caption -->
+        <video
+          src={chunk.presigned_s3_url}
+          controls
+          playsinline
+          preload="metadata"
+          class="absolute inset-0 h-full w-full object-contain"
+        ></video>
+      {:else}
+        <div class="absolute inset-0 flex flex-col items-center justify-center gap-2 text-white/50 py-8">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
+          </svg>
+          <span class="text-xs text-white/60">
+            {#if chunk.status === RENDER_JOB_STATUS.PENDING}Pending render{/if}
+            {#if chunk.status === RENDER_JOB_STATUS.PROCESSING}Rendering{/if}
+            {#if chunk.status === RENDER_JOB_STATUS.COMPLETED}Rendered{/if}
+            {#if chunk.status === RENDER_JOB_STATUS.FAILED}Render failed{/if}
+          </span>
+        </div>
+      {/if}
+    </div>
   </div>
 
   <div class="flex-1 min-w-0 p-4 flex flex-col gap-3">

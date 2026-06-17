@@ -168,14 +168,16 @@
   </div>
 
   <div class="px-3 sm:px-6 py-4 space-y-4">
-    {#each $generationChunks as chunk (chunk.id)}
-      <ChunkCard
-        {...({
-          chunk,
-          selectionOrder: selectionOrder(chunk.id),
-          onToggle: toggleChunk
-        } as any)}
-      />
+    {#each $generationChunks as chunk, i (chunk.id)}
+      <div class="animate-fade-in-up" style={`animation-delay:${i * 60}ms`}>
+        <ChunkCard
+          {...({
+            chunk,
+            selectionOrder: selectionOrder(chunk.id),
+            onToggle: toggleChunk
+          } as any)}
+        />
+      </div>
     {/each}
   </div>
 {:else if $generationStore.error}

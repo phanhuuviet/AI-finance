@@ -182,48 +182,51 @@
           <p class="text-xs mt-1">Select chunks on a generation and click 'Tạo Video'.</p>
         </div>
       {:else}
-        {#each $compositions as composition (composition.id)}
+        {#each $compositions as composition, i (composition.id)}
           <div
-            class="w-full text-left"
+            class="w-full text-left animate-fade-in-up"
+            style={`animation-delay:${i * 70}ms`}
             on:click={() => openComposition(composition.session_id, composition.id)}
             on:keydown={(event) => onCardKeydown(event, composition.session_id, composition.id)}
             role="button"
             tabindex="0"
           >
-            <div class="relative flex flex-col md:flex-row gap-0 md:gap-4 bg-white border rounded-xl overflow-hidden hover:border-purple-200 transition-colors duration-150 border-gray-200">
-              <div class="md:w-[40%] md:flex-shrink-0 bg-gray-900 flex items-center justify-center min-h-[170px] border-b md:border-b-0 md:border-r border-gray-100">
-                {#if composition.presigned_s3_url}
-                  <!-- svelte-ignore a11y-media-has-caption -->
-                  <video
-                    src={composition.presigned_s3_url}
-                    controls
-                    playsinline
-                    preload="metadata"
-                    on:loadedmetadata={preventAutoplay}
-                    class="w-full h-56 md:h-full object-contain max-h-64"
-                  ></video>
-                {:else}
-                  <div class="w-full h-56 md:h-full px-4 py-6 flex flex-col items-center justify-center gap-2 text-center
-                    {composition.status === RENDER_JOB_STATUS.PENDING ? 'bg-gray-50 text-gray-600' : ''}
-                    {composition.status === RENDER_JOB_STATUS.PROCESSING ? 'bg-amber-50 text-amber-700' : ''}
-                    {composition.status === RENDER_JOB_STATUS.COMPLETED ? 'bg-green-50 text-green-700' : ''}
-                    {composition.status === RENDER_JOB_STATUS.FAILED ? 'bg-rose-50 text-rose-700' : ''}
-                  ">
-                    {#if composition.status === RENDER_JOB_STATUS.PENDING}
-                      <p class="text-sm">Waiting to process</p>
-                    {:else if composition.status === RENDER_JOB_STATUS.PROCESSING}
-                      <p class="text-sm">Processing</p>
-                    {:else if composition.status === RENDER_JOB_STATUS.COMPLETED}
-                      <p class="text-sm">Ready</p>
-                      <p class="text-xs">No preview URL available yet</p>
-                    {:else}
-                      <p class="text-sm">Failed</p>
-                      {#if composition.error_message}
-                        <p class="text-xs">{composition.error_message}</p>
+            <div class="hover-lift relative flex flex-col md:flex-row gap-0 md:gap-4 bg-[var(--bg-card)] border border-[var(--border-default)] rounded-xl overflow-hidden shadow-[var(--shadow-soft)] hover:border-[var(--border-purple)]">
+              <div class="md:w-[40%] md:flex-shrink-0 border-b md:border-b-0 md:border-r border-[var(--border-subtle)]">
+                <div class="relative w-full aspect-video bg-[#0b0b0f]">
+                  {#if composition.presigned_s3_url}
+                    <!-- svelte-ignore a11y-media-has-caption -->
+                    <video
+                      src={composition.presigned_s3_url}
+                      controls
+                      playsinline
+                      preload="metadata"
+                      on:loadedmetadata={preventAutoplay}
+                      class="absolute inset-0 h-full w-full object-contain"
+                    ></video>
+                  {:else}
+                    <div class="absolute inset-0 px-4 py-6 flex flex-col items-center justify-center gap-2 text-center
+                      {composition.status === RENDER_JOB_STATUS.PENDING ? 'bg-gray-50 text-gray-600' : ''}
+                      {composition.status === RENDER_JOB_STATUS.PROCESSING ? 'bg-amber-50 text-amber-700' : ''}
+                      {composition.status === RENDER_JOB_STATUS.COMPLETED ? 'bg-green-50 text-green-700' : ''}
+                      {composition.status === RENDER_JOB_STATUS.FAILED ? 'bg-rose-50 text-rose-700' : ''}
+                    ">
+                      {#if composition.status === RENDER_JOB_STATUS.PENDING}
+                        <p class="text-sm">Waiting to process</p>
+                      {:else if composition.status === RENDER_JOB_STATUS.PROCESSING}
+                        <p class="text-sm">Processing</p>
+                      {:else if composition.status === RENDER_JOB_STATUS.COMPLETED}
+                        <p class="text-sm">Ready</p>
+                        <p class="text-xs">No preview URL available yet</p>
+                      {:else}
+                        <p class="text-sm">Failed</p>
+                        {#if composition.error_message}
+                          <p class="text-xs line-clamp-3">{composition.error_message}</p>
+                        {/if}
                       {/if}
-                    {/if}
-                  </div>
-                {/if}
+                    </div>
+                  {/if}
+                </div>
               </div>
 
               <div class="flex-1 min-w-0 p-4 flex flex-col gap-3">

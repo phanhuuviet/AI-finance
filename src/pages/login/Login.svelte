@@ -57,8 +57,8 @@
     isLogin = !isLogin;
   }
 
-  // @ts-ignore
-  function handleToggleKeydown(event: KeyboardEvent) {
+  /** @param {KeyboardEvent} event */
+  function handleToggleKeydown(event) {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       toggleAuthMode();

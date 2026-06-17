@@ -233,7 +233,7 @@
       </button>
     {:else}
       <button
-        class="shrink-0 px-5 py-2.5 rounded-[var(--radius-md)] border-0 [background:var(--gradient-accent)] text-white font-semibold text-sm whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+        class="press shrink-0 px-5 py-2.5 rounded-[var(--radius-md)] border-0 [background:var(--gradient-accent)] text-white font-semibold text-sm whitespace-nowrap shadow-[0_2px_10px_rgba(99,102,241,0.3)] hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
         disabled={!canSend}
         on:click={handleSend}
         aria-label="Send message"

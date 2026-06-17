@@ -4,9 +4,9 @@
 </script>
 
 {#if $toastStore.visible}
-  <div class="fixed right-4 top-4 z-[60]" transition:fade={{ duration: 140 }}>
+  <div class="fixed inset-x-4 top-4 z-[60] flex justify-end sm:left-auto" transition:fade={{ duration: 140 }}>
     <div
-      class={`min-w-[260px] max-w-[360px] rounded-xl border px-4 py-3 text-sm shadow-md ${
+      class={`w-full sm:w-auto sm:min-w-[260px] max-w-[360px] rounded-xl border px-4 py-3 text-sm shadow-md ${
         $toastStore.type === 'success'
           ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
           : $toastStore.type === 'error'

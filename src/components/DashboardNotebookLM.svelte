@@ -256,7 +256,7 @@
           <Button
             unstyled
             on:click={() => (isNewChatModalOpen = true)}
-            className="px-3 sm:px-4 py-2 min-h-11 [background:var(--gradient-accent)] text-white text-xs sm:text-sm font-semibold rounded-[var(--radius-md)] border-none shadow-[0_2px_8px_rgba(99,102,241,0.35)] hover:opacity-90 hover:shadow-[0_4px_12px_rgba(99,102,241,0.45)] transition-[opacity,box-shadow] duration-150"
+            className="press px-3 sm:px-4 py-2 min-h-11 [background:var(--gradient-accent)] text-white text-xs sm:text-sm font-semibold rounded-[var(--radius-md)] border-none shadow-[0_2px_8px_rgba(99,102,241,0.35)] hover:opacity-90 hover:shadow-[0_4px_12px_rgba(99,102,241,0.45)] transition-[opacity,box-shadow,transform] duration-150"
           >
             <span class="hidden sm:inline">{$t("chat.newChatButton")}</span>
             <span class="sm:hidden">+</span>
