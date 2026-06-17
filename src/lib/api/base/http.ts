@@ -44,7 +44,8 @@ export class ApiError extends Error {
       if (typeof candidate.statusCode === 'number' || detail || candidate.message) {
         return new ApiError(
           candidate.statusCode ?? 500,
-          detail || candidate.message || 'INTERNAL_SERVER_ERROR',
+          // Always prefer `data.detail`; never the top-level `message` field.
+          detail || 'INTERNAL_SERVER_ERROR',
           candidate.data
         );
       }
@@ -159,7 +160,16 @@ export async function http<T>(
     let rawPayload = await parseResponse(response);
     let envelope = toEnvelope<T>(rawPayload, response);
 
-    if (response.status === 401 && !resolvedEndpoint.startsWith('/auth/refresh')) {
+    // A 401 from the login/register/refresh endpoints means the submitted
+    // credentials were rejected — not that an access token expired. Skip the
+    // refresh flow so the real error detail (e.g. "Invalid email or password")
+    // propagates instead of a generic "UNAUTHORIZED".
+    const isAuthChallengeEndpoint =
+      resolvedEndpoint.startsWith('/auth/refresh') ||
+      resolvedEndpoint.startsWith('/auth/login') ||
+      resolvedEndpoint.startsWith('/auth/register');
+
+    if (response.status === 401 && !isAuthChallengeEndpoint) {
       const refreshToken = tokenStorage.getRefresh();
 
       if (!refreshToken) {
@@ -216,8 +226,11 @@ export async function http<T>(
     }
 
     if (!response.ok || envelope.statusCode >= 400) {
+      // Always surface the backend `data.detail`. The top-level `message`
+      // field is never used for display — fall back to a generic code only
+      // when `detail` is absent.
       const preferredMessage =
-        extractErrorDetail(envelope.data) || envelope.message || 'REQUEST_FAILED';
+        extractErrorDetail(envelope.data) || 'REQUEST_FAILED';
       throw new ApiError(
         envelope.statusCode || response.status,
         preferredMessage,

@@ -22,6 +22,9 @@
   import Button from "$lib/components/common/Button.svelte";
   import { t } from "../../../../lib/i18n";
   import { CHAT_ROLE } from "$lib/constants/index.js";
+  import { user } from "../../../../stores/auth.js";
+
+  $: userInitial = ($user?.full_name?.[0] || $user?.email?.[0] || "U").toUpperCase();
 
   /** @typedef {import('../../../../lib/models').ChatMessage} ChatMessage */
 
@@ -46,10 +49,12 @@
   $: historyError = $chatStore.error;
   $: canSend = inputValue.trim().length > 0 && !$isGenerating && !$isTyping && !$isConnecting;
 
+  /** @param {string} content */
   function renderMarkdown(content) {
     return /** @type {string} */ (marked.parse(content));
   }
 
+  /** @param {string | number | Date} value */
   function formatTime(value) {
     return new Date(value).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
   }
@@ -74,6 +79,7 @@
     wsService.stopGeneration();
   }
 
+  /** @param {KeyboardEvent} e */
   function handleKeydown(e) {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -86,20 +92,26 @@
   class="flex min-h-0 flex-col h-full bg-[var(--color-bg-surface)] rounded-lg border border-[var(--color-border-default)]"
 >
   <div
-    class="p-3 sm:p-4 border-b border-[var(--color-border-default)] flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center bg-[var(--color-bg-app)] rounded-t-lg"
+    class="p-3 sm:p-4 border-b border-[var(--color-border-default)] flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center bg-[var(--bg-panel)] rounded-t-lg"
   >
     <h2 class="text-base sm:text-lg font-semibold text-[var(--color-text-primary)]">
       {sessionId ? $t("chat.session") : $t("chat.selectChat")}
     </h2>
     <div class="flex items-center gap-3">
       {#if $isConnecting}
-        <span class="text-xs font-medium text-[var(--amber-500)]">Connecting...</span>
+        <span class="inline-flex items-center gap-1.5 rounded-full bg-[var(--amber-50)] px-2.5 py-1 text-xs font-medium text-[var(--amber-600)]">
+          <span class="h-1.5 w-1.5 rounded-full bg-[var(--amber-500)] [animation:blink_1s_step-end_infinite]"></span>
+          Connecting...
+        </span>
       {:else if $activeSessionId}
-        <span class="text-xs font-medium text-[var(--green-500)]">● Live</span>
+        <span class="inline-flex items-center gap-1.5 rounded-full bg-[var(--green-50)] px-2.5 py-1 text-xs font-medium text-[var(--green-600)]">
+          <span class="h-1.5 w-1.5 rounded-full bg-[var(--green-500)]"></span>
+          Live
+        </span>
       {/if}
 
       {#if $wsError}
-        <span class="text-xs font-medium text-[var(--rose-500)]">{$wsError}</span>
+        <span class="inline-flex items-center rounded-full bg-[var(--rose-50)] px-2.5 py-1 text-xs font-medium text-[var(--rose-600)]">{$wsError}</span>
       {/if}
     </div>
   </div>
@@ -131,54 +143,61 @@
     {:else}
       <div transition:fade={{ duration: 180 }}>
         {#each messages as msg}
-          <div
-            class={`mb-3 flex ${msg.role === CHAT_ROLE.ASSISTANT ? "justify-start" : "justify-end"}`}
-          >
-            <div class="max-w-[88%] sm:max-w-[75%]">
-              {#if msg.role === CHAT_ROLE.ASSISTANT}
-                <span class="mb-1 inline-flex rounded-full bg-[var(--purple-100)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.05em] text-[var(--purple-700)]">
+          {#if msg.role === CHAT_ROLE.ASSISTANT}
+            <div class="mb-5 flex items-start gap-2.5 justify-start">
+              <div class="mt-0.5 h-8 w-8 shrink-0 rounded-full [background:var(--gradient-accent)] flex items-center justify-center text-white shadow-[var(--shadow-soft)]">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
+                  <path d="M12 2l1.9 4.7L18.6 8 14 10.1 12 15l-2-4.9L5.4 8l4.7-1.3L12 2zm6.5 9l.95 2.35L21.8 14l-2.35.95L18.5 17l-.95-2.05L15.2 14l2.35-.65L18.5 11zM6 14l.8 2L9 16.8l-2.2.8L6 20l-.8-2.4L3 16.8 5.2 16 6 14z" />
+                </svg>
+              </div>
+              <div class="min-w-0 max-w-[88%] sm:max-w-[78%]">
+                <span class="mb-1 ml-0.5 block text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--purple-700)]">
                   Assistant
                 </span>
-              {/if}
-
-              <div
-                class={`rounded-[12px] p-3 text-sm leading-relaxed ${
-                  msg.role === CHAT_ROLE.ASSISTANT
-                    ? "bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-purple)] rounded-tl-none"
-                    : "bg-[var(--indigo-600,#4F46E5)] text-white border-0 rounded-[12px_0_12px_12px]"
-                }`}
-              >
-                {#if msg.role === CHAT_ROLE.ASSISTANT}
+                <div class="rounded-2xl rounded-tl-md border border-[var(--border-default)] bg-[var(--bg-card)] p-3.5 text-sm leading-relaxed text-[var(--text-primary)] shadow-[var(--shadow-soft)]">
                   <div class="markdown-body [&>p]:m-0 [&>p+p]:mt-2 [&_ul]:mt-1 [&_ul]:ml-4 [&_ol]:mt-1 [&_ol]:ml-4 [&_code]:rounded [&_code]:bg-[rgba(99,102,241,0.12)] [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-[0.85em]">{@html renderMarkdown(msg.content)}</div>
-                {:else}
-                  <p class="whitespace-pre-wrap text-white">{msg.content}</p>
-                {/if}
-                <span class={`mt-2 block text-xs ${msg.role === CHAT_ROLE.ASSISTANT ? "text-[var(--text-muted)]" : "text-white/80"}`}>
-                  {formatTime(msg.created_at)}
-                </span>
+                </div>
+                <span class="mt-1 ml-0.5 block text-[11px] text-[var(--text-muted)]">{formatTime(msg.created_at)}</span>
               </div>
             </div>
-          </div>
+          {:else}
+            <div class="mb-5 flex items-start gap-2.5 justify-end">
+              <div class="flex min-w-0 max-w-[88%] flex-col items-end sm:max-w-[78%]">
+                <div class="rounded-2xl rounded-tr-md [background:var(--gradient-accent)] p-3.5 text-sm leading-relaxed text-white shadow-[0_2px_10px_rgba(99,102,241,0.28)]">
+                  <p class="whitespace-pre-wrap">{msg.content}</p>
+                </div>
+                <span class="mt-1 mr-0.5 block text-[11px] text-[var(--text-muted)]">{formatTime(msg.created_at)}</span>
+              </div>
+              <div class="mt-0.5 h-8 w-8 shrink-0 rounded-full bg-[var(--bg-sidebar-active)] flex items-center justify-center text-xs font-semibold text-white">
+                {userInitial}
+              </div>
+            </div>
+          {/if}
         {/each}
 
         {#if $isTyping}
-          <div class="mb-3 flex justify-start">
-            <div class="max-w-[88%] sm:max-w-[75%]">
-              <span class="mb-1 inline-flex rounded-full bg-[var(--purple-100)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.05em] text-[var(--purple-700)]">
-                AI
-              </span>
+          <div class="mb-5 flex items-start gap-2.5 justify-start">
+            <div class="mt-0.5 h-8 w-8 shrink-0 rounded-full [background:var(--gradient-accent)] flex items-center justify-center text-white shadow-[var(--shadow-soft)]">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
+                <path d="M12 2l1.9 4.7L18.6 8 14 10.1 12 15l-2-4.9L5.4 8l4.7-1.3L12 2zm6.5 9l.95 2.35L21.8 14l-2.35.95L18.5 17l-.95-2.05L15.2 14l2.35-.65L18.5 11zM6 14l.8 2L9 16.8l-2.2.8L6 20l-.8-2.4L3 16.8 5.2 16 6 14z" />
+              </svg>
+            </div>
+            <div class="rounded-2xl rounded-tl-md border border-[var(--border-default)] bg-[var(--bg-card)] px-3.5 py-3 shadow-[var(--shadow-soft)]">
               <TypingIndicator />
             </div>
           </div>
         {/if}
 
         {#if $streamingContent && !$isTyping}
-          <div class="mb-3 flex justify-start">
-            <div class="max-w-[88%] sm:max-w-[75%]">
-              <span class="mb-1 inline-flex rounded-full bg-[var(--purple-100)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.05em] text-[var(--purple-700)]">
-                AI
-              </span>
-              <div class="rounded-[12px] rounded-tl-none border border-[var(--border-purple)] bg-[var(--purple-50)] p-3 text-sm leading-relaxed text-[var(--text-primary)]">
+          <div class="mb-5 flex items-start gap-2.5 justify-start">
+            <div class="mt-0.5 h-8 w-8 shrink-0 rounded-full [background:var(--gradient-accent)] flex items-center justify-center text-white shadow-[var(--shadow-soft)]">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
+                <path d="M12 2l1.9 4.7L18.6 8 14 10.1 12 15l-2-4.9L5.4 8l4.7-1.3L12 2zm6.5 9l.95 2.35L21.8 14l-2.35.95L18.5 17l-.95-2.05L15.2 14l2.35-.65L18.5 11zM6 14l.8 2L9 16.8l-2.2.8L6 20l-.8-2.4L3 16.8 5.2 16 6 14z" />
+              </svg>
+            </div>
+            <div class="min-w-0 max-w-[88%] sm:max-w-[78%]">
+              <span class="mb-1 ml-0.5 block text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--purple-700)]">Assistant</span>
+              <div class="rounded-2xl rounded-tl-md border border-[var(--border-default)] bg-[var(--bg-card)] p-3.5 text-sm leading-relaxed text-[var(--text-primary)] shadow-[var(--shadow-soft)]">
                 <div class="markdown-body inline [&>p]:m-0 [&>p+p]:mt-2 [&_ul]:mt-1 [&_ul]:ml-4 [&_ol]:mt-1 [&_ol]:ml-4 [&_code]:rounded [&_code]:bg-[rgba(99,102,241,0.12)] [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-[0.85em]">{@html renderMarkdown($streamingContent)}</div><span class="inline-block ml-0.5 text-[var(--purple-400)] [animation:blink_1s_step-end_infinite]">|</span>
               </div>
             </div>

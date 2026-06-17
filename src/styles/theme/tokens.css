@@ -1,41 +1,41 @@
 :root {
-  /* Base surfaces */
-  --bg-app: #f3f9ff;
-  --bg-sidebar: #08253a;
-  --bg-sidebar-hover: #0d3854;
-  --bg-sidebar-active: #0f5f87;
+  /* Base surfaces — clean neutral canvas, white cards, light sidebar */
+  --bg-app: #f6f7f9;
+  --bg-sidebar: #ffffff;
+  --bg-sidebar-hover: #f4f4f5;
+  --bg-sidebar-active: #18181b;
   --bg-panel: #ffffff;
-  --bg-card: #fcfeff;
-  --bg-card-hover: #f2f8ff;
-  --bg-input: #f8fbff;
-  --bg-chat-list: #edf6ff;
+  --bg-card: #ffffff;
+  --bg-card-hover: #fafafa;
+  --bg-input: #f9fafb;
+  --bg-chat-list: #f7f7f8;
 
-  /* Gradients */
-  --gradient-hero: linear-gradient(135deg, #0ea5e9 0%, #0f766e 100%);
-  --gradient-studio: linear-gradient(135deg, #0284c7 0%, #0ea5a3 100%);
-  --gradient-doc: linear-gradient(135deg, #22d3ee 0%, #0ea5e9 100%);
-  --gradient-accent: linear-gradient(120deg, #0284c7 0%, #059669 100%);
-  --gradient-success: linear-gradient(135deg, #22c55e 0%, #14b8a6 100%);
-  --gradient-amber: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+  /* Gradients — indigo→violet brand accent + status gradients */
+  --gradient-hero: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  --gradient-studio: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  --gradient-doc: linear-gradient(135deg, #818cf8 0%, #6366f1 100%);
+  --gradient-accent: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  --gradient-success: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+  --gradient-amber: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
 
-  /* Purple / Indigo (Primary) */
-  --purple-50: #ecfeff;
-  --purple-100: #cffafe;
-  --purple-200: #a5f3fc;
-  --purple-400: #22d3ee;
-  --purple-500: #06b6d4;
-  --purple-600: #0891b2;
-  --purple-700: #0e7490;
-  --purple-900: #164e63;
+  /* Violet (brand pop) — kept under legacy 'purple' token names */
+  --purple-50: #f5f3ff;
+  --purple-100: #ede9fe;
+  --purple-200: #ddd6fe;
+  --purple-400: #a78bfa;
+  --purple-500: #8b5cf6;
+  --purple-600: #7c3aed;
+  --purple-700: #6d28d9;
+  --purple-900: #4c1d95;
 
-  /* Indigo */
-  --indigo-50: #ecfeff;
-  --indigo-100: #e0f2fe;
-  --indigo-400: #38bdf8;
-  --indigo-500: #0284c7;
-  --indigo-600: #0369a1;
-  --indigo-700: #075985;
-  --indigo-900: #0c4a6e;
+  /* Indigo (primary accent) */
+  --indigo-50: #eef2ff;
+  --indigo-100: #e0e7ff;
+  --indigo-400: #818cf8;
+  --indigo-500: #6366f1;
+  --indigo-600: #4f46e5;
+  --indigo-700: #4338ca;
+  --indigo-900: #312e81;
 
   /* Teal */
   --teal-50: #f0fdfa;
@@ -47,13 +47,13 @@
   --teal-800: #115e59;
 
   /* Amber */
-  --amber-50: #fff7ed;
-  --amber-100: #ffedd5;
+  --amber-50: #fffbeb;
+  --amber-100: #fef3c7;
   --amber-300: #fcd34d;
   --amber-400: #fbbf24;
   --amber-500: #f59e0b;
-  --amber-600: #ea580c;
-  --amber-800: #9a3412;
+  --amber-600: #d97706;
+  --amber-800: #92400e;
 
   /* Green */
   --green-50: #ecfdf5;
@@ -74,45 +74,46 @@
   /* Blue */
   --blue-50: #eff6ff;
   --blue-100: #dbeafe;
-  --blue-400: #38bdf8;
-  --blue-500: #0ea5e9;
-  --blue-600: #0284c7;
+  --blue-400: #60a5fa;
+  --blue-500: #3b82f6;
+  --blue-600: #2563eb;
 
-  /* Text */
-  --text-primary: #0f172a;
-  --text-secondary: #334155;
-  --text-muted: #64748b;
-  --text-on-dark: #f8fafc;
-  --text-on-dark-2: #bfdbfe;
+  /* Text — near-black on light, neutral grays */
+  --text-primary: #18181b;
+  --text-secondary: #3f3f46;
+  --text-muted: #71717a;
+  --text-on-dark: #fafafa;
+  /* Repurposed: muted sidebar text (light sidebar uses dark-gray inactive labels) */
+  --text-on-dark-2: #52525b;
 
-  /* Borders */
-  --border-default: #d9e5f2;
-  --border-subtle: #eaf1f8;
-  --border-purple: #bae6fd;
+  /* Borders — neutral hairlines */
+  --border-default: #e4e4e7;
+  --border-subtle: #f0f0f1;
+  --border-purple: #ddd6fe;
   --border-teal: #99f6e4;
-  --border-amber: #fdba74;
+  --border-amber: #fde68a;
   --border-green: #a7f3d0;
   --border-rose: #fecdd3;
 
-  /* Radius */
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
+  /* Radius — generous, soft cards */
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
 
   /* Compatibility aliases */
   --color-bg-app: var(--bg-app);
   --color-bg-surface: var(--bg-panel);
-  --color-bg-sidebar: #e8f3ff;
+  --color-bg-sidebar: #f4f4f5;
   --color-bg-elevated: var(--bg-panel);
-  --color-bg-hover: #e6f6ff;
-  --color-bg-active: #d7f0ff;
-  --color-bg-muted: #edf7ff;
+  --color-bg-hover: #f4f4f5;
+  --color-bg-active: #ededee;
+  --color-bg-muted: #f6f7f9;
 
   --color-accent: var(--indigo-500);
   --color-accent-light: var(--purple-100);
   --color-accent-hover: var(--indigo-600);
-  --color-accent-text: var(--purple-700);
+  --color-accent-text: var(--indigo-600);
   --color-accent-strong: var(--indigo-700);
   --color-accent-contrast: var(--text-on-dark);
   --color-accent-muted: var(--purple-50);
@@ -130,7 +131,7 @@
   --color-border-accent: var(--border-purple);
   --color-border-muted: var(--border-subtle);
   --color-border-soft: var(--border-default);
-  --color-border-strong: var(--border-purple);
+  --color-border-strong: var(--border-default);
 
   --color-status-ready: var(--green-600);
   --color-status-ready-bg: var(--green-50);
@@ -153,10 +154,10 @@
   --color-success-muted: var(--green-50);
   --color-warning: var(--amber-600);
   --color-warning-muted: var(--amber-50);
-  --color-info: var(--blue-600);
-  --color-info-muted: var(--blue-50);
+  --color-info: var(--indigo-600);
+  --color-info-muted: var(--indigo-50);
 
-  --color-overlay: rgba(8, 37, 58, 0.48);
+  --color-overlay: rgba(24, 24, 27, 0.45);
   --overlay-blur: 0;
 
   --color-surface: var(--bg-panel);
@@ -164,7 +165,8 @@
   --color-surface-elevated: var(--bg-card);
   --color-surface-highlight: var(--purple-50);
 
-  --shadow-soft: 0 8px 22px rgba(2, 132, 199, 0.08);
-  --shadow-medium: 0 14px 30px rgba(2, 132, 199, 0.14);
-  --shadow-strong: 0 24px 44px rgba(15, 118, 110, 0.2);
+  /* Soft, neutral elevation */
+  --shadow-soft: 0 1px 2px rgba(24, 24, 27, 0.04), 0 4px 12px rgba(24, 24, 27, 0.05);
+  --shadow-medium: 0 2px 6px rgba(24, 24, 27, 0.06), 0 10px 24px rgba(24, 24, 27, 0.07);
+  --shadow-strong: 0 8px 28px rgba(24, 24, 27, 0.12);
 }

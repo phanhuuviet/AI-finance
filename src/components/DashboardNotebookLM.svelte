@@ -47,6 +47,9 @@
 
   let isNewChatModalOpen = false;
 
+  /**
+   * @param {string} page
+   */
   function pageTitle(page) {
     if (page === "analytics") return $t("header.analytics");
     if (page === "settings") return $t("header.settings");
@@ -61,6 +64,7 @@
   $: activeTab = tabFromPage($route.page);
 
   // When URL is /workspace/:idchat, select that chat.
+  /** @type {string | null} */
   let lastLoadedChatId = null;
   $: if ($route.page === "workspace") {
     const chatId = $route.chatId;
@@ -95,10 +99,10 @@
   <aside
     class={`fixed inset-y-0 left-0 z-40 w-72 max-w-[85vw] bg-[var(--bg-sidebar)] flex flex-col transform transition-all duration-200 lg:static lg:inset-auto lg:max-w-none lg:translate-x-0 ${isDesktopCollapsed ? "lg:w-20" : "lg:w-64"} ${mobileNavOpen ? "translate-x-0" : "-translate-x-full"}`}
   >
-    <div class="p-4 border-b border-[rgba(199,210,254,0.16)]">
+    <div class="p-4 border-b border-[var(--border-subtle)]">
       <div class={`flex items-center gap-2 ${isDesktopCollapsed ? "justify-center" : "justify-between"}`}>
         {#if !isDesktopCollapsed}
-          <h1 class="text-xl font-bold text-[var(--text-on-dark)] flex items-center gap-2">
+          <h1 class="text-xl font-bold text-[var(--text-primary)] flex items-center gap-2">
             <span class="h-2.5 w-2.5 rounded-full [background:var(--gradient-accent)]"></span>
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -118,7 +122,7 @@
         <Button
           unstyled
           type="button"
-          className="hidden lg:inline-flex h-9 w-9 items-center justify-center rounded-md border border-[rgba(199,210,254,0.2)] text-[var(--text-on-dark-2)] hover:text-[var(--text-on-dark)] hover:bg-[var(--bg-sidebar-hover)]"
+          className="hidden lg:inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--border-default)] text-[var(--text-on-dark-2)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-sidebar-hover)]"
           on:click={toggleSidebarCollapse}
           aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
@@ -132,7 +136,7 @@
     <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
       <Button
         unstyled
-        className={`w-full flex items-center ${isDesktopCollapsed ? "justify-center" : "gap-3"} px-4 py-3 rounded-lg text-left transition-[background,color,box-shadow] duration-150 ${activeTab === "home" ? "bg-[var(--bg-sidebar-active)] text-[var(--text-on-dark)] font-semibold shadow-[inset_3px_0_0_var(--purple-400)]" : "text-[var(--text-on-dark-2)] hover:bg-[var(--bg-sidebar-hover)] hover:text-[var(--text-on-dark)]"}`}
+        className={`w-full flex items-center ${isDesktopCollapsed ? "justify-center" : "gap-3"} px-4 py-3 rounded-lg text-left transition-[background,color,box-shadow] duration-150 ${activeTab === "home" ? "bg-[var(--bg-sidebar-active)] text-[var(--text-on-dark)] font-semibold shadow-[inset_3px_0_0_var(--purple-400)]" : "text-[var(--text-on-dark-2)] hover:bg-[var(--bg-sidebar-hover)] hover:text-[var(--text-primary)]"}`}
         on:click={() => goToTab("home")}
         title={$t("header.workspace")}
       >
@@ -145,7 +149,7 @@
       </Button>
       <Button
         unstyled
-        className={`w-full flex items-center ${isDesktopCollapsed ? "justify-center" : "gap-3"} px-4 py-3 rounded-lg text-left transition-[background,color,box-shadow] duration-150 ${activeTab === "analytics" ? "bg-[var(--bg-sidebar-active)] text-[var(--text-on-dark)] font-semibold shadow-[inset_3px_0_0_var(--purple-400)]" : "text-[var(--text-on-dark-2)] hover:bg-[var(--bg-sidebar-hover)] hover:text-[var(--text-on-dark)]"}`}
+        className={`w-full flex items-center ${isDesktopCollapsed ? "justify-center" : "gap-3"} px-4 py-3 rounded-lg text-left transition-[background,color,box-shadow] duration-150 ${activeTab === "analytics" ? "bg-[var(--bg-sidebar-active)] text-[var(--text-on-dark)] font-semibold shadow-[inset_3px_0_0_var(--purple-400)]" : "text-[var(--text-on-dark-2)] hover:bg-[var(--bg-sidebar-hover)] hover:text-[var(--text-primary)]"}`}
         on:click={() => goToTab("analytics")}
         title={$t("header.analytics")}
       >
@@ -159,7 +163,7 @@
       </Button>
       <Button
         unstyled
-        className={`w-full flex items-center ${isDesktopCollapsed ? "justify-center" : "gap-3"} px-4 py-3 rounded-lg text-left transition-[background,color,box-shadow] duration-150 ${activeTab === "settings" ? "bg-[var(--bg-sidebar-active)] text-[var(--text-on-dark)] font-semibold shadow-[inset_3px_0_0_var(--purple-400)]" : "text-[var(--text-on-dark-2)] hover:bg-[var(--bg-sidebar-hover)] hover:text-[var(--text-on-dark)]"}`}
+        className={`w-full flex items-center ${isDesktopCollapsed ? "justify-center" : "gap-3"} px-4 py-3 rounded-lg text-left transition-[background,color,box-shadow] duration-150 ${activeTab === "settings" ? "bg-[var(--bg-sidebar-active)] text-[var(--text-on-dark)] font-semibold shadow-[inset_3px_0_0_var(--purple-400)]" : "text-[var(--text-on-dark-2)] hover:bg-[var(--bg-sidebar-hover)] hover:text-[var(--text-primary)]"}`}
         on:click={() => goToTab("settings")}
         title={$t("header.settings")}
       >
@@ -172,7 +176,7 @@
       </Button>
     </nav>
 
-    <div class="p-4 border-t border-[rgba(199,210,254,0.16)]">
+    <div class="p-4 border-t border-[var(--border-subtle)]">
       <div class={`flex items-center mb-4 ${isDesktopCollapsed ? "justify-center" : "gap-3"}`}>
         <div
           class="w-10 h-10 rounded-full [background:var(--gradient-accent)] flex items-center justify-center text-[var(--text-on-dark)] font-bold"
@@ -181,7 +185,7 @@
         </div>
         {#if !isDesktopCollapsed}
           <div class="overflow-hidden">
-            <p class="text-sm font-medium text-[var(--text-on-dark)] truncate">
+            <p class="text-sm font-medium text-[var(--text-primary)] truncate">
               {$user?.full_name || $t("header.guest")}
             </p>
             <p class="text-xs text-[var(--text-on-dark-2)] truncate">{$user?.email}</p>

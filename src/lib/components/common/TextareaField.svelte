@@ -18,18 +18,22 @@
   // Added to preserve original classes when replacing already-styled native textareas.
   export let unstyled = false;
   export let maxHeight = 160;
+  /** @type {HTMLTextAreaElement | null} */
   export let textareaRef = null;
 
   const dispatch = createEventDispatcher();
 
+  /** @param {Event} event */
   function handleInput(event) {
     dispatch("input", event);
   }
 
+  /** @param {Event} event */
   function handleChange(event) {
     dispatch("change", event);
   }
 
+  /** @param {HTMLTextAreaElement} node */
   function autoResize(node) {
     function resize() {
       node.style.height = "auto";
