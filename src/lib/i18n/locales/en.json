@@ -38,9 +38,11 @@
   },
   "header": {
     "workspace": "Workspace",
+    "chats": "Chats",
+    "recents": "Recents",
     "analytics": "Analytics",
     "settings": "Settings",
-    "newChat": "New Chat",
+    "newChat": "New chat",
     "language": "Language",
     "signOut": "Sign Out",
     "guest": "Guest",

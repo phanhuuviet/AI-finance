@@ -6,10 +6,14 @@
   import { workspaceStore } from "../stores/workspace.js";
   import WorkspacePanel from "../pages/workspace/WorkspacePanel.svelte";
   import NewChatModal from "../pages/workspace/components/chat/NewChatModal.svelte";
+  import SidebarRecents from "./SidebarRecents.svelte";
   import { route, navigate } from "../stores/router.js";
   import Button from "$lib/components/common/Button.svelte";
   import { language, setLanguage, t } from "../lib/i18n";
   import { LOCALE } from "$lib/constants/index.js";
+  import { newChatModalOpen } from "../stores/ui.js";
+  import { chatService } from "$lib/services/chat.service";
+  import { wsService } from "$lib/services/websocket.service";
 
   let activeTab = "home"; // home | analytics | settings
   let mobileNavOpen = false;
@@ -45,7 +49,10 @@
     sidebarCollapsed = !sidebarCollapsed;
   }
 
-  let isNewChatModalOpen = false;
+  function openNewChat() {
+    mobileNavOpen = false;
+    newChatModalOpen.set(true);
+  }
 
   /**
    * @param {string} page
@@ -53,7 +60,7 @@
   function pageTitle(page) {
     if (page === "analytics") return $t("header.analytics");
     if (page === "settings") return $t("header.settings");
-    return $t("header.workspace");
+    return $t("header.chats");
   }
 
   $: if ($route.page) {
@@ -63,7 +70,9 @@
   // Keep UI tab synced with URL.
   $: activeTab = tabFromPage($route.page);
 
-  // When URL is /workspace/:idchat, select that chat.
+  // Keep the active session in sync with the URL. This is the single place that
+  // selects a session (sidebar/chats just navigate), so a direct load, reload or
+  // back/forward on /workspace/:id restores the chat — history + websocket included.
   /** @type {string | null} */
   let lastLoadedChatId = null;
   $: if ($route.page === "workspace") {
@@ -72,13 +81,15 @@
       if ($workspaceStore.currentSessionId) {
         workspaceStore.setCurrentSession(null);
       }
-    }
-    if (chatId && chatId !== $workspaceStore.currentSessionId) {
+      if (lastLoadedChatId) {
+        wsService.disconnect();
+        lastLoadedChatId = null;
+      }
+    } else if (chatId !== lastLoadedChatId) {
+      lastLoadedChatId = chatId;
       workspaceStore.setCurrentSession(chatId);
-      lastLoadedChatId = chatId;
-    } else if (chatId && chatId === $workspaceStore.currentSessionId && lastLoadedChatId !== chatId) {
-      // Direct URL load (or back/forward) where store already has chatId but messages not loaded in this session
-      lastLoadedChatId = chatId;
+      chatService.loadHistory(chatId);
+      wsService.connect(chatId);
     }
   }
 </script>
@@ -124,23 +135,41 @@
       </Button>
     </div>
 
-    <nav class="flex-1 space-y-1 overflow-y-auto px-2.5 py-2">
+    <!-- New chat -->
+    <div class="px-2.5 pt-1">
       <Button
         unstyled
-        className={`w-full flex items-center ${isDesktopCollapsed ? "justify-center" : "gap-3"} px-3 py-2.5 rounded-[10px] text-[14px] text-left transition-colors duration-150 ${activeTab === "home" ? "bg-[var(--color-bg-active)] text-[var(--text-primary)] font-semibold" : "text-[var(--text-secondary)] hover:bg-[var(--bg-sidebar-hover)] hover:text-[var(--text-primary)]"}`}
-        on:click={() => goToTab("home")}
-        title={$t("header.workspace")}
+        type="button"
+        className={`press w-full flex items-center overflow-hidden whitespace-nowrap ${isDesktopCollapsed ? "justify-center" : "gap-2"} rounded-[10px] border border-[var(--border-default)] bg-[var(--bg-card)] px-3 py-2.5 text-[14px] font-medium text-[var(--text-primary)] shadow-[var(--shadow-soft)] hover:bg-[var(--bg-card-hover)] transition-[background,transform] duration-150`}
+        on:click={openNewChat}
+        title={$t("header.newChat")}
       >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-[18px] w-[18px] shrink-0">
-          <path d="M11.47 3.84a.75.75 0 011.06 0l7.5 7.5a.75.75 0 11-1.06 1.06L18.75 12.19V19.5a.75.75 0 01-.75.75h-4.5v-5.25h-3V20.25H6a.75.75 0 01-.75-.75v-7.31l-.22.21a.75.75 0 11-1.06-1.06l7.5-7.5z" />
+          <path d="M11.25 4.5a.75.75 0 011.5 0v6.75H19.5a.75.75 0 010 1.5h-6.75V19.5a.75.75 0 01-1.5 0v-6.75H4.5a.75.75 0 010-1.5h6.75V4.5z" />
         </svg>
         {#if !isDesktopCollapsed}
-          {$t("header.workspace")}
+          {$t("header.newChat")}
+        {/if}
+      </Button>
+    </div>
+
+    <nav class="space-y-0.5 px-2.5 py-2">
+      <Button
+        unstyled
+        className={`w-full flex items-center ${isDesktopCollapsed ? "justify-center" : "gap-3"} overflow-hidden whitespace-nowrap px-3 py-2.5 rounded-[10px] text-[14px] text-left transition-colors duration-150 ${activeTab === "home" ? "bg-[var(--color-bg-active)] text-[var(--text-primary)] font-semibold" : "text-[var(--text-secondary)] hover:bg-[var(--bg-sidebar-hover)] hover:text-[var(--text-primary)]"}`}
+        on:click={() => goToTab("home")}
+        title={$t("header.chats")}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-[18px] w-[18px] shrink-0">
+          <path fill-rule="evenodd" d="M4.804 21.644A6.707 6.707 0 006 21.75a6.721 6.721 0 003.583-1.029c.774.182 1.584.279 2.417.279 5.322 0 9.75-3.97 9.75-9 0-5.03-4.428-9-9.75-9s-9.75 3.97-9.75 9c0 2.409 1.025 4.587 2.674 6.192.232.226.277.428.254.543a3.73 3.73 0 01-.814 1.686.75.75 0 00.44 1.223z" clip-rule="evenodd" />
+        </svg>
+        {#if !isDesktopCollapsed}
+          {$t("header.chats")}
         {/if}
       </Button>
       <Button
         unstyled
-        className={`w-full flex items-center ${isDesktopCollapsed ? "justify-center" : "gap-3"} px-3 py-2.5 rounded-[10px] text-[14px] text-left transition-colors duration-150 ${activeTab === "analytics" ? "bg-[var(--color-bg-active)] text-[var(--text-primary)] font-semibold" : "text-[var(--text-secondary)] hover:bg-[var(--bg-sidebar-hover)] hover:text-[var(--text-primary)]"}`}
+        className={`w-full flex items-center ${isDesktopCollapsed ? "justify-center" : "gap-3"} overflow-hidden whitespace-nowrap px-3 py-2.5 rounded-[10px] text-[14px] text-left transition-colors duration-150 ${activeTab === "analytics" ? "bg-[var(--color-bg-active)] text-[var(--text-primary)] font-semibold" : "text-[var(--text-secondary)] hover:bg-[var(--bg-sidebar-hover)] hover:text-[var(--text-primary)]"}`}
         on:click={() => goToTab("analytics")}
         title={$t("header.analytics")}
       >
@@ -154,7 +183,7 @@
       </Button>
       <Button
         unstyled
-        className={`w-full flex items-center ${isDesktopCollapsed ? "justify-center" : "gap-3"} px-3 py-2.5 rounded-[10px] text-[14px] text-left transition-colors duration-150 ${activeTab === "settings" ? "bg-[var(--color-bg-active)] text-[var(--text-primary)] font-semibold" : "text-[var(--text-secondary)] hover:bg-[var(--bg-sidebar-hover)] hover:text-[var(--text-primary)]"}`}
+        className={`w-full flex items-center ${isDesktopCollapsed ? "justify-center" : "gap-3"} overflow-hidden whitespace-nowrap px-3 py-2.5 rounded-[10px] text-[14px] text-left transition-colors duration-150 ${activeTab === "settings" ? "bg-[var(--color-bg-active)] text-[var(--text-primary)] font-semibold" : "text-[var(--text-secondary)] hover:bg-[var(--bg-sidebar-hover)] hover:text-[var(--text-primary)]"}`}
         on:click={() => goToTab("settings")}
         title={$t("header.settings")}
       >
@@ -166,6 +195,12 @@
         {/if}
       </Button>
     </nav>
+
+    {#if !isDesktopCollapsed}
+      <SidebarRecents />
+    {:else}
+      <div class="flex-1"></div>
+    {/if}
 
     <div class="border-t border-[var(--border-subtle)] p-2.5">
       <div class={`flex items-center rounded-[10px] px-2 py-2 ${isDesktopCollapsed ? "justify-center" : "gap-2.5"}`}>
@@ -186,7 +221,7 @@
       <Button
         unstyled
         on:click={logout}
-        className={`mt-1 w-full flex items-center ${isDesktopCollapsed ? "justify-center" : "gap-3"} px-3 py-2.5 rounded-[10px] text-[14px] text-[var(--text-secondary)] transition-colors hover:bg-[var(--rose-50)] hover:text-[var(--rose-600)]`}
+        className={`mt-1 w-full flex items-center overflow-hidden whitespace-nowrap ${isDesktopCollapsed ? "justify-center" : "gap-3"} px-3 py-2.5 rounded-[10px] text-[14px] text-[var(--text-secondary)] transition-colors hover:bg-[var(--rose-50)] hover:text-[var(--rose-600)]`}
         title={$t("header.signOut")}
       >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-[18px] w-[18px] shrink-0">
@@ -240,19 +275,6 @@
             EN
           </Button>
         </div>
-
-        {#if $route.page === "workspace"}
-          <Button
-            unstyled
-            on:click={() => (isNewChatModalOpen = true)}
-            className="press inline-flex items-center gap-1.5 rounded-full [background:var(--gradient-accent)] px-3.5 py-2 min-h-0 text-[13px] font-medium text-white shadow-[var(--shadow-soft)] hover:opacity-90 transition-[opacity,transform] duration-150"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
-              <path d="M11.25 4.5a.75.75 0 011.5 0v6.75H19.5a.75.75 0 010 1.5h-6.75V19.5a.75.75 0 01-1.5 0v-6.75H4.5a.75.75 0 010-1.5h6.75V4.5z" />
-            </svg>
-            <span class="hidden sm:inline">{$t("header.newChat")}</span>
-          </Button>
-        {/if}
       </div>
     </header>
 
@@ -262,10 +284,6 @@
           <WorkspacePanel />
         </div>
       </div>
-
-      {#if isNewChatModalOpen}
-        <NewChatModal onClose={() => (isNewChatModalOpen = false)} />
-      {/if}
     {:else if $route.page === "analytics"}
       <div class="flex-1 overflow-auto px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-6">
         <TokenUsageChart />
@@ -277,3 +295,7 @@
     {/if}
   </main>
 </div>
+
+{#if $newChatModalOpen}
+  <NewChatModal onClose={() => newChatModalOpen.set(false)} />
+{/if}

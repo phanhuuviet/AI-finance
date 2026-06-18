@@ -38,6 +38,8 @@
   },
   "header": {
     "workspace": "Workspace",
+    "chats": "Chats",
+    "recents": "Gần đây",
     "analytics": "Phân tích",
     "settings": "Cài đặt",
     "newChat": "Chat mới",
