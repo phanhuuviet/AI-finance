@@ -57,11 +57,11 @@
       {#if sessionId}
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div
-            class="inline-flex max-w-full overflow-x-auto rounded-[var(--radius-md)] border border-[var(--border-purple)] bg-[var(--purple-50)] p-1"
+            class="inline-flex max-w-full overflow-x-auto rounded-full border border-[var(--border-subtle)] bg-[var(--bg-app)] p-1"
           >
             <Button
               unstyled
-              className={`px-3 py-2 min-h-11 rounded-[var(--radius-sm)] text-sm whitespace-nowrap transition-all duration-200 ${section === "documents" ? "[background:var(--gradient-accent)] text-[var(--text-on-dark)] font-semibold shadow-[0_1px_6px_rgba(99,102,241,0.3)]" : "bg-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"}`}
+              className={`px-3.5 py-1.5 min-h-0 rounded-full text-[13px] whitespace-nowrap transition-colors duration-150 ${section === "documents" ? "bg-[var(--bg-card)] text-[var(--text-primary)] font-medium shadow-[var(--shadow-soft)]" : "bg-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}
               on:click={() => setSection("documents")}
               type="button"
             >
@@ -69,7 +69,7 @@
             </Button>
             <Button
               unstyled
-              className={`px-3 py-2 min-h-11 rounded-[var(--radius-sm)] text-sm whitespace-nowrap transition-all duration-200 ${section === "chat" ? "[background:var(--gradient-accent)] text-[var(--text-on-dark)] font-semibold shadow-[0_1px_6px_rgba(99,102,241,0.3)]" : "bg-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"}`}
+              className={`px-3.5 py-1.5 min-h-0 rounded-full text-[13px] whitespace-nowrap transition-colors duration-150 ${section === "chat" ? "bg-[var(--bg-card)] text-[var(--text-primary)] font-medium shadow-[var(--shadow-soft)]" : "bg-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}
               on:click={() => setSection("chat")}
               type="button"
             >
@@ -77,7 +77,7 @@
             </Button>
             <Button
               unstyled
-              className={`px-3 py-2 min-h-11 rounded-[var(--radius-sm)] text-sm whitespace-nowrap transition-all duration-200 ${section === "studio" ? "[background:var(--gradient-accent)] text-[var(--text-on-dark)] font-semibold shadow-[0_1px_6px_rgba(99,102,241,0.3)]" : "bg-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"}`}
+              className={`px-3.5 py-1.5 min-h-0 rounded-full text-[13px] whitespace-nowrap transition-colors duration-150 ${section === "studio" ? "bg-[var(--bg-card)] text-[var(--text-primary)] font-medium shadow-[var(--shadow-soft)]" : "bg-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}
               on:click={() => setSection("studio")}
               type="button"
             >
@@ -85,15 +85,15 @@
             </Button>
             <Button
               unstyled
-              className={`px-3 py-2 min-h-11 rounded-[var(--radius-sm)] text-sm whitespace-nowrap transition-all duration-200 ${section === "compositions" ? "[background:var(--gradient-accent)] text-[var(--text-on-dark)] font-semibold shadow-[0_1px_6px_rgba(99,102,241,0.3)]" : "bg-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"}`}
+              className={`px-3.5 py-1.5 min-h-0 rounded-full text-[13px] whitespace-nowrap transition-colors duration-150 ${section === "compositions" ? "bg-[var(--bg-card)] text-[var(--text-primary)] font-medium shadow-[var(--shadow-soft)]" : "bg-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}
               on:click={() => setSection("compositions")}
               type="button"
             >
-              Compositions
+              {$t("compositions.title")}
             </Button>
             <Button
               unstyled
-              className={`px-3 py-2 min-h-11 rounded-[var(--radius-sm)] text-sm whitespace-nowrap transition-all duration-200 ${section === "subs" ? "[background:var(--gradient-accent)] text-[var(--text-on-dark)] font-semibold shadow-[0_1px_6px_rgba(99,102,241,0.3)]" : "bg-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"}`}
+              className={`px-3.5 py-1.5 min-h-0 rounded-full text-[13px] whitespace-nowrap transition-colors duration-150 ${section === "subs" ? "bg-[var(--bg-card)] text-[var(--text-primary)] font-medium shadow-[var(--shadow-soft)]" : "bg-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}
               on:click={() => setSection("subs")}
               type="button"
             >
