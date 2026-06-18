@@ -144,7 +144,7 @@
           {#if msg.role === CHAT_ROLE.ASSISTANT}
             <!-- Assistant message: clean text, no bubble -->
             <div class="group py-4">
-              <div class="mx-auto max-w-[720px] px-6 sm:px-12">
+              <div class="mx-auto max-w-[900px] px-6 sm:px-12">
                 <div class="markdown-body text-[14.5px] leading-[1.7] text-[var(--chat-text)] break-words [&_a]:text-[var(--indigo-600)] [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:text-[var(--indigo-700)] [&_blockquote]:my-3 [&_blockquote]:border-l-[3px] [&_blockquote]:border-[var(--chat-text-muted)] [&_blockquote]:px-4 [&_blockquote]:text-[var(--chat-text-secondary)] [&_code]:rounded [&_code]:border [&_code]:border-[var(--chat-code-border)] [&_code]:bg-[var(--chat-code-bg)] [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:text-[0.85em] [&_code]:text-[var(--chat-code-text)] [&_em]:italic [&_h1]:mt-5 [&_h1]:mb-2 [&_h1]:text-[1.3em] [&_h1]:font-semibold [&_h2]:mt-5 [&_h2]:mb-2 [&_h2]:text-[1.15em] [&_h2]:font-semibold [&_h3]:mt-5 [&_h3]:mb-2 [&_h3]:text-[1.05em] [&_h3]:font-semibold [&_hr]:my-5 [&_hr]:border-[var(--chat-separator)] [&_li]:my-1 [&_ol]:my-2 [&_ol]:pl-6 [&_p]:m-0 [&_p+p]:mt-3 [&_pre]:my-3 [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:border [&_pre]:border-[var(--chat-code-border)] [&_pre]:bg-[var(--chat-code-bg)] [&_pre]:p-4 [&_pre_code]:border-0 [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:text-[13px] [&_pre_code]:text-[var(--chat-text)] [&_strong]:font-semibold [&_table]:my-3 [&_table]:w-full [&_table]:border-collapse [&_td]:border [&_td]:border-[var(--chat-code-border)] [&_td]:p-2 [&_td]:text-[13px] [&_th]:border [&_th]:border-[var(--chat-code-border)] [&_th]:bg-[var(--chat-code-bg)] [&_th]:p-2 [&_th]:text-[13px] [&_th]:font-semibold [&_ul]:my-2 [&_ul]:pl-6">{@html renderMarkdown(msg.content)}</div>
                 <span class="mt-1 block text-[11px] text-[var(--chat-text-muted)] opacity-0 transition-opacity group-hover:opacity-100">{formatTime(msg.created_at)}</span>
               </div>
@@ -152,7 +152,7 @@
           {:else}
             <!-- User message: subtle elevated pill, right-aligned -->
             <div class="group py-1">
-              <div class="mx-auto flex max-w-[720px] flex-col items-end px-6 sm:px-12">
+              <div class="mx-auto flex max-w-[900px] flex-col items-end px-6 sm:px-12">
                 <p class="m-0 inline-block max-w-[85%] whitespace-pre-wrap break-words rounded-[20px] rounded-br-md bg-[var(--chat-bg-user)] px-[18px] py-3 text-[14.5px] leading-[1.6] text-[var(--chat-text)]">{msg.content}</p>
                 <span class="mt-1 block text-[11px] text-[var(--chat-text-muted)] opacity-0 transition-opacity group-hover:opacity-100">{formatTime(msg.created_at)}</span>
               </div>
@@ -163,7 +163,7 @@
         <!-- Typing indicator -->
         {#if $isTyping}
           <div class="py-4">
-            <div class="mx-auto max-w-[720px] px-6 sm:px-12">
+            <div class="mx-auto max-w-[900px] px-6 sm:px-12">
               <TypingIndicator />
             </div>
           </div>
@@ -172,7 +172,7 @@
         <!-- Streaming content -->
         {#if $streamingContent && !$isTyping}
           <div class="py-4">
-            <div class="mx-auto max-w-[720px] px-6 sm:px-12">
+            <div class="mx-auto max-w-[900px] px-6 sm:px-12">
               <div class="markdown-body inline text-[14.5px] leading-[1.7] text-[var(--chat-text)] break-words [&_code]:rounded [&_code]:border [&_code]:border-[var(--chat-code-border)] [&_code]:bg-[var(--chat-code-bg)] [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:text-[0.85em] [&_code]:text-[var(--chat-code-text)] [&_p]:m-0 [&_p+p]:mt-3 [&_strong]:font-semibold [&_ul]:my-2 [&_ul]:pl-6 [&_ol]:my-2 [&_ol]:pl-6">{@html renderMarkdown($streamingContent)}<span class="ml-0.5 inline-block text-[var(--chat-text-muted)] [animation:blink_1s_step-end_infinite]">|</span></div>
             </div>
           </div>
@@ -182,7 +182,7 @@
   </div>
 
   <!-- Input area -->
-  <div class="px-4 pb-4 sm:mx-auto sm:w-full sm:max-w-[780px] sm:px-6 sm:pb-5">
+  <div class="px-4 pb-4 sm:mx-auto sm:w-full sm:max-w-[860px] sm:px-6 sm:pb-5">
     <div class="flex items-end rounded-[22px] border border-[var(--chat-input-border)] bg-[var(--chat-bg-input)] py-1.5 pl-[18px] pr-1.5 transition-[border-color,background,box-shadow] duration-200 focus-within:border-[var(--chat-input-border-focus)] focus-within:bg-[var(--chat-bg-input-focus)] focus-within:[box-shadow:0_0_0_3px_var(--chat-focus-ring)]">
       <TextareaField
         bare

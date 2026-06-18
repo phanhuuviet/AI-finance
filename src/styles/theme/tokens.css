@@ -1,14 +1,14 @@
 :root {
-  /* Base surfaces — clean neutral canvas, white cards, light sidebar */
-  --bg-app: #f6f7f9;
-  --bg-sidebar: #ffffff;
-  --bg-sidebar-hover: #f4f4f5;
-  --bg-sidebar-active: #18181b;
+  /* Base surfaces — warm neutral "Claude" canvas, white cards, warm sidebar */
+  --bg-app: #f5f4ef;
+  --bg-sidebar: #faf9f6;
+  --bg-sidebar-hover: #f0efe9;
+  --bg-sidebar-active: #1a1a18;
   --bg-panel: #ffffff;
   --bg-card: #ffffff;
-  --bg-card-hover: #fafafa;
-  --bg-input: #f9fafb;
-  --bg-chat-list: #f7f7f8;
+  --bg-card-hover: #faf9f5;
+  --bg-input: #f7f7f5;
+  --bg-chat-list: #f7f7f5;
 
   /* Gradients — indigo→violet brand accent + status gradients */
   --gradient-hero: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
@@ -78,17 +78,17 @@
   --blue-500: #3b82f6;
   --blue-600: #2563eb;
 
-  /* Text — near-black on light, neutral grays */
-  --text-primary: #18181b;
-  --text-secondary: #3f3f46;
-  --text-muted: #71717a;
+  /* Text — warm near-black, warm grays */
+  --text-primary: #1a1a18;
+  --text-secondary: #44413b;
+  --text-muted: #8a857e;
   --text-on-dark: #fafafa;
-  /* Repurposed: muted sidebar text (light sidebar uses dark-gray inactive labels) */
-  --text-on-dark-2: #52525b;
+  /* Repurposed: muted sidebar text (light sidebar uses warm-gray inactive labels) */
+  --text-on-dark-2: #6b6760;
 
-  /* Borders — neutral hairlines */
-  --border-default: #e4e4e7;
-  --border-subtle: #f0f0f1;
+  /* Borders — warm hairlines */
+  --border-default: #e6e3db;
+  --border-subtle: #efece6;
   --border-purple: #ddd6fe;
   --border-teal: #99f6e4;
   --border-amber: #fde68a;
@@ -104,11 +104,11 @@
   /* Compatibility aliases */
   --color-bg-app: var(--bg-app);
   --color-bg-surface: var(--bg-panel);
-  --color-bg-sidebar: #f4f4f5;
+  --color-bg-sidebar: #f0efe9;
   --color-bg-elevated: var(--bg-panel);
-  --color-bg-hover: #f4f4f5;
-  --color-bg-active: #ededee;
-  --color-bg-muted: #f6f7f9;
+  --color-bg-hover: #f0efe9;
+  --color-bg-active: #e8e6df;
+  --color-bg-muted: #f5f4ef;
 
   --color-accent: var(--indigo-500);
   --color-accent-light: var(--purple-100);
@@ -165,10 +165,10 @@
   --color-surface-elevated: var(--bg-card);
   --color-surface-highlight: var(--purple-50);
 
-  /* Soft, neutral elevation */
-  --shadow-soft: 0 1px 2px rgba(24, 24, 27, 0.04), 0 4px 12px rgba(24, 24, 27, 0.05);
-  --shadow-medium: 0 2px 6px rgba(24, 24, 27, 0.06), 0 10px 24px rgba(24, 24, 27, 0.07);
-  --shadow-strong: 0 8px 28px rgba(24, 24, 27, 0.12);
+  /* Soft, warm elevation */
+  --shadow-soft: 0 1px 2px rgba(60, 54, 46, 0.04), 0 4px 12px rgba(60, 54, 46, 0.05);
+  --shadow-medium: 0 2px 6px rgba(60, 54, 46, 0.06), 0 10px 24px rgba(60, 54, 46, 0.07);
+  --shadow-strong: 0 8px 28px rgba(60, 54, 46, 0.12);
 
   /* ── Chat theme (Claude-like, light) ── */
   --chat-bg: #ffffff;
