@@ -169,4 +169,23 @@
   --shadow-soft: 0 1px 2px rgba(24, 24, 27, 0.04), 0 4px 12px rgba(24, 24, 27, 0.05);
   --shadow-medium: 0 2px 6px rgba(24, 24, 27, 0.06), 0 10px 24px rgba(24, 24, 27, 0.07);
   --shadow-strong: 0 8px 28px rgba(24, 24, 27, 0.12);
+
+  /* ── Chat theme (Claude-like, light) ── */
+  --chat-bg: #ffffff;
+  --chat-bg-subtle: #f7f7f5;
+  --chat-bg-user: #f3f1eb;
+  --chat-bg-input: #f7f7f5;
+  --chat-bg-input-focus: #ffffff;
+  --chat-input-border: #d8d6d0;
+  --chat-input-border-focus: #b0ada6;
+  --chat-text: #1a1a1a;
+  --chat-text-secondary: #4a4740;
+  --chat-text-muted: #8a857e;
+  --chat-code-bg: #f5f3ef;
+  --chat-code-border: #e5e2db;
+  --chat-code-text: #b35e14;
+  --chat-separator: #eae8e3;
+  --chat-scroll-thumb: #d0cdc7;
+  --chat-scroll-track: transparent;
+  --chat-focus-ring: rgba(99, 102, 241, 0.1);
 }

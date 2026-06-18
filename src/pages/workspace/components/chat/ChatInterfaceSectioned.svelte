@@ -88,46 +88,41 @@
   }
 </script>
 
-<div
-  class="flex min-h-0 flex-col h-full bg-[var(--color-bg-surface)] rounded-lg border border-[var(--color-border-default)]"
->
-  <div
-    class="p-3 sm:p-4 border-b border-[var(--color-border-default)] flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center bg-[var(--bg-panel)] rounded-t-lg"
-  >
-    <h2 class="text-base sm:text-lg font-semibold text-[var(--color-text-primary)]">
-      {sessionId ? $t("chat.session") : $t("chat.selectChat")}
-    </h2>
-    <div class="flex items-center gap-3">
+<!--
+  Claude-like chat surface. Styled with TailwindCSS v4 utility classes and
+  theme tokens (var(--chat-*) defined in src/styles/theme/tokens.css) per the
+  project convention — no bespoke stylesheet, no hardcoded hex.
+-->
+<div class="relative flex h-full min-h-0 flex-col overflow-hidden rounded-[var(--radius-lg)] bg-[var(--chat-bg)]">
+  <!-- Floating status badge: absolute so it never shifts the message layout -->
+  {#if $isConnecting || $wsError}
+    <div class="pointer-events-none absolute inset-x-0 top-3 z-10 flex justify-center gap-2 px-4">
       {#if $isConnecting}
-        <span class="inline-flex items-center gap-1.5 rounded-full bg-[var(--amber-50)] px-2.5 py-1 text-xs font-medium text-[var(--amber-600)]">
-          <span class="h-1.5 w-1.5 rounded-full bg-[var(--amber-500)] [animation:blink_1s_step-end_infinite]"></span>
+        <span class="inline-flex items-center gap-1.5 rounded-full border border-[var(--chat-separator)] bg-[var(--chat-bg)] px-2.5 py-1 text-[11px] font-medium text-[var(--amber-600)] shadow-[var(--shadow-soft)]">
+          <span class="h-1.5 w-1.5 rounded-full bg-current [animation:blink_1.5s_ease-in-out_infinite]"></span>
           {$t('chat.connecting')}
         </span>
-      {:else if $activeSessionId}
-        <span class="inline-flex items-center gap-1.5 rounded-full bg-[var(--green-50)] px-2.5 py-1 text-xs font-medium text-[var(--green-600)]">
-          <span class="h-1.5 w-1.5 rounded-full bg-[var(--green-500)]"></span>
-          {$t('chat.live')}
-        </span>
       {/if}
-
       {#if $wsError}
-        <span class="inline-flex items-center rounded-full bg-[var(--rose-50)] px-2.5 py-1 text-xs font-medium text-[var(--rose-600)]">{$wsError}</span>
+        <span class="inline-flex items-center rounded-full border border-[var(--rose-100)] bg-[var(--rose-50)] px-2.5 py-1 text-[11px] font-medium text-[var(--rose-600)] shadow-[var(--shadow-soft)]">{$wsError}</span>
       {/if}
     </div>
-  </div>
+  {/if}
 
-  <div bind:this={chatContainer} class="flex-1 min-h-0 overflow-y-auto p-3 sm:p-4 space-y-4">
+  <!-- Messages area -->
+  <div bind:this={chatContainer} class="min-h-0 flex-1 overflow-y-auto py-6">
     {#if !sessionId}
-      <div class="h-full flex items-center justify-center text-[var(--color-text-muted)]">
-        {$t("chat.selectChatHint")}
+      <div class="flex h-full flex-col items-center justify-center gap-3 text-[var(--chat-text-muted)]">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="h-12 w-12 opacity-40">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        <p class="text-sm">{$t("chat.selectChatHint")}</p>
       </div>
     {:else if isLoadingHistory}
-      <div class="space-y-4" aria-live="polite">
-        <LoadingBlock rows={2} rowHeight="h-10" className="max-w-[72%]" active={true} />
-        <div class="flex justify-end">
-          <LoadingBlock rows={1} rowHeight="h-10" className="w-[58%]" active={true} />
-        </div>
-        <LoadingBlock rows={2} rowHeight="h-10" className="max-w-[68%]" active={true} />
+      <div class="space-y-4 px-6 sm:px-12" aria-live="polite">
+        <LoadingBlock rows={2} rowHeight="h-5" className="max-w-[70%]" active={true} />
+        <LoadingBlock rows={1} rowHeight="h-5" className="w-1/3" active={true} />
+        <LoadingBlock rows={2} rowHeight="h-5" className="max-w-[60%]" active={true} />
       </div>
     {:else if historyError}
       <ErrorFallback
@@ -137,69 +132,48 @@
         on:retry={() => sessionId && chatService.loadHistory(sessionId)}
       />
     {:else if messages.length === 0}
-      <div class="h-full flex items-center justify-center text-[var(--color-text-muted)]">
-        {$t('chat.noMessages')}
+      <div class="flex h-full flex-col items-center justify-center gap-3 text-[var(--chat-text-muted)]">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="h-12 w-12 opacity-40">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        <p class="text-sm">{$t('chat.noMessages')}</p>
       </div>
     {:else}
-      <div transition:fade={{ duration: 180 }}>
+      <div class="flex flex-col" transition:fade={{ duration: 180 }}>
         {#each messages as msg}
           {#if msg.role === CHAT_ROLE.ASSISTANT}
-            <div class="mb-5 flex items-start gap-2.5 justify-start">
-              <div class="mt-0.5 h-8 w-8 shrink-0 rounded-full [background:var(--gradient-accent)] flex items-center justify-center text-white shadow-[var(--shadow-soft)]">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
-                  <path d="M12 2l1.9 4.7L18.6 8 14 10.1 12 15l-2-4.9L5.4 8l4.7-1.3L12 2zm6.5 9l.95 2.35L21.8 14l-2.35.95L18.5 17l-.95-2.05L15.2 14l2.35-.65L18.5 11zM6 14l.8 2L9 16.8l-2.2.8L6 20l-.8-2.4L3 16.8 5.2 16 6 14z" />
-                </svg>
-              </div>
-              <div class="min-w-0 max-w-[88%] sm:max-w-[78%]">
-                <span class="mb-1 ml-0.5 block text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--purple-700)]">
-                  {$t('chat.assistant')}
-                </span>
-                <div class="rounded-2xl rounded-tl-md border border-[var(--border-default)] bg-[var(--bg-card)] p-3.5 text-sm leading-relaxed text-[var(--text-primary)] shadow-[var(--shadow-soft)]">
-                  <div class="markdown-body [&>p]:m-0 [&>p+p]:mt-2 [&_ul]:mt-1 [&_ul]:ml-4 [&_ol]:mt-1 [&_ol]:ml-4 [&_code]:rounded [&_code]:bg-[rgba(99,102,241,0.12)] [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-[0.85em]">{@html renderMarkdown(msg.content)}</div>
-                </div>
-                <span class="mt-1 ml-0.5 block text-[11px] text-[var(--text-muted)]">{formatTime(msg.created_at)}</span>
+            <!-- Assistant message: clean text, no bubble -->
+            <div class="group py-4">
+              <div class="mx-auto max-w-[720px] px-6 sm:px-12">
+                <div class="markdown-body text-[14.5px] leading-[1.7] text-[var(--chat-text)] break-words [&_a]:text-[var(--indigo-600)] [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:text-[var(--indigo-700)] [&_blockquote]:my-3 [&_blockquote]:border-l-[3px] [&_blockquote]:border-[var(--chat-text-muted)] [&_blockquote]:px-4 [&_blockquote]:text-[var(--chat-text-secondary)] [&_code]:rounded [&_code]:border [&_code]:border-[var(--chat-code-border)] [&_code]:bg-[var(--chat-code-bg)] [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:text-[0.85em] [&_code]:text-[var(--chat-code-text)] [&_em]:italic [&_h1]:mt-5 [&_h1]:mb-2 [&_h1]:text-[1.3em] [&_h1]:font-semibold [&_h2]:mt-5 [&_h2]:mb-2 [&_h2]:text-[1.15em] [&_h2]:font-semibold [&_h3]:mt-5 [&_h3]:mb-2 [&_h3]:text-[1.05em] [&_h3]:font-semibold [&_hr]:my-5 [&_hr]:border-[var(--chat-separator)] [&_li]:my-1 [&_ol]:my-2 [&_ol]:pl-6 [&_p]:m-0 [&_p+p]:mt-3 [&_pre]:my-3 [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:border [&_pre]:border-[var(--chat-code-border)] [&_pre]:bg-[var(--chat-code-bg)] [&_pre]:p-4 [&_pre_code]:border-0 [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:text-[13px] [&_pre_code]:text-[var(--chat-text)] [&_strong]:font-semibold [&_table]:my-3 [&_table]:w-full [&_table]:border-collapse [&_td]:border [&_td]:border-[var(--chat-code-border)] [&_td]:p-2 [&_td]:text-[13px] [&_th]:border [&_th]:border-[var(--chat-code-border)] [&_th]:bg-[var(--chat-code-bg)] [&_th]:p-2 [&_th]:text-[13px] [&_th]:font-semibold [&_ul]:my-2 [&_ul]:pl-6">{@html renderMarkdown(msg.content)}</div>
+                <span class="mt-1 block text-[11px] text-[var(--chat-text-muted)] opacity-0 transition-opacity group-hover:opacity-100">{formatTime(msg.created_at)}</span>
               </div>
             </div>
           {:else}
-            <div class="mb-5 flex items-start gap-2.5 justify-end">
-              <div class="flex min-w-0 max-w-[88%] flex-col items-end sm:max-w-[78%]">
-                <div class="rounded-2xl rounded-tr-md [background:var(--gradient-accent)] p-3.5 text-sm leading-relaxed text-white shadow-[0_2px_10px_rgba(99,102,241,0.28)]">
-                  <p class="whitespace-pre-wrap">{msg.content}</p>
-                </div>
-                <span class="mt-1 mr-0.5 block text-[11px] text-[var(--text-muted)]">{formatTime(msg.created_at)}</span>
-              </div>
-              <div class="mt-0.5 h-8 w-8 shrink-0 rounded-full bg-[var(--bg-sidebar-active)] flex items-center justify-center text-xs font-semibold text-white">
-                {userInitial}
+            <!-- User message: subtle elevated pill, right-aligned -->
+            <div class="group py-1">
+              <div class="mx-auto flex max-w-[720px] flex-col items-end px-6 sm:px-12">
+                <p class="m-0 inline-block max-w-[85%] whitespace-pre-wrap break-words rounded-[20px] rounded-br-md bg-[var(--chat-bg-user)] px-[18px] py-3 text-[14.5px] leading-[1.6] text-[var(--chat-text)]">{msg.content}</p>
+                <span class="mt-1 block text-[11px] text-[var(--chat-text-muted)] opacity-0 transition-opacity group-hover:opacity-100">{formatTime(msg.created_at)}</span>
               </div>
             </div>
           {/if}
         {/each}
 
+        <!-- Typing indicator -->
         {#if $isTyping}
-          <div class="mb-5 flex items-start gap-2.5 justify-start">
-            <div class="mt-0.5 h-8 w-8 shrink-0 rounded-full [background:var(--gradient-accent)] flex items-center justify-center text-white shadow-[var(--shadow-soft)]">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
-                <path d="M12 2l1.9 4.7L18.6 8 14 10.1 12 15l-2-4.9L5.4 8l4.7-1.3L12 2zm6.5 9l.95 2.35L21.8 14l-2.35.95L18.5 17l-.95-2.05L15.2 14l2.35-.65L18.5 11zM6 14l.8 2L9 16.8l-2.2.8L6 20l-.8-2.4L3 16.8 5.2 16 6 14z" />
-              </svg>
-            </div>
-            <div class="rounded-2xl rounded-tl-md border border-[var(--border-default)] bg-[var(--bg-card)] px-3.5 py-3 shadow-[var(--shadow-soft)]">
+          <div class="py-4">
+            <div class="mx-auto max-w-[720px] px-6 sm:px-12">
               <TypingIndicator />
             </div>
           </div>
         {/if}
 
+        <!-- Streaming content -->
         {#if $streamingContent && !$isTyping}
-          <div class="mb-5 flex items-start gap-2.5 justify-start">
-            <div class="mt-0.5 h-8 w-8 shrink-0 rounded-full [background:var(--gradient-accent)] flex items-center justify-center text-white shadow-[var(--shadow-soft)]">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
-                <path d="M12 2l1.9 4.7L18.6 8 14 10.1 12 15l-2-4.9L5.4 8l4.7-1.3L12 2zm6.5 9l.95 2.35L21.8 14l-2.35.95L18.5 17l-.95-2.05L15.2 14l2.35-.65L18.5 11zM6 14l.8 2L9 16.8l-2.2.8L6 20l-.8-2.4L3 16.8 5.2 16 6 14z" />
-              </svg>
-            </div>
-            <div class="min-w-0 max-w-[88%] sm:max-w-[78%]">
-              <span class="mb-1 ml-0.5 block text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--purple-700)]">{$t('chat.assistant')}</span>
-              <div class="rounded-2xl rounded-tl-md border border-[var(--border-default)] bg-[var(--bg-card)] p-3.5 text-sm leading-relaxed text-[var(--text-primary)] shadow-[var(--shadow-soft)]">
-                <div class="markdown-body inline [&>p]:m-0 [&>p+p]:mt-2 [&_ul]:mt-1 [&_ul]:ml-4 [&_ol]:mt-1 [&_ol]:ml-4 [&_code]:rounded [&_code]:bg-[rgba(99,102,241,0.12)] [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-[0.85em]">{@html renderMarkdown($streamingContent)}</div><span class="inline-block ml-0.5 text-[var(--purple-400)] [animation:blink_1s_step-end_infinite]">|</span>
-              </div>
+          <div class="py-4">
+            <div class="mx-auto max-w-[720px] px-6 sm:px-12">
+              <div class="markdown-body inline text-[14.5px] leading-[1.7] text-[var(--chat-text)] break-words [&_code]:rounded [&_code]:border [&_code]:border-[var(--chat-code-border)] [&_code]:bg-[var(--chat-code-bg)] [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:text-[0.85em] [&_code]:text-[var(--chat-code-text)] [&_p]:m-0 [&_p+p]:mt-3 [&_strong]:font-semibold [&_ul]:my-2 [&_ul]:pl-6 [&_ol]:my-2 [&_ol]:pl-6">{@html renderMarkdown($streamingContent)}<span class="ml-0.5 inline-block text-[var(--chat-text-muted)] [animation:blink_1s_step-end_infinite]">|</span></div>
             </div>
           </div>
         {/if}
@@ -207,53 +181,49 @@
     {/if}
   </div>
 
-  <div class="flex gap-2 items-end p-3 border-t border-[var(--border-subtle)] bg-[var(--color-bg-surface)] rounded-b-lg">
-    <TextareaField
-      bare
-      unstyled
-      bind:textareaRef={textareaEl}
-      bind:value={inputValue}
-      maxHeight={160}
-      rows={1}
-      placeholder={$t('chat.typeMessageHint')}
-      disabled={$isGenerating || $isTyping || !sessionId || $isConnecting}
-      onkeydown={handleKeydown}
-      textareaClass="chat-textarea w-full resize-none overflow-y-auto px-3 sm:px-4 py-2.5 min-h-11 rounded-lg border border-[var(--color-border-default)] bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)] leading-relaxed placeholder:text-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-border-accent)] focus:[box-shadow:0_0_0_3px_rgba(91,79,207,0.12)]"
-    />
+  <!-- Input area -->
+  <div class="px-4 pb-4 sm:mx-auto sm:w-full sm:max-w-[780px] sm:px-6 sm:pb-5">
+    <div class="flex items-end rounded-[22px] border border-[var(--chat-input-border)] bg-[var(--chat-bg-input)] py-1.5 pl-[18px] pr-1.5 transition-[border-color,background,box-shadow] duration-200 focus-within:border-[var(--chat-input-border-focus)] focus-within:bg-[var(--chat-bg-input-focus)] focus-within:[box-shadow:0_0_0_3px_var(--chat-focus-ring)]">
+      <TextareaField
+        bare
+        unstyled
+        bind:textareaRef={textareaEl}
+        bind:value={inputValue}
+        maxHeight={160}
+        rows={1}
+        placeholder={$t('chat.typeMessageHint')}
+        disabled={$isGenerating || $isTyping || !sessionId || $isConnecting}
+        onkeydown={handleKeydown}
+        textareaClass="min-h-9 max-h-40 flex-1 resize-none border-0 bg-transparent py-1.5 text-[14.5px] leading-normal text-[var(--chat-text)] outline-none placeholder:text-[var(--chat-text-muted)] disabled:cursor-not-allowed disabled:opacity-50"
+      />
 
-    {#if $isGenerating || $isTyping}
-      <button
-        class="shrink-0 flex items-center gap-1.5 px-5 py-2.5 rounded-[var(--radius-md)] border-[1.5px] border-[var(--rose-400)] bg-[var(--rose-50)] text-[var(--rose-600)] font-semibold text-sm whitespace-nowrap hover:bg-[var(--rose-100)]"
-        on:click={handleStop}
-        aria-label={$t('chat.stopGeneration')}
-        type="button"
-      >
-        <span class="text-[10px]">■</span>
-        {$t('chat.stop')}
-      </button>
-    {:else}
-      <button
-        class="press shrink-0 px-5 py-2.5 rounded-[var(--radius-md)] border-0 [background:var(--gradient-accent)] text-white font-semibold text-sm whitespace-nowrap shadow-[0_2px_10px_rgba(99,102,241,0.3)] hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
-        disabled={!canSend}
-        on:click={handleSend}
-        aria-label={$t('chat.sendMessage')}
-        type="button"
-      >
-        {$t('chat.send')}
-      </button>
-    {/if}
+      <div class="flex shrink-0 items-center gap-1 pb-0.5">
+        {#if $isGenerating || $isTyping}
+          <button
+            class="press flex h-9 w-9 items-center justify-center rounded-full border-0 bg-[var(--rose-500)] text-[var(--text-on-dark)] hover:bg-[var(--rose-600)]"
+            on:click={handleStop}
+            aria-label={$t('chat.stopGeneration')}
+            type="button"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+              <rect x="6" y="6" width="12" height="12" rx="2" />
+            </svg>
+          </button>
+        {:else}
+          <button
+            class="press flex h-9 w-9 items-center justify-center rounded-full border-0 bg-[var(--chat-text)] text-[var(--chat-bg)] hover:opacity-85 disabled:cursor-not-allowed disabled:opacity-25"
+            disabled={!canSend}
+            on:click={handleSend}
+            aria-label={$t('chat.sendMessage')}
+            type="button"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+              <line x1="12" y1="19" x2="12" y2="5" />
+              <polyline points="5 12 12 5 19 12" />
+            </svg>
+          </button>
+        {/if}
+      </div>
+    </div>
   </div>
 </div>
-
-<style>
-  @keyframes blink {
-    0%,
-    100% {
-      opacity: 1;
-    }
-
-    50% {
-      opacity: 0;
-    }
-  }
-</style>
